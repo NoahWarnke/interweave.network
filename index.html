@@ -4,12 +4,16 @@
       <script src="src/web3.min.js"></script>
       <script src="src/storelinkabi.js"></script>
       <script src="src/code.js"></script>
+      <link rel="stylesheet" href="src/styles.css">
     </head>
     <body>
-        <h2>Greetings</h2>
-        <p>Injected web3 available: <span id="status"></span></p>
+        <h2>Welcome to the StoreLink frontend</h2>
+        <p>This is just a practice experimental dapp. (See the <a href="https://ropsten.etherscan.io/address/0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514#events">test contract</a>)</p>
+        <p>Dapp status: <span id="status"></span></p>
         <p>Current network: <span id="network"></span></p>
         <p>Current account: <span id="account"></span></p>
         <p>Stored contract value for account: <span id="value"></span></p>
+        <button id="submit-new">Set a new value!</button>
+        <input type="text" id="new-value"></input>
     </body>
 </html>

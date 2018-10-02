@@ -69,10 +69,7 @@ class Web3Handler {
       console.log("No injected web3 interface, cannot get default account.")
       return;
     }
-    return this.web3Interface().eth.accounts
-      ? this.web3Interface().eth.accounts[0]
-      : this.web3Interface().eth.defaultAccount
-    ;
+    return this.web3Interface().eth.defaultAccount;
   }
   
   getNetwork() {
@@ -98,9 +95,8 @@ class Web3Handler {
   }
   
   testContractGetValue(ethAddress) {
-    console.log("testContractGetValue: " + ethAddress);
-    if (this.web3LibraryUnavailable()) {
-      console.log("No Web3 library, cannot try calling a contract.");
+    if (this.web3LibraryUnavailable() || this.web3InterfaceUnavailable()) {
+      console.log("Dapp not ready, cannot try calling a contract.");
       return;
     }
     
@@ -111,6 +107,25 @@ class Web3Handler {
     
     return methods.getLink(ethAddress).call();
   }
+  
+  testContractSetValue(newValue) {
+    if (newValue.length > 32) {
+      console.log("Too long.");
+      return;
+    }
+    
+    if (this.web3LibraryUnavailable() || this.web3InterfaceUnavailable()) {
+      console.log("Dapp not ready, cannot try calling a contract.");
+      return;
+    }
+    
+    var contractABI = storelinkABI;
+    var contractAddress = "0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514";
+    var tokenContract = new this.localWeb3.eth.Contract(contractABI, contractAddress);
+    var methods = tokenContract.methods;
+    
+    return methods.setLink(newValue).call();
+  }
 }
 
 
@@ -118,4 +133,10 @@ class Web3Handler {
 let myWeb3Handler = new Web3Handler();
 
 // Listen for the window to load, and then set up the web3 provider.
-window.addEventListener('load', () => myWeb3Handler.setUpProvider());
+window.addEventListener('load', () => {
+  myWeb3Handler.setUpProvider();
+  document.querySelector("#submit-new").addEventListener('click', () => {
+    let value = document.querySelector('#new-value').value;
+    myWeb3Handler.testContractSetValue(value);
+  });
+});
