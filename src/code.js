@@ -108,7 +108,7 @@ class Web3Handler {
     return methods.getLink(ethAddress).call();
   }
   
-  testContractSetValue(newValue) {
+  testContractSetValue(account, newValue) {
     if (newValue.length > 32) {
       console.log("Too long.");
       return;
@@ -124,7 +124,12 @@ class Web3Handler {
     var tokenContract = new this.localWeb3.eth.Contract(contractABI, contractAddress);
     var methods = tokenContract.methods;
     
-    return methods.setLink(newValue).call();
+    return new Promise((resolve, reject) => {
+      methods.setLink(newValue).send({from: account, value: 0, gas})
+        .on("receipt", (receipt) => resolve(receipt))
+        .on("error", (error) => reject(error))
+      ;
+    });
   }
 }
 
@@ -137,6 +142,11 @@ window.addEventListener('load', () => {
   myWeb3Handler.setUpProvider();
   document.querySelector("#submit-new").addEventListener('click', () => {
     let value = document.querySelector('#new-value').value;
-    myWeb3Handler.testContractSetValue(value);
+    try {
+      myWeb3Handler.testContractSetValue(myWeb3Handler.getDefaultAccount(), value);
+    }
+    catch (e) {
+      console.log("Error calling setLink: " + e);
+    }
   });
 });
