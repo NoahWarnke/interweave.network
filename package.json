@@ -1,0 +1,29 @@
+{
+  "name": "interweave.network",
+  "version": "1.0.0",
+  "description": "Frontend for the interweave dapp",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/NoahWarnke/interweave.network.git"
+  },
+  "keywords": [
+    "network",
+    "graph",
+    "node",
+    "edge",
+    "interweave"
+  ],
+  "author": "Noah Warnke",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/NoahWarnke/interweave.network/issues"
+  },
+  "homepage": "https://github.com/NoahWarnke/interweave.network#readme",
+  "dependencies": {
+    "vue": "^2.5.17"
+  }
+}
