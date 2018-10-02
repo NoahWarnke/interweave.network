@@ -125,7 +125,7 @@ class Web3Handler {
     var methods = tokenContract.methods;
     
     return new Promise((resolve, reject) => {
-      methods.setLink(newValue).send({from: account, value: 0, gas})
+      methods.setLink(newValue).send({from: account, value: 0})
         .on("receipt", (receipt) => resolve(receipt))
         .on("error", (error) => reject(error))
       ;
