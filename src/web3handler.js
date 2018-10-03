@@ -69,7 +69,7 @@ class Web3Handler {
     // Check for library.
     if (this.web3LibraryUnavailable()) {
       console.log("Web3.js library missing...");
-      document.querySelector('#status').innerHTML = "No Web3 library.";
+      //document.querySelector('#status').innerHTML = "No Web3 library.";
       return;
     }
     else {
@@ -79,7 +79,7 @@ class Web3Handler {
     // Check for interface.
     if (this.web3InterfaceUnavailable()) {
       console.log("No injected web3 interface. Get MetaMask?");
-      document.querySelector('#status').innerHTML = "No injected web3.";
+      //document.querySelector('#status').innerHTML = "No injected web3.";
       return;
     }
     else {
@@ -87,7 +87,7 @@ class Web3Handler {
       
       this.provider = this.web3Interface().currentProvider;
       this.localWeb3 = new (this.web3Library())(this.provider);
-      document.querySelector('#status').innerHTML = "Ready.";
+      //document.querySelector('#status').innerHTML = "Ready.";
     }
     
     // Do stuff when ready.
@@ -153,20 +153,3 @@ class Web3Handler {
     });
   }
 }
-
-// Instantiate my handler.
-let myWeb3Handler = new Web3Handler();
-
-// Listen for the window to load, and then set up the web3 provider.
-window.addEventListener('load', () => {
-  myWeb3Handler.setUpProvider();
-  document.querySelector("#submit-new").addEventListener('click', () => {
-    let value = document.querySelector('#new-value').value;
-    try {
-      myWeb3Handler.testContractSetValue(myWeb3Handler.getDefaultAccount(), value);
-    }
-    catch (e) {
-      console.log("Error calling setLink: " + e);
-    }
-  });
-});
