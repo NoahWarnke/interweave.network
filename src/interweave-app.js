@@ -15,7 +15,7 @@ async function startup() {
       web3Available: !myWeb3Handler.web3InterfaceUnavailable(),
       status: myWeb3Handler.web3InterfaceUnavailable() ? "Please install MetaMask and sign in" : "Connected to " + myWeb3Handler.getNetwork() + "!",
       account: myWeb3Handler.getDefaultAccount(),
-      value: myWeb3Handler.testContractGetValue(),
+      value: myWeb3Handler.testContractGetValue(myWeb3Handler.getDefaultAccount()),
       formInput: "type here"
     },
     methods: {
