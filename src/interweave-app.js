@@ -1,21 +1,16 @@
 window.addEventListener('load', startup);
 
 async function startup() {
-  // Instantiate my handler.
-  let myWeb3Handler = new Web3Handler();
-  
-  // Get provider set up.
-  await myWeb3Handler.setUpProvider();
   
   // Set up our Vue app.
   let app = new Vue({
     el: '#interweave-app',
     data: {
-      doneStartup: true,
-      web3Available: !myWeb3Handler.web3InterfaceUnavailable(),
-      status: myWeb3Handler.web3InterfaceUnavailable() ? "Please install MetaMask and sign in" : "Connected to " + myWeb3Handler.getNetwork() + "!",
-      account: myWeb3Handler.getDefaultAccount(),
-      value: myWeb3Handler.testContractGetValue(myWeb3Handler.getDefaultAccount()),
+      doneStartup: false,
+      web3Available: false,
+      status: "Loading...",
+      account: "",
+      value: "",
       formInput: "type here"
     },
     methods: {
@@ -29,4 +24,20 @@ async function startup() {
       }
     }
   });
+  
+  window.interweaveApp = app;
+  
+  // Instantiate my handler.
+  let myWeb3Handler = new Web3Handler();
+  
+  // Get provider set up.
+  await myWeb3Handler.setUpProvider();
+  
+  // Set app values from web3handler.
+  app.web3Available = !myWeb3Handler.web3InterfaceUnavailable();
+  app.doneStartup = true;
+  app.network = await myWeb3Handler.getNetwork();
+  app.status = !app.web3Available ? "Please install MetaMask and sign in" : "Connected to " + app.network + "!"
+  app.account = myWeb3Handler.getDefaultAccount();
+  app.value = await myWeb3Handler.testContractGetValue(app.account);
 }
