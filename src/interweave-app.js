@@ -37,7 +37,16 @@ async function startup() {
   app.web3Available = !myWeb3Handler.web3InterfaceUnavailable();
   app.doneStartup = true;
   app.network = await myWeb3Handler.getNetwork();
-  app.status = !app.web3Available ? "Please install MetaMask and sign in" : "Connected to " + app.network + "!"
   app.account = myWeb3Handler.getDefaultAccount();
-  app.value = await myWeb3Handler.testContractGetValue(app.account);
+  
+  if (!app.web3Available) {
+    app.status = "Please install MetaMask and sign in";
+  }
+  else if (app.account === undefined) {
+    app.status = "Please sign into MetaMask";
+  }
+  else {
+    app.status = "Connected to " + app.network + "!";
+    app.value = await myWeb3Handler.testContractGetValue(app.account);
+  }
 }
