@@ -1,10 +1,11 @@
-window.addEventListener('load', () => {
-  
+window.addEventListener('load', startup);
+
+async function startup() {
   // Instantiate my handler.
   let myWeb3Handler = new Web3Handler();
   
   // Get provider set up.
-  myWeb3Handler.setUpProvider();
+  await myWeb3Handler.setUpProvider();
   
   // Set up our Vue app.
   let app = new Vue({
@@ -28,5 +29,4 @@ window.addEventListener('load', () => {
       }
     }
   });
-  
-});
+}

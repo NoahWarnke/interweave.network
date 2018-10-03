@@ -69,7 +69,6 @@ class Web3Handler {
     // Check for library.
     if (this.web3LibraryUnavailable()) {
       console.log("Web3.js library missing...");
-      //document.querySelector('#status').innerHTML = "No Web3 library.";
       return;
     }
     else {
@@ -79,7 +78,6 @@ class Web3Handler {
     // Check for interface.
     if (this.web3InterfaceUnavailable()) {
       console.log("No injected web3 interface. Get MetaMask?");
-      //document.querySelector('#status').innerHTML = "No injected web3.";
       return;
     }
     else {
@@ -87,21 +85,7 @@ class Web3Handler {
       
       this.provider = this.web3Interface().currentProvider;
       this.localWeb3 = new (this.web3Library())(this.provider);
-      //document.querySelector('#status').innerHTML = "Ready.";
     }
-    
-    // Do stuff when ready.
-    
-    let network = await this.getNetwork();
-    console.log("Network: " + network);
-    document.querySelector('#network').innerHTML = network;
-    
-    let account = this.getDefaultAccount();
-    console.log("Account: " + account);
-    document.querySelector('#account').innerHTML = account;
-    
-    let value = await this.testContractGetValue(account);
-    document.querySelector('#value').innerHTML = value;
   }
   
   /**
