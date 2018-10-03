@@ -14,7 +14,7 @@
   <body>
     <div id="interweave-app">
       <p id="status">{{status}}</p>
-      <div id="viewables">
+      <div id="viewables" v-if="web3Available && accountAvailable">
         <p>Message for your address {{account}}:</p>
         <h1>{{value}}</h1>
         <input type="text" v-model="formInput"></input>

@@ -63,8 +63,7 @@ class Web3Handler {
    * Sets up state variables for this Web3Hander, including getting the injected provider
    * and creating a new Web3 instance from it.
    */
-  async setUpProvider() {
-    console.log("Window loaded...");
+  setUpProvider() {
     
     // Check for library.
     if (this.web3LibraryUnavailable()) {
