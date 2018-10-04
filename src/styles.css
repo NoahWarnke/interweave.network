@@ -1,5 +1,6 @@
 body {
   background-image: linear-gradient(to bottom right, #ddffff, #88aaff);
+  height: 100%;
 }
 
 #status {
