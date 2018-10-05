@@ -12,9 +12,6 @@ class Web3Handler {
       console.log("Web3.js library missing...");
       return;
     }
-    else {
-      console.log("Web3.js library available.");
-    }
     
     // Check for provider.
     if (this.providerUnavailable()) {
@@ -22,7 +19,6 @@ class Web3Handler {
       return;
     }
     else {
-      console.log("web3 interface was injected. Using it to create a new Web3 instance.");
       this.localWeb3 = new (this.web3Library())(this.provider());
     }
   }
@@ -119,26 +115,28 @@ class Web3Handler {
         
     // Modern dapp browsers.
     if (window.ethereum) {
+      // Modern dapp browser.
       this.accountAccessEnabled = false;
       try {
-        console.log("Modern dapp browser, requesting user account access...");
+        // Request user account access...
         let accounts = await window.ethereum.enable();
         this.accountAccessEnabled = true;
         if (accounts.length === 0) {
-          console.log("Access granted, but no default account (user not signed in?)");
+          // Access granted, but no default account (user not signed in?)
           return false;
         }
-        console.log("Access granted, returning default account.");
+        // Access granted, return default account.
         return accounts[0];
       }
       catch (error) {
-        console.log("User rejected account access.");
+        // User rejected account access.
         return false;
       }
     }
     
     // Legacy dapp browsers.
     if (!this.web3InterfaceUnavailable()) {
+      this.accountAccessEnabled = true;
       console.log("Legacy dapp browser, getting defaultAccount.");
       return this.web3Interface().eth.defaultAccount;
     }
@@ -176,11 +174,14 @@ class Web3Handler {
       if (netId === false) {
         return false;
       }
-      let networks = ["Unknown", "Mainnet", "Morden", "Ropsten", "Rinkeby", "Kovan"];
-      return netId < networks.length
-        ? networks[netId]
-        : "Unknown"
-      ;
+      switch (netId) {
+        case 1: return "Mainnet";
+        case 2: return "Morden";
+        case 3: return "Ropsten";
+        case 4: return "Rinkeby";
+        case 42: return "Kovan";
+        default: return "Unknown";
+      }
     });
   }
   
