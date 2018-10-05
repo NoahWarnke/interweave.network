@@ -87,29 +87,6 @@ class Web3Handler {
     return (this.contractABI() === false);
   }
   
-  /** Prepare the dapp contract object for calling and sending. */
-  async prepareContract() {
-    // Get contract access.
-    if (this.contractABIUnavailable()) {
-      throw new Error("Contract ABI variable is not available. Can't access contract.");
-    }
-    let contractABI = this.contractABI();
-    
-    // Get network so we can get the contract address.
-    let netId = await this.getNetwork();
-    if (netId === false) {
-      throw new Error("Network not available. Can't select contract address, so can't access contract.");
-    }
-    
-    let contractAddress = this.contractAddress(netId);
-    if (contractAddress === false) {
-      throw new Error("Contract not available on the current network.");
-    }
-    
-    // Create the contract object!
-    this.tokenContract = new this.localWeb3.eth.Contract(contractABI, contractAddress);
-  }
-  
   /** @returns the default Eth account from the injected web3 interface, if it is available, or false otherwise. */
   async getDefaultAccount() {
         
@@ -138,7 +115,10 @@ class Web3Handler {
     if (!this.web3InterfaceUnavailable()) {
       this.accountAccessEnabled = true;
       console.log("Legacy dapp browser, getting defaultAccount.");
-      return this.web3Interface().eth.defaultAccount;
+      if (this.web3Interface().eth.defaultAccount !== undefined) {
+        return this.web3Interface().eth.defaultAccount;
+      }
+      return false;
     }
     
     console.log("Browser without Ethereum support, so can't get default account. Install MetaMask?");
@@ -183,6 +163,29 @@ class Web3Handler {
         default: return "Unknown";
       }
     });
+  }
+  
+  /** Prepare the dapp contract object for calling and sending. */
+  async prepareContract() {
+    // Get contract access.
+    if (this.contractABIUnavailable()) {
+      throw new Error("Contract ABI variable is not available. Can't access contract.");
+    }
+    let contractABI = this.contractABI();
+    
+    // Get network so we can get the contract address.
+    let netId = await this.getNetwork();
+    if (netId === false) {
+      throw new Error("Network not available. Can't select contract address, so can't access contract.");
+    }
+    
+    let contractAddress = this.contractAddress(netId);
+    if (contractAddress === false) {
+      throw new Error("Contract not available on the current network.");
+    }
+    
+    // Create the contract object!
+    this.tokenContract = new this.localWeb3.eth.Contract(contractABI, contractAddress);
   }
   
   /**
