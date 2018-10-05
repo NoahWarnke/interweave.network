@@ -8,6 +8,7 @@ async function startup() {
     data: {
       doneStartup: false,
       web3Available: false,
+      accountAccessEnabled: false,
       accountAvailable: false,
       account: undefined,
       value: undefined,
@@ -32,27 +33,31 @@ async function startup() {
   // Instantiate my handler.
   let myWeb3Handler = new Web3Handler();
   
-  // Get provider set up.
-  myWeb3Handler.setUpProvider();
-  
   // Set app values from web3handler.
   app.web3Available = !myWeb3Handler.web3InterfaceUnavailable();
   if (app.web3Available) {
     app.network = await myWeb3Handler.getNetwork();
-    app.account = myWeb3Handler.getDefaultAccount();
+    app.account = await myWeb3Handler.getDefaultAccount();
+    app.accountAccessEnabled = myWeb3Handler.accountAccessGranted(); // Check after a getDefaultAccount call, where it will be requested if needed.
   }
-  app.accountAvailable = (app.account !== undefined);
+  app.accountAvailable = (app.account !== false);
   
   // Set status and get message.
   if (!app.web3Available) {
-    app.status = "Please install MetaMask and sign in";
+    app.status = "Please install MetaMask to use ths dapp.";
   }
   else if (!app.accountAvailable) {
-    app.status = "Please sign into MetaMask";
+    if (!app.accountAccessEnabled) {
+      app.status = "Please accept the connect request for this dapp in MetaMask.";
+    }
+    else {
+      app.status = "Please sign into MetaMask to use this dapp.";
+    }
   }
   else {
     app.status = "Connected to " + app.network + "!";
     app.value = await myWeb3Handler.testContractGetValue(app.account);
+    console.log(app.value);
   }
   app.doneStartup = true;
 }

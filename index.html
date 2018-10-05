@@ -15,10 +15,11 @@
     <div id="interweave-app">
       <p id="status">{{status}}</p>
       <div id="viewables" v-if="web3Available && accountAvailable">
-        <p>Message for your address {{account}}:</p>
-        <h1>{{value}}</h1>
+        <p v-if="value !== ''">Message for your address {{account}}</p>
+        <h1 v-if="value !== ''">{{value}}</h1>
+        <p v-if="value === ''">Your address {{account}} has no message set.</p>
         <input type="text" v-model="formInput"></input>
-        <button v-on:click="callSet">Set a new value!</button>
+        <button v-on:click="callSet">Set a {{value !== '' ? 'new ' : ''}}value!</button>
       </div>
     </div>
   </body>
