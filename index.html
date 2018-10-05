@@ -14,7 +14,7 @@
   <body>
     <div id="interweave-app">
       <p id="status">{{status}}</p>
-      <div id="viewables" v-if="web3Available && accountAvailable">
+      <div id="viewables" v-if="web3Available && accountAvailable && contractReady">
         <p v-if="value !== ''">Message for your address {{account}}</p>
         <h1 v-if="value !== ''">{{value}}</h1>
         <p v-if="value === ''">Your address {{account}} has no message set.</p>

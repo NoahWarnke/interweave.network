@@ -5,6 +5,7 @@ class Web3Handler {
   constructor() {
     this.localWeb3 = undefined;
     this.accountAccessEnabled = false;
+    this.tokenContract = undefined;
     
     // Check for library.
     if (this.web3LibraryUnavailable()) {
@@ -65,6 +66,54 @@ class Web3Handler {
     return (this.web3Library() === false);
   }
   
+  /** @returns the dapp's Solidity contract for the given network, or false if unavailable. */
+  contractAddress(netId) {
+    switch (netId) {
+      case 3: {
+        return "0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514";
+      }
+      default: {
+        return false;
+      }
+    }
+  }
+  
+  /** @returns the contract ABI, or false if not available. */
+  contractABI() {
+    if (!storelinkABI) {
+      return false;
+    }
+    return storelinkABI;
+  }
+  
+  /** @returns true if contract ABI variable is not available. */
+  contractABIUnavailable() {
+    return (this.contractABI() === false);
+  }
+  
+  /** Prepare the dapp contract object for calling and sending. */
+  async prepareContract() {
+    // Get contract access.
+    if (this.contractABIUnavailable()) {
+      throw new Error("Contract ABI variable is not available. Can't access contract.");
+    }
+    let contractABI = this.contractABI();
+    
+    // Get network so we can get the contract address.
+    let netId = await this.getNetwork();
+    if (netId === false) {
+      throw new Error("Network not available. Can't select contract address, so can't access contract.");
+    }
+    
+    let contractAddress = this.contractAddress(netId);
+    if (contractAddress === false) {
+      throw new Error("Contract not available on the current network.");
+    }
+    
+    // Create the contract object!
+    this.tokenContract = new this.localWeb3.eth.Contract(contractABI, contractAddress);
+  }
+  
   /** @returns the default Eth account from the injected web3 interface, if it is available, or false otherwise. */
   async getDefaultAccount() {
         
@@ -103,7 +152,7 @@ class Web3Handler {
     return this.accountAccessEnabled;
   }
   
-  /** @returns (asynchronously) a string indicating the current network, mapped from the injected web3 interface, if it exists, or false otherwise. */
+  /** @returns (asynchronously) a number indicating the current network, from the injected web3 interface, if it exists, or false otherwise. */
   getNetwork() {
     if (this.web3InterfaceUnavailable()) {
       console.log("No injected web3 interface, cannot get current network.")
@@ -115,34 +164,39 @@ class Web3Handler {
           reject(err);
         }
         else {
-          let networks = ["Unknown", "Mainnet", "Morden", "Ropsten", "Rinkeby", "Kovan"];
-          resolve(
-            netId < networks.length
-              ? networks[netId]
-              : "Unknown"
-          );
+          resolve(parseInt(netId));
         }
       });
+    });
+  }
+  
+  /** @returns (asynchronously) a string indicating the current network, if available, or false otherwise. */
+  getNetworkString() {
+    return this.getNetwork().then((netId) => {
+      if (netId === false) {
+        return false;
+      }
+      let networks = ["Unknown", "Mainnet", "Morden", "Ropsten", "Rinkeby", "Kovan"];
+      return netId < networks.length
+        ? networks[netId]
+        : "Unknown"
+      ;
     });
   }
   
   /**
    * Call the getLink function on the test contract.
    * @param ethAddress the Eth address to look up in the contract.
-   * @returns the string the Eth address maps to in the contract (may be false).
+   * @returns the string the Eth address maps to in the contract (may be "" if not set, or false if unable to call contract.)
    */
   testContractGetValue(ethAddress) {
-    if (this.web3LibraryUnavailable() || this.web3InterfaceUnavailable()) {
-      console.log("Dapp not ready, cannot try calling a contract.");
-      return;
+    
+    if (this.tokenContract === undefined) {
+      console.log("Contract not initialized, can't call getLink function.");
+      return false;
     }
     
-    var contractABI = storelinkABI;
-    var contractAddress = "0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514";
-    var tokenContract = new this.localWeb3.eth.Contract(contractABI, contractAddress);
-    var methods = tokenContract.methods;
-    
-    return methods.getLink(ethAddress).call();
+    return this.tokenContract.methods.getLink(ethAddress).call();
   }
   
   /**
@@ -152,23 +206,19 @@ class Web3Handler {
    * @returns the string the Eth address maps to in the contract (may be false).
    */
   testContractSetValue(ethAddress, newValue) {
+    
     if (newValue.length > 32) {
-      console.log("Too long.");
+      console.log("String too long.");
       return;
     }
     
-    if (this.web3LibraryUnavailable() || this.web3InterfaceUnavailable()) {
-      console.log("Dapp not ready, cannot try calling a contract.");
-      return;
+    if (this.tokenContract === undefined) {
+      console.log("Contract not initialized, can't call getLink function.");
+      return false;
     }
-    
-    var contractABI = storelinkABI;
-    var contractAddress = "0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514";
-    var tokenContract = new this.localWeb3.eth.Contract(contractABI, contractAddress);
-    var methods = tokenContract.methods;
     
     return new Promise((resolve, reject) => {
-      methods.setLink(newValue).send({from: ethAddress, value: 0})
+      this.tokenContract.methods.setLink(newValue).send({from: ethAddress, value: 0})
         .on("receipt", (receipt) => resolve(receipt))
         .on("error", (error) => reject(error))
       ;

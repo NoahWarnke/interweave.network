@@ -10,6 +10,7 @@ async function startup() {
       web3Available: false,
       accountAccessEnabled: false,
       accountAvailable: false,
+      contractReady: false,
       account: undefined,
       value: undefined,
       status: "Loading...",
@@ -32,11 +33,18 @@ async function startup() {
   
   // Instantiate my handler.
   let myWeb3Handler = new Web3Handler();
+  try {
+    await myWeb3Handler.prepareContract();
+    app.contractReady = true;
+  }
+  catch (error) {
+    console.log(error);
+  }
   
   // Set app values from web3handler.
   app.web3Available = !myWeb3Handler.web3InterfaceUnavailable();
   if (app.web3Available) {
-    app.network = await myWeb3Handler.getNetwork();
+    app.network = await myWeb3Handler.getNetworkString();
     app.account = await myWeb3Handler.getDefaultAccount();
     app.accountAccessEnabled = myWeb3Handler.accountAccessGranted(); // Check after a getDefaultAccount call, where it will be requested if needed.
   }
@@ -55,9 +63,13 @@ async function startup() {
     }
   }
   else {
-    app.status = "Connected to " + app.network + "!";
-    app.value = await myWeb3Handler.testContractGetValue(app.account);
-    console.log(app.value);
+    if (app.contractReady) {
+      app.status = "Connected to " + app.network + "!";
+      app.value = await myWeb3Handler.testContractGetValue(app.account);
+    }
+    else {
+      app.status = "Connected to " + app.network + " but no contract available on this network. Try Ropsten.";
+    }
   }
   app.doneStartup = true;
 }
