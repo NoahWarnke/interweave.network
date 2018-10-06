@@ -15,7 +15,8 @@ async function startup() {
       account: undefined,
       enteredAccount: "0xa1b6d4d311a9da00d32738824e8c67b2001b3cd5", // A starting account.
       value: undefined,
-      formInput: "type here"
+      formInput: "type here",
+      statusCol: "good"
     },
     methods: {
       callSet: function() {
@@ -27,7 +28,7 @@ async function startup() {
         }
       },
       callGet: async function() {
-        if (this.myStoreLinkContractHandler === undefined) {
+        if (!this.contractReady) {
           return;
         }
         if (this.browserType === "nondapp" || !this.loggedIn) {
@@ -43,20 +44,31 @@ async function startup() {
       },
       status: function() {
         if (this.browserType === "nondapp") {
-          return "No MetaMask detected; dapp in view-only mode.";
+          this.statusCol = "warn";
+          return "No MetaMask detected; dapp connected to Ropsten via Infura in view-only mode.";
         }
         if (!this.accountAvailable) {
           if (!this.accountAccessEnabled && !this.accountAccessRejected) {
+            this.statusCol = "warn";
             return "Please accept the connect request for this dapp in MetaMask.";
           }
           if (this.accountAccessRejected) {
+            this.statusCol = "error";
             return "You rejected the connect request for this dapp in MetaMask. Please accept it.";
           }
-          return "Not signed in to MetaMask; dapp in view-only mode.";
+          if (!this.contractReady) {
+            this.statusCol = "error";
+            return "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode, but no contract available on this network. Try Ropsten.";
+          }
+          this.statusCol = "warn";
+          return "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode.";
+          
         }
         else if (!this.contractReady) {
+          this.statusCol = "error";
           return "Connected to " + app.network + " but no contract available on this network. Try Ropsten.";
         }
+        this.statusCol = "good";
         return "Connected to " + this.network + "!";
       }
     }

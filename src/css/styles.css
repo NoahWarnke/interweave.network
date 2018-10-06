@@ -1,10 +1,25 @@
 body {
   background-image: linear-gradient(to bottom right, #ddffff, #88aaff);
   height: 100%;
+  font-family: Verdana,sans-serif;
 }
 
 #status {
-  float: right;
+  padding: 15px;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.good {
+  background-color: #00cc00;
+}
+
+.warn {
+  background-color: #cc7500;
+}
+
+.error {
+  background-color: #cc0000;
 }
 
 #viewables {
@@ -20,5 +35,9 @@ body {
   max-width: 100%;
   max-height: 100%;
   overflow: auto;
+  text-align: center;
+}
+
+.center {
   text-align: center;
 }

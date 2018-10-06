@@ -12,7 +12,9 @@
   </head>
   <body>
     <div id="interweave-app">
-      <p id="status">{{status()}}</p>
+      <p id="status" v-bind:class="statusCol">{{status()}}</p>
+      <h2 class="center">StoreLink Example (real site coming soon)</h2>
+      <p class="center">A simple practice dapp that lets you set a single message (<= 32 characters) for each of your Ethereum addresses. Free except for gas.</p>
       <div id="viewables" v-if="contractReady">
         <div id="account-available" v-if="accountAvailable">
           <p v-if="value !== ''">Message for your address {{account}}</p>
