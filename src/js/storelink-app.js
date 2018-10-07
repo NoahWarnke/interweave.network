@@ -16,16 +16,54 @@ async function startup() {
       enteredAccount: "0xa1b6d4d311a9da00d32738824e8c67b2001b3cd5", // A starting account.
       value: undefined,
       formInput: "type here",
-      statusCol: "good"
+      statusCol: "good",
+      setTxHash: undefined,
+      setConfirmations: -1,
+      setError: undefined,
+      transactionInProgress: false
     },
     methods: {
       callSet: function() {
+        if (app.setTxHash !== undefined && app.setConfirmations < 1 && app.setError === undefined) {
+          return; // Can't call set while a previous transaction is waiting. If it's confirmed or errored, then it's fine.
+        }
+        app.closeTxWindow(); // The submission form is hidden if a transaction is already open, but just in case.
+        app.transactionInProgress = true;
         try {
-          app.myStoreLinkContractHandler.setLink(this.account, this.formInput);
+          app.myStoreLinkContractHandler.setLink(this.account, this.formInput)
+            .on("transactionHash", (hash) => {
+              if (!app.transactionInProgress) {
+                return;
+              }
+              app.setTxHash = hash;
+              app.$forceUpdate();
+            })
+            .on("confirmation", (number, receipt) => {
+              if (!app.transactionInProgress) {
+                return;
+              }
+              app.setConfirmations = number;
+              app.callGet();
+              app.$forceUpdate();
+            })
+            .on("error", (err, receipt) => {
+              if (!app.transactionInProgress) {
+                return;
+              }
+              console.log(err);
+              app.setError = err;
+            })
+          ;
         }
-        catch (e) {
-          console.log("Error calling setLink: " + e);
+        catch (error) {
+          console.log(error);
         }
+      },
+      closeTxWindow: function() {
+        app.setTxHash = undefined;
+        app.setConfirmations = -1;
+        app.setError = undefined;
+        app.transactionInProgress = false;
       },
       callGet: async function() {
         if (!this.contractReady) {
@@ -33,7 +71,12 @@ async function startup() {
         }
         if (this.browserType === "nondapp" || !this.loggedIn) {
           console.log("callGet nodapp: " + this.enteredAccount);
-          this.value = await this.myStoreLinkContractHandler.getLink(this.enteredAccount);
+          try {
+            this.value = await this.myStoreLinkContractHandler.getLink(this.enteredAccount);
+          }
+          catch (error) {
+            console.log("Error calling getLink: " + e);
+          }
         }
         else if (this.loggedIn) {
           this.value = await this.myStoreLinkContractHandler.getLink(this.account);
@@ -89,6 +132,9 @@ async function startup() {
   myWeb3Handler.registerListener("accessEnabledChanged", (oldVal, newVal) => {app.accountAccessEnabled = newVal; app.$forceUpdate();});
   
   myWeb3Handler.registerListener("accountChanged", (oldVal, newVal) => {
+    if (oldVal !== newVal) {
+      app.closeTxWindow();
+    }
     app.account = newVal;
     app.accountAvailable = (newVal === undefined ? false : true);
     app.callGet();

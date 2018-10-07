@@ -61,7 +61,7 @@ class StoreLinkContractHandler {
   /**
    * Call the getLink function on the test contract.
    * @param ethAddress the Eth address to look up in the contract.
-   * @returns the string the Eth address maps to in the contract (may be "" if not set.)
+   * @returns a Promise wrapping the string the Eth address maps to in the contract (may be "" if not set.)
    */
   getLink(ethAddress) {
     
@@ -76,10 +76,9 @@ class StoreLinkContractHandler {
    * Send a new transaction calling the setLink function on the test contract.
    * @param ethAddress the Eth address to set the value for in the contract.
    * @param newValue the new string (must be <= 32 characters) to set the
-   * @returns the string the Eth address maps to in the contract (may be false).
+   * @returns a PromiEvent for the assorted tx events. If successful, 'receipt' will be the transaction receipt.
    */
   setLink(ethAddress, newValue) {
-    
     if (newValue.length > 32) {
       throw new Error("String too long.");
     }
@@ -88,11 +87,15 @@ class StoreLinkContractHandler {
       throw new Error("Contract not initialized, can't call getLink function.");
     }
     
+    return this.tokenContract.methods.setLink(newValue).send({from: ethAddress, value: 0});
+    
+    /**
     return new Promise((resolve, reject) => {
       this.tokenContract.methods.setLink(newValue).send({from: ethAddress, value: 0})
         .on("receipt", (receipt) => resolve(receipt))
         .on("error", (error) => reject(error))
       ;
     });
+    */
   }
 }

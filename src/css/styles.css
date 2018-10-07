@@ -23,8 +23,8 @@ body {
 }
 
 #viewables {
-  width: 700px;
-  height: 150px;
+  width: 720px;
+  height: 255px;
   background-color: #6d6d6d47;
   border-radius: 20px;
   padding: 10px;
@@ -40,4 +40,8 @@ body {
 
 .center {
   text-align: center;
+}
+
+.x {
+  float: right;
 }

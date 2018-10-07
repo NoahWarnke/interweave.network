@@ -6,27 +6,42 @@
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
     <script src="src/js/web3Handler.js"></script>
     <script src="src/js/contractHandler.js"></script>
-    <script src="src/js/interweave-app.js"></script>
+    <script src="src/js/storelink-app.js"></script>
     <link rel="stylesheet" href="src/css/styles.css">
     <link rel="shortcut icon" type="image/png" href="assets/icon-32x32.png"/>
   </head>
   <body>
     <div id="interweave-app">
       <p id="status" v-bind:class="statusCol">{{status()}}</p>
-      <h2 class="center">StoreLink Example (real site coming soon)</h2>
-      <p class="center">A simple practice dapp that lets you set a single message (<= 32 characters) for each of your Ethereum addresses. Free except for gas.</p>
+      <h2 class="center">StoreLink example (real Interweave Network site coming soon)</h2>
+      <p class="center">A simple practice dapp that lets you set a single message (up to 32 characters) for each of your Ethereum addresses. Free except for gas.</p>
       <div id="viewables" v-if="contractReady">
         <div id="account-available" v-if="accountAvailable">
           <p v-if="value !== ''">Message for your address {{account}}</p>
           <p v-if="value === ''">Your address {{account}} has no message set.</p>
           <h1 v-if="value !== ''">{{value}}</h1>
-          <input type="text" v-model="formInput"></input>
-          <button v-on:click="callSet">Set a {{value !== '' ? 'new ' : ''}}value!</button>
+          <input type="text" v-model="formInput" v-if="!transactionInProgress" maxlength="32" size="32"></input>
+          <button v-on:click="callSet" v-if="!transactionInProgress">Set {{value !== '' ? 'new ' : ''}}value!</button>
         </div>
         <div id="nondapp" v-if="browserType === 'nondapp' || !loggedIn">
           <p>Get message for address <input type="text" size="50" v-model="enteredAccount" v-on:change="callGet"></input></p>
           <h1 v-if="value !== ''">{{value}}</h1>
           <p v-if="value === ''">(no message set)</p>
+        </div>
+        <div id="transaction" v-if="setTxHash !== undefined" v-bind:class="setConfirmations < 1 ? (setError === undefined ? 'warn' : 'error') : 'good'">
+          <hr>
+          <button class="x" v-on:click="closeTxWindow">X</button>
+          <p>
+            You have submitted a
+            <a target="_blank" v-bind:href="'https://' + (network === 'mainnet' ? '' : network + '.') + 'etherscan.io/tx/' + setTxHash">transaction</a>
+            to change your message to {{formInput}}.
+          </p>
+          <p>
+            It
+            <span v-if="setConfirmations < 1 && setError === undefined"> is awaiting confirmation.</span>
+            <span v-if="setConfirmations > 0"> has been confirmed with {{setConfirmations + (setConfirmations === 24 ? '+' : '')}} block confirmations!</span>
+            <span v-if="setError !== undefined"> failed due to an error. Check the tx link above or MetaMask for details.</span>
+          </p>
         </div>
       </div>
     </div>
