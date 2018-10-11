@@ -23,16 +23,62 @@ The end goal of the project is to interweave every virtual place possible, exist
 
 ## Existing Work
 
+What similar things are being used as inspiration and examples of what to do (or not to do)?
+
+
+- Adventure-esque games
+  - Zork
+- Hyperstudio
+- World Wide Web
+- Online sandbox games:
+  - Second Life
+  - Wurm Online
+- Decentraland
+
+
 ## Rationale
+
+Why does this project make sense to develop versus using that existing work?
+
+- Decentralized, unlike everything except Decentraland. Reduces security and censorship risks.
+- Every node within the Network will be on equal footing, and can be connected with any other node. No place will need to be 'siloed' for technological or competitive reasons (more connections will almost always be desirable for both connected parties.)
+- Unlimited building potential with no arbitrary scarcity, unlike Decentraland.
+- Very low barrier to entry for building, being feeless apart from gas (and possible Ethereum rent someday).
 
 ## Philosophy
 
+What values does the project hope to promote?
+
+- Open source development
+- Fair for all participants (all functionality available to everyone regardless of wealth or when they arrive)
+- Nonprofit infrastructure: project developers are not aiming to make money from the running of the Network.
+  - Small fees may be charged solely for paying Ethereum rent someday.
+  - Creators and early users may be able to make money by having nodes built earlier in the system, and thus older and more central to the eventual network and thus potentially more valuable... But no special privileges relative to the infrastructure.
+- Flexible: formats are unspecified by the Network, and the project explicitly hopes people will develop many of these.
+- Aesthetic appeal: the locations nodes represent should strive to be 'eye candy', or 'mind's eye candy' in the case of text-based nodes. Exploring should be fun and rewarding.
+
+
 ## Architecture
+
+In broad strokes, what technical components will the project be composed of?
 
 ## Applications
 
+Once up and running, what problems will the project solve or new capabilities will it enable for its users?
+
+- Initially, as a game itself
+- As glue between and method for locating existing games relative to each other
+- As a free framework where you can build yourself a 'place' in the virtual world that you alone own and control (see 'profiles' on most social sites... but these always fail to be a truly immersive 'place', being just sterile slabs of UI with some blanks filled in)
+
+
 ## Challenges
+
+What aspects of the project are especially risky with respect to getting it completed and working as designed?
 
 ## Summary
 
+Reword the abstract :)
+
 ## Further Reading
+
+A list of all citations from above.
