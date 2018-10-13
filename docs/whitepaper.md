@@ -20,38 +20,18 @@ The end goal of the project is to interweave every virtual place possible, exist
 6. [Challenges](#challenges)
 7. [Summary](#summary)
 8. [Further Reading](#further-reading)
+9. [Appendix](#appendix)
 
 ## Existing Work
-Graph-based games and information spaces possess an extremely rich 40-year history. Examples have heavily informed and inspired Interweave Network's design and goals. To make comparing the below examples more straightforward, the following set of flags, collectively called the Interweave Assessment Number, will be used to categorize games and other applications.
-
-#### Interweave Assessment Number (IWAN)
-A number betweem between ```0x00``` and ```0xff```, produced by bitwise-ORing together those of a set of eight flags that are true for a given application:
-1. ##### Graph ```0x01```
-   The application world (the set of all its locations) can be best represented as a set of nodes associated to arbitrary data and connected by edges.
-2. ##### Multiplayer ```0x02```
-   Multiple users can explore and interact in the same world at once.
-3. ##### Ownable ```0x04``` *(only if Multiplayer)*
-   Users can own and trade locations (nodes in a graph or spaces in non-graphs).
-4. ##### Creatable ```0x08``` *(only if Graph)*
-   Users can create nodes.
-5. ##### Settable ```0x10```
-   Users can set the content for locations (nodes or spaces).
-6. ##### Panformat ```0x20``` *(only if Settable)*
-   Users are not limited to a subset of potentially available formats for node content.
-7. ##### Seamless ```0x40``` *(only if Graph)*
-   Users can follow edges between nodes smoothly and without breaking immersion, rather than instantly and jarringly, even if they have different formats.
-8. ##### Decentralized ```0x80``` *(only if Multiplayer)*
-   The application world's structure and content is owned and hosted by many different parties, and no one entity owns a majority or large minority.
-
-For example, a graph-based, multiplayer, centralized game where users could create, set, own, and seamlessly move between single-format nodes, would have an IWAN of ```0x01``` | ```0x02``` | ```0x04``` | ```0x08``` | ```0x10``` | ```0x40``` = ```0x5f```.
+Graph-based games and information spaces possess an extremely rich 40-year history. Examples have heavily informed and inspired Interweave Network's design and goals. To make comparing the below examples more systematic, the Interweave Assessment Number (see the [appendix](#appendix)) will be used to categorize games and other applications.
 
 ### Interactive Fiction
-The oldest graph-based games were text-based games of the [interactive fiction](https://en.wikipedia.org/wiki/Interactive_fiction) genre.
+The oldest games built on location graphs were text-based games of the [interactive fiction](https://en.wikipedia.org/wiki/Interactive_fiction) genre.
 
-##### Colossal Cave Adventure ```IWAN 0x41 (Seamless Graph)```
+##### Colossal Cave Adventure | ```IWAN 0x41 (Seamless Graph)```
 The original text adventure, [Colossal Cave Adventure](http://rickadams.org/adventure/) provided players in 1977 with a text interface with which they could navigate a fixed network of "rooms", locations with a text description and possibly containing items and monsters. They would traverse the edges between rooms by giving simple direction-based text commands, like "go north". Interestingly, rooms could be slightly customized by picking up and dropping items in them, a mechanic that made solving one of the game's puzzles possible, but were not truly settable. Because the format was the same for all nodes, transitions were seamless within the console, although edges did not have their own descriptions. The game [proved addictive](https://web.archive.org/web/19970607204921/http://www.csd.uwo.ca/Infocom/Articles/globe84.html) when it hit the fledgling ARPANET, showing the potential for such exploration-based experiences. Slightly later and even-more-popular games like [Zork](https://en.wikipedia.org/wiki/Zork) were largely similar in mechanics, but featured different worlds within the text-based framework.
 
-##### Multi-User Dungeons ```IWAN 0x43 (Seamless Multiplayer Graph)```
+##### Multi-User Dungeons | ```IWAN 0x43 (Seamless Multiplayer Graph)```
 Building on games like Colossal Cave, and taking advantage of the huge growth of the Internet, text-based [MUDs](https://en.wikipedia.org/wiki/MUD) allowed multiple players to explore the same world and interact with one another as well as their surroundings. This opened up social play as a possibility, something that had needed to occur in-person in the past, e.g. during Dungeons and Dragons sessions. Players still could not create nodes in the game's location graph, however, an ability limited to the game's creators outside of gameplay.
 
 ### Hyperlinked Applications
@@ -140,3 +120,26 @@ Reword the abstract :)
 ## Further Reading
 
 A list of all citations from above.
+
+## Appendix
+
+#### Interweave Assessment Number (IWAN)
+A number betweem between ```0x00``` and ```0xff```, produced by bitwise-ORing together those of a set of eight flags that are true for a given application:
+1. ##### Graph ```0x01```
+   The application world (the set of all its locations) can be best represented as a set of nodes associated to arbitrary data and connected by edges.
+2. ##### Multiplayer ```0x02```
+   Multiple users can explore and interact in the same world at once.
+3. ##### Ownable ```0x04``` *(only if Multiplayer)*
+   Users can own and trade locations (nodes in a graph or spaces in non-graphs).
+4. ##### Creatable ```0x08``` *(only if Graph)*
+   Users can create nodes.
+5. ##### Settable ```0x10```
+   Users can set the content for locations (nodes or spaces).
+6. ##### Panformat ```0x20``` *(only if Settable)*
+   Users are not limited to a subset of potentially available formats for node content.
+7. ##### Seamless ```0x40``` *(only if Graph)*
+   Users can follow edges between nodes smoothly and without breaking immersion, rather than instantly and jarringly, even if they have different formats.
+8. ##### Decentralized ```0x80``` *(only if Multiplayer)*
+   The application world's structure and content is owned and hosted by many different parties, and no one entity owns a majority or large minority.
+
+For example, a graph-based, multiplayer, centralized game where users could create, set, own, and seamlessly move between single-format nodes, would have an IWAN of ```0x01``` | ```0x02``` | ```0x04``` | ```0x08``` | ```0x10``` | ```0x40``` = ```0x5f```.
