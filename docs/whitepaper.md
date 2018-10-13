@@ -77,25 +77,26 @@ What similar things are being used as inspiration and examples of what to do (or
   - Users can set the content that is present on each node, with ultimately unlimited formats (they'll need to be vetted and integrated.)
 
 ### Step 3: Create Binary Categories
-So, here are some flags of properties with which existing work can be considered:
-- [001 Graph/Nongraph] Graph-based vs. not.
-- [002 Multi/Single] Multi-player vs. single-player.
-- [004 Ownable/Nonownable] Users in multi-player context can own and trade locations (nodes on the graph or spaces on non-graphs) vs. not.
-- [008 Creatable/Noncreatable] Users can create nodes on the graph vs. not.
-- [016 Settable/Nonsettable] Users can set the content for locations (nodes or not) vs. not.
-- [032 Unlimited/Limited] Users can use unlimited node formats vs. limited formats.
-- [064 Seamless/Disjointed] Users in graph context can follow edges without leaving the current format.
-- [128 Decentralized/Centralized] Decentralized (no central servers hosting, or monolithic ownership of, world structure) in multi-player context vs. not.
+Here are some flags (let's call them the Interweave Assessment or IWA) of properties with which existing work can be considered:
+- [```0b00000001``` Graph] Graph-based: world can be fully represented as a set of nodes with arbitrary data, connected by edges.
+- [```0b00000010``` Multi] Multi-player: multiple people can explore and interact in the same world at once.
+- [```0b00000100``` Ownable] [Only if Multi] Users can own and trade locations (nodes on the graph or spaces on non-graphs).
+- [```0b00001000``` Creatable] [Only if Graph] Users can create nodes.
+- [```0b00010000``` Settable] Users can set the content for locations (nodes or spaces).
+- [```0b00100000``` Panformat] [Only if Settable] Users can use unlimited formats vs. limited formats.
+- [```0b01000000``` Seamless] [Only if Graph] Users can follow edges between nodes smoothly, not instantly and jarringly, even if they have different formats.
+- [```0b10000000``` Decentralized] [Only if Multi] No central servers hosting, or monolithic ownership of, world's structure.
+
+For example, a graph-based, multiplayer, centralized game where you could create, set, own, and seamlessly move between single-format nodes, its IWA would be ```0b01011111``` or ```0x5f```. Applications sharing an IWA might be considered fundamentally isomorphic, and when one app's IWA is bitwise >= the other's, it could potentially completely encapsulate or emulate the first. Therefore, producing a framework with an IWA of 0xff, all other applications can be emulated or encapsulated.
 
 ### Step 4: Categorize Existing Things
-- Colossal Cave Adventure: 65 [Graph/Single/Nonownable/Noncreatable/Nonsettable/Limited/Seamless/Centralized]
-- Zork: 65 [Graph/Single/Nonownable/Noncreatable/Nonsettable/Limited/Seamless/Centralized]
-- MUDs: 67 [Graph/Multi/Nonownable/Noncreatable/Nonsettable/Limited/Seamless/Centralized]
-- Hyperstudio: 89 [Graph/Single/Nonownable/Creatable/Settable/Limited/Seamless/Centralized]
-- WWW: 63 [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Disjointed/Centralized]
-- OpenCroquet/OpenCobalt: 95 [Graph/Multi/Ownable/Creatable/Settable/Limited/Seamless/Centralized]
-- Decentraland: 215 [Graph/Multi/Ownable/Noncreatable/Settable/Limited/Seamless/Decentralized]
-- Interweave Network: 255 [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Seamless/Decentralized]
+- Colossal Cave Adventure: ```0b01000001 = 0x41``` [```Graph```/```Seamless```]
+- MUDs: ```0b01000011 = 0x43``` [```Graph```/```Multi```/```Seamless```]
+- Hyperstudio: ```0b01011001 = 0x59``` [Graph/Creatable/Settable/Seamless]
+- WWW: ```0b00111111 = 0x3f``` [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Centralized]
+- OpenCroquet/OpenCobalt: ```0b01011111 = 0x5f``` [Graph/Multi/Ownable/Creatable/Settable/Seamless]
+- Decentraland: ```0b11010111 = 0xd7``` [Graph/Multi/Ownable/Settable/Seamless/Decentralized]
+- Interweave Network: ```0b11111111 = 0xff``` [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Seamless/Decentralized]
 
 ### Step 5: Write this up :)
 
