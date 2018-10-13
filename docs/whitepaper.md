@@ -27,21 +27,21 @@ Graph-based games and information spaces possess an extremely rich 40-year histo
 #### Interweave Assessment Number (IWAN)
 A number betweem between ```0x00``` and ```0xff```, produced by bitwise-ORing together those of a set of eight flags that are true for a given application:
 1. ##### Graph ```0x01```
-The world (the set of all locations) can be best represented as a set of nodes associated to arbitrary data and connected by edges.
+   The world (the set of all locations) can be best represented as a set of nodes associated to arbitrary data and connected by edges.
 2. ##### Multiplayer ```0x02```
-Multiple users can explore and interact in the same world at once.
+   Multiple users can explore and interact in the same world at once.
 3. ##### Ownable ```0x04``` *(only if Multiplayer)*
-Users can own and trade locations (nodes in a graph or spaces in non-graphs).
+   Users can own and trade locations (nodes in a graph or spaces in non-graphs).
 4. ##### Creatable ```0x08``` *(only if Graph)*
-Users can create nodes.
+   Users can create nodes.
 5. ##### Settable ```0x10```
-Users can set the content for locations (nodes or spaces).
+   Users can set the content for locations (nodes or spaces).
 6. ##### Panformat ```0x20``` *(only if Settable)*
-Users are not limited to a subset of potentially available formats for nodes.
+   Users are not limited to a subset of potentially available formats for nodes.
 7. ##### Seamless ```0x40``` *(only if Graph)*
-Users can follow edges between nodes smoothly and without breaking immersion, rather than instantly and jarringly, even if they have different formats.
+   Users can follow edges between nodes smoothly and without breaking immersion, rather than instantly and jarringly, even if they have different formats.
 8. ##### Decentralized ```0x80``` *(only if Multiplayer)*
-The world's structure and content is owned and hosted by many different parties, and no one entity owns a majority or large minority.
+   The world's structure and content is owned and hosted by many different parties, and no one entity owns a majority or large minority.
 
 For example, a graph-based, multiplayer, centralized game where users could create, set, own, and seamlessly move between single-format nodes, would have an IWAN of ```0x01``` | ```0x02``` | ```0x04``` | ```0x08``` | ```0x10``` | ```0x40``` = ```0x5f```.
 
