@@ -3,11 +3,11 @@
 ## Abstract
 Human existence revolves around our twin needs to *explore*, experiencing our environment, and to *build*, modifying it. Computer-based manifestations of our urge to explore, including the World Wide Web and computer games, have commensurately proved to be enormously significant in modern culture and society. But users do not have perfect freedom to wander the digital frontier -- games in particular are highly siloed from one another, with one virtual world rarely reachable from within any other. Our desire to build has proven considerably more difficult to fulfill, an asymmetry suffered partly because of a lack of know-how, but also significantly at the hands of centralization. Gatekeepers like domain registrars and monolithic game studios have made obtaining a website, or adding something to a favorite game world, difficult or impossible for the average Internet user, who is left with the meager Facebook post or YouTube vlog as their primary creative outlet.
 
-The Interweave Network project proposes to eliminate the explore/build asymmetry in the <a href="https://www.nealstephenson.com/snow-crash.html">metaverse</a> and make meeting these equally important needs equally frictionless.
+The Interweave Network project proposes to eliminate the explore/build asymmetry in the [metaverse](https://www.nealstephenson.com/snow-crash.html) and make meeting these equally important needs equally frictionless.
 
-A new type of digital tool, the <a href="https://github.com/ethereum/wiki/wiki/White-Paper">programmable blockchain</a>, has recently emerged to provide mechanisms for decentralizing and finalizing arbitrary state transitions. The Interweave Network will use such a framework to disentangle the simple acts of visiting shared virtual locations and creating new ones from the inequitable and insecure concentrations of power that currently comprise the status quo.
+A new type of digital tool, the [programmable blockchain](https://github.com/ethereum/wiki/wiki/White-Paper), has recently emerged to provide mechanisms for decentralizing and finalizing arbitrary state transitions. The Interweave Network will use such a framework to disentangle the simple acts of visiting shared virtual locations and creating new ones from the inequitable and insecure concentrations of power that currently comprise the status quo.
 
-The Interweave Network will consist of a decentralized graph on the <a href="https://ethereum.org/">Ethereum</a> blockchain, whose nodes can represent literally anything conceptually identifiable as a *place*, and frontend viewer applications that connect to the smart contracts containing this graph, interpret node and edge data for users, and provide an interface for creating new content. The Network will allow its users to create, own, transfer, and connect nodes in an easy, fair, and secure manner. Nodes will each be an instance of an <a href="https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md">ERC-721</a> non-fungible token with additional properties like a data URL and list of edges connecting to other nodes that can be managed only by the owners of the nodes involved. Critically, nodes will be an *unlimited* resource: users can create as many as they can afford the gas for. Value will come not from scarcity, but from quality and connectedness.
+The Interweave Network will consist of a decentralized graph on the [Ethereum](https://ethereum.org/) blockchain, whose nodes can represent literally anything conceptually identifiable as a *place*, and frontend viewer applications that connect to the smart contracts containing this graph, interpret node and edge data for users, and provide an interface for creating new content. The Network will allow its users to create, own, transfer, and connect nodes in an easy, fair, and secure manner. Nodes will each be an instance of an [ERC-721](https://github.com/ethereum/EIPs/blob/master/EIPS/eip-721.md) non-fungible token with additional properties like a data URL and list of edges connecting to other nodes that can be managed only by the owners of the nodes involved. Critically, nodes will be an *unlimited* resource: users can create as many as they can afford the gas for. Value will come not from scarcity, but from quality and connectedness.
 
 The end goal of the project is to interweave every virtual place possible, existing and new, into one seamless, metaverse-spanning network.
 
@@ -22,85 +22,73 @@ The end goal of the project is to interweave every virtual place possible, exist
 8. [Further Reading](#further-reading)
 
 ## Existing Work
+Graph-based games and information spaces possess an extremely rich history over the past 40+ years. Examples have heavily informed and inspired Interweave Network's design and goals. To make comparing the below examples more straightforward, the following set of flags, collectively called the Interweave Assessment Number, will be used to categorize games and other applications.
 
-What similar things are being used as inspiration and examples of what to do (or not to do), without getting into the specifics of what to [not] do.
+#### Interweave Assessment Number (IWAN)
+A number betweem between ```0x00``` and ```0xff```, produced by bitwise-ORing together each of a set of eight binary flags that are true for a given application:
+1. ```0b00000001``` **Graph** The world can be fully represented as a set of nodes associated to arbitrary data and connected by edges.
+2. ```0b00000010``` **Multiplayer** Multiple users can explore and interact in the same world at once.
+3. ```0b00000100``` **Ownable** [Only if **Multiplayer**] Users can own and trade locations (nodes in a graph or spaces in non-graphs).
+4. ```0b00001000``` **Creatable** [Only if **Graph**] Users can create nodes.
+5. ```0b00010000``` **Settable** Users can set the content for locations (nodes or spaces).
+6. ```0b00100000``` **Panformat** [Only if **Settable**] Users are not limited to a subset of potentially available formats for nodes.
+7. ```0b01000000``` **Seamless** [Only if **Graph**] Users can follow edges between nodes smoothly and without breaking immersion, rather than instantly and jarringly, even if they have different formats.
+8. ```0b10000000``` **Decentralized** [Only if **Multiplayer**] The world's structure and content is owned and hosted by many different parties, and no one entity owns a majority or large minority.
 
-### Step 1: research:
-- Adventure-esque games ("interactive fiction")
-  - Colossal Cave Adventure
-  - Zork
-  - Modern abstractions: Twinery, etc. (not shared!)
-- Hyperlinking:
-  - Hyperstudio ("single player")
-  - World Wide Web (duh)
-  - OpenCroquet/OpenCobalt
-- Online sandbox games:
-  - Second Life
-    - Own plots of land within the game (bought via auction from Linden Labs or other players)
-    - Multiple plots per server.
-  - Wurm Online
-    - "Own" regions you put walls around (entirely ingame and free, but risky since others can break in)
-    - Own deeds you pay money to CodeClubAAB for.
-    - Own servers (Wurm Unlimited)
-  - Minecraft
-    - "Own" fortified regions,  but again, risky since other players can break in.
-    - Own servers
-    - Can move between servers on some modded versions.
+For example, a graph-based, multiplayer, centralized game where users could create, set, own, and seamlessly move between single-format nodes, would have an IWAN of ```0b01011111``` or ```0x5f```.
 
-- Decentraland
+### Interactive Fiction
+The oldest graph-based games were text-based games of the [interactive fiction](https://en.wikipedia.org/wiki/Interactive_fiction) genre.
+
+##### Colossal Cave Adventure ```IWAN 0b01000001 = 0x41```
+The original text adventure, [Colossal Cave Adventure](http://rickadams.org/adventure/) provided players in 1977 with a text interface with which they could navigate a fixed network of "rooms", locations with a text description and where items and monsters were available. They would traverse the edges between rooms by giving simple direction-based text commands, like "go north". Remarkably for the era, rooms could be slightly customized by picking up and dropping items in them, a mechanic that made solving one of the game's puzzles possible. Because the format was the same for all nodes, transitions were seamless within the console, although edges did not have their own descriptions. The game [proved addictive](https://web.archive.org/web/19970607204921/http://www.csd.uwo.ca/Infocom/Articles/globe84.html) when it hit computers at MIT and elsewhere, showing the potential for such exploration-based experiences. Later games like [Zork](https://en.wikipedia.org/wiki/Zork) were largely similar in mechanics, but featured different worlds within the text-based framework.
+
+##### Multi-User Dungeons ```0b01000011 = 0x43```
+Building on games like Colossal Cave, and taking advantage of the advent of the Internet, text-based [MUDs](https://en.wikipedia.org/wiki/MUD) allowed multiple players to explore the same dungeon and interact with one another as well as their surroundings. This opened up social play as a possibility, something that had needed to occur in person in the past, e.g. during Dungeons and Dragons sessions. Players still could not create nodes in the game's location graph, however, an ability limited to the game's creators outside of gameplay.
+
+### Hyperlinks
+- Media-based graphs.
+- Users can set the content that is present on each node, with either limited or unlimited formats
+- Both single- and multi-player, though the latter is what made it famous.
+- Users can create and own the graph, with varying degrees of difficulty.
+
+- ##### Hyperstudio ```0b01011001 = 0x59```
+  - [Graph/Creatable/Settable/Seamless]
+- ##### World Wide Web ```0b00111111 = 0x3f```
+  - [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Centralized]
+- ##### OpenCroquet/OpenCobalt ```0b01011111 = 0x5f```
+  - [Graph/Multi/Ownable/Creatable/Settable/Seamless]
+
+#### Multiplayer Sandbox Games
+- Locations are open worlds and can be both fixed (canonical servers) and free-to-create (user servers)
+- Sometimes different worlds are connected, but rarely, and always within the same game.
+- Massively multi-player.
+- Users can create and own spaces within open worlds, and sometimes own servers too.
+
+
+- ##### Second Life
+  - Own plots of land within the game (bought via auction from Linden Labs or other players)
+  - Multiple plots per server.
+- ##### Wurm Online
+  - "Own" regions you put walls around (entirely ingame and free, but risky since others can break in)
+  - Own deeds you pay money to CodeClubAAB for.
+  - Own servers (Wurm Unlimited)
+- ##### Minecraft
+  - "Own" fortified regions,  but again, risky since other players can break in.
+  - Own servers
+  - Can move between servers on some modded versions.
+
+#### Decentralized Onership Games
+- Locations are user-ownable NFTs on a blockchain.
+- Locations are created and connected once, by the game owner.
+- Users can set the content that is present on each node, within a single framework.
+
+- ##### Decentraland ```0b11010111 = 0xd7```
+  - [Graph/Multi/Ownable/Settable/Seamless/Decentralized]
   - Inflexible in format
   - Totally inflexible in openness: fixed number of nodes.
-  
-### Step 2: Characterize Groups
-1. Interactive text adventures
-  - First instance of location-based graphs.
-  - Single-player (until MUDs) (well, not counting over-the-shoulder)
-  - Users cannot create or own the graph.
-2. Hyperlinking
-  - Media-based graphs.
-  - Users can set the content that is present on each node, with either limited or unlimited formats
-  - Both single- and multi-player, though the latter is what made it famous.
-  - Users can create and own the graph, with varying degrees of difficulty.
-3. Multiplayer sandbox games
-  - Locations are open worlds and can be both fixed (canonical servers) and free-to-create (user servers)
-  - Sometimes different worlds are connected, but rarely, and always within the same game.
-  - Massively multi-player.
-  - Users can create and own spaces within open worlds, and sometimes own servers too.
-4. Decentralized fixed-location-ownership games
-  - Locations are user-ownable NFTs on a blockchain.
-  - Locations are created and connected once, by the game owner.
-  - Users can set the content that is present on each node, within a single framework.
-  
-5. Decentralized open-location-ownership networks (this work):
-  - Locations are user-ownable NFTs on a blockchain.
-  - Locations are created and connected continuously, by the network users.
-  - Users can set the content that is present on each node, with ultimately unlimited formats (they'll need to be vetted and integrated.)
 
-### Step 3: Create Binary Categories
-Here are some flags (let's call them the Interweave Assessment or IWA) of properties with which existing work can be considered:
-- [```0b00000001``` Graph] Graph-based: world can be fully represented as a set of nodes with arbitrary data, connected by edges.
-- [```0b00000010``` Multi] Multi-player: multiple people can explore and interact in the same world at once.
-- [```0b00000100``` Ownable] [Only if Multi] Users can own and trade locations (nodes on the graph or spaces on non-graphs).
-- [```0b00001000``` Creatable] [Only if Graph] Users can create nodes.
-- [```0b00010000``` Settable] Users can set the content for locations (nodes or spaces).
-- [```0b00100000``` Panformat] [Only if Settable] Users can use unlimited formats vs. limited formats.
-- [```0b01000000``` Seamless] [Only if Graph] Users can follow edges between nodes smoothly, not instantly and jarringly, even if they have different formats.
-- [```0b10000000``` Decentralized] [Only if Multi] No central servers hosting, or monolithic ownership of, world's structure.
-
-For example, a graph-based, multiplayer, centralized game where you could create, set, own, and seamlessly move between single-format nodes, its IWA would be ```0b01011111``` or ```0x5f```. Applications sharing an IWA might be considered fundamentally isomorphic, and when one app's IWA is bitwise >= the other's, it could potentially completely encapsulate or emulate the first. Therefore, producing a framework with an IWA of 0xff, all other applications can be emulated or encapsulated.
-
-### Step 4: Categorize Existing Things
-- Colossal Cave Adventure: ```0b01000001 = 0x41``` [```Graph```/```Seamless```]
-- MUDs: ```0b01000011 = 0x43``` [```Graph```/```Multi```/```Seamless```]
-- Hyperstudio: ```0b01011001 = 0x59``` [Graph/Creatable/Settable/Seamless]
-- WWW: ```0b00111111 = 0x3f``` [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Centralized]
-- OpenCroquet/OpenCobalt: ```0b01011111 = 0x5f``` [Graph/Multi/Ownable/Creatable/Settable/Seamless]
-- Decentraland: ```0b11010111 = 0xd7``` [Graph/Multi/Ownable/Settable/Seamless/Decentralized]
 - Interweave Network: ```0b11111111 = 0xff``` [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Seamless/Decentralized]
-
-### Step 5: Write this up :)
-
-
 
 ## Rationale
 
