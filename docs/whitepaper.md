@@ -23,17 +23,82 @@ The end goal of the project is to interweave every virtual place possible, exist
 
 ## Existing Work
 
-What similar things are being used as inspiration and examples of what to do (or not to do)?
+What similar things are being used as inspiration and examples of what to do (or not to do), without getting into the specifics of what to [not] do.
 
-
-- Adventure-esque games
+### Step 1: research:
+- Adventure-esque games ("interactive fiction")
+  - Colossal Cave Adventure
   - Zork
-- Hyperstudio
-- World Wide Web
+  - Modern abstractions: Twinery, etc. (not shared!)
+- Hyperlinking:
+  - Hyperstudio ("single player")
+  - World Wide Web (duh)
+  - OpenCroquet/OpenCobalt
 - Online sandbox games:
   - Second Life
+    - Own plots of land within the game (bought via auction from Linden Labs or other players)
+    - Multiple plots per server.
   - Wurm Online
+    - "Own" regions you put walls around (entirely ingame and free, but risky since others can break in)
+    - Own deeds you pay money to CodeClubAAB for.
+    - Own servers (Wurm Unlimited)
+  - Minecraft
+    - "Own" fortified regions,  but again, risky since other players can break in.
+    - Own servers
+    - Can move between servers on some modded versions.
+
 - Decentraland
+  - Inflexible in format
+  - Totally inflexible in openness: fixed number of nodes.
+  
+### Step 2: Characterize Groups
+1. Interactive text adventures
+  - First instance of location-based graphs.
+  - Single-player (until MUDs) (well, not counting over-the-shoulder)
+  - Users cannot create or own the graph.
+2. Hyperlinking
+  - Media-based graphs.
+  - Users can set the content that is present on each node, with either limited or unlimited formats
+  - Both single- and multi-player, though the latter is what made it famous.
+  - Users can create and own the graph, with varying degrees of difficulty.
+3. Multiplayer sandbox games
+  - Locations are open worlds and can be both fixed (canonical servers) and free-to-create (user servers)
+  - Sometimes different worlds are connected, but rarely, and always within the same game.
+  - Massively multi-player.
+  - Users can create and own spaces within open worlds, and sometimes own servers too.
+4. Decentralized fixed-location-ownership games
+  - Locations are user-ownable NFTs on a blockchain.
+  - Locations are created and connected once, by the game owner.
+  - Users can set the content that is present on each node, within a single framework.
+  
+5. Decentralized open-location-ownership networks (this work):
+  - Locations are user-ownable NFTs on a blockchain.
+  - Locations are created and connected continuously, by the network users.
+  - Users can set the content that is present on each node, with ultimately unlimited formats (they'll need to be vetted and integrated.)
+
+### Step 3: Create Binary Categories
+So, here are some flags of properties with which existing work can be considered:
+- [001 Graph/Nongraph] Graph-based vs. not.
+- [002 Multi/Single] Multi-player vs. single-player.
+- [004 Ownable/Nonownable] Users in multi-player context can own and trade locations (nodes on the graph or spaces on non-graphs) vs. not.
+- [008 Creatable/Noncreatable] Users can create nodes on the graph vs. not.
+- [016 Settable/Nonsettable] Users can set the content for locations (nodes or not) vs. not.
+- [032 Unlimited/Limited] Users can use unlimited node formats vs. limited formats.
+- [064 Seamless/Disjointed] Users in graph context can follow edges without leaving the current format.
+- [128 Decentralized/Centralized] Decentralized (no central servers hosting, or monolithic ownership of, world structure) in multi-player context vs. not.
+
+### Step 4: Categorize Existing Things
+- Colossal Cave Adventure: 65 [Graph/Single/Nonownable/Noncreatable/Nonsettable/Limited/Seamless/Centralized]
+- Zork: 65 [Graph/Single/Nonownable/Noncreatable/Nonsettable/Limited/Seamless/Centralized]
+- MUDs: 67 [Graph/Multi/Nonownable/Noncreatable/Nonsettable/Limited/Seamless/Centralized]
+- Hyperstudio: 89 [Graph/Single/Nonownable/Creatable/Settable/Limited/Seamless/Centralized]
+- WWW: 63 [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Disjointed/Centralized]
+- OpenCroquet/OpenCobalt: 95 [Graph/Multi/Ownable/Creatable/Settable/Limited/Seamless/Centralized]
+- Decentraland: 215 [Graph/Multi/Ownable/Noncreatable/Settable/Limited/Seamless/Decentralized]
+- Interweave Network: 255 [Graph/Multi/Ownable/Creatable/Settable/Unlimited/Seamless/Decentralized]
+
+### Step 5: Write this up :)
+
 
 
 ## Rationale
