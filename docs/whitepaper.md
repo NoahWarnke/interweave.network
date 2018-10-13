@@ -23,7 +23,7 @@ The end goal of the project is to interweave every virtual place possible, exist
 9. [Appendix](#appendix)
 
 ## Existing Work
-Graph-based games and information spaces possess an extremely rich 40-year history. Examples have heavily informed and inspired Interweave Network's design and goals. To make comparing the below examples more systematic, the Interweave Assessment Number (see the [appendix](#appendix)) will be used to categorize games and other applications.
+Graph-based games and information spaces possess an extremely rich 40-year history. Examples have heavily informed and inspired Interweave Network's design and goals. To make comparing the below examples more systematic, the Interweave Assessment Number or IWAN (see the [appendix](#appendix)) will be used to categorize games and other applications.
 
 ### Interactive Fiction
 The oldest games built on location graphs were text-based games of the [interactive fiction](https://en.wikipedia.org/wiki/Interactive_fiction) genre.
@@ -38,7 +38,7 @@ Building on games like Colossal Cave, and taking advantage of the huge growth of
 The graph format so successfully used by interactive fiction was subsequently generalized to many different types of media in the form of hyperlinking. By allowing users to create and set (in some cases arbitrarily) the content of nodes in the graph, and then easily link between them, hyperlinked applications were largely responsible for the viral onset of the Information Age.
 
 ##### HyperStudio ```IWAN 0x59 (Seamless, Settable, Creatable Graph)```
-An early example of such a hyperlinked application was [HyperStudio](https://en.wikipedia.org/wiki/HyperStudio). It allowed users to create a "stack" of "cards", somewhat similar to a modern deck of PowerPoint slides. These 2D cards could embed text, images, videos, and assorted other media. Significantly, users could create buttons, arbitrarily shaped clickable regions on a card, that could link to *any card in the stack*, not just the previous or next ones. These hyperlinks, essentially edges in the graph between the cards/nodes, enabled stacks to be small fully explorable worlds, and the software was frequently used for this purpose. However, it was not multiplayer, and only supported its 2D cards as nodes, limiting its usefulness.
+An early example of such a hyperlinked application was [HyperStudio](http://www.rogerwagner.com/hs/testdrive/Welcome_Page.html). It allowed users to create a "stack" of "cards", somewhat similar to a modern deck of PowerPoint slides. These 2D cards could embed text, images, videos, and assorted other media. Significantly, users could create buttons, arbitrarily shaped clickable regions on a card, that could link to *any card in the stack*, not just the previous or next ones. These buttons were edges in the graph between the card-nodes, and enabled stacks to be small fully explorable worlds, a purpose the software was frequently used for. However, it was not multiplayer, and only supported its 2D cards as a node format, limiting its usefulness.
   
 ##### World Wide Web ```IWAN 0x3f (Panformat, Settable, Creatable, Ownable, Multiplayer Graph)```
 By far the most popular and successful implementation of hyperlinking has been the [World Wide Web](https://www.w3.org/). Its genius was to specify a document format (HTML) which could contain links intermixed with other content, to provide an initial implementation of a web browser that could parse HTML files, and to define locations on the Internet called URLs where resources (including HTML files) could be accessed via a new protocol (HTTP). Each URL is a node, and each link an edge, on a massive globe-spanning graph. Users can, with varying degrees of difficulty, create and set the content, in any arbitrary format, for URLs that they have control over (by owning the root domain name). Soon many other web browsers sprang up, supporting an increasing array of data formats and methods for adjusting presentation and scripting behavior. Links do not specify transitions between nodes, however (usually they are as instantaneous as possible). While the Web as a whole is very decentralized, a large fraction of present-day Web traffic, especially for important operations like registering or resolving domain names, passes through or depends on a relatively small set of monolithic domains, making that traffic vulnerable to [security flaws](https://www.nytimes.com/2018/09/28/technology/facebook-hack-data-breach.html), [accidents](https://aws.amazon.com/message/41926/), and [censorship](https://en.wikipedia.org/wiki/Censorship_by_Google#China) on the part of those centralized entities.
@@ -47,37 +47,27 @@ By far the most popular and successful implementation of hyperlinking has been t
 An interesting project in the hyperlinking genre was [OpenCroquet](http://wiki.c2.com/?OpenCroquet) and successor [OpenCobalt](http://www.opencobalt.net/). These involved the production of a "virtual world browser" which let users create and live-edit 3D virtual worlds, and seamlessly walk between them via see-through "portals". Other content could be embedded and edited within virtual worlds, including the code for the world itself, but the 3D world was the core node format, and the "portal" the edge format. In contrast to the World Wide Web, OpenCroquet/Cobalt gave up the panformat property in return for the seamless property, but also made setting node content much easier. Sadly, these projects never took off.
 
 ### Multiplayer Sandbox Games
-
-
-- Locations are open worlds and can be both fixed (canonical servers) and free-to-create (user servers)
-- Sometimes different worlds are connected, but rarely, and always within the same game.
-- Massively multi-player.
-- Users can create and own spaces within open worlds, and sometimes own servers too.
-
+Back in the realm of computer games, a popular genre in the past fifteen or so years has been the multiplayer sandbox game. These games give their many players a large amount of agency in collaboratively modifying their environments, subject to certain rules. Most such games might not be seen as graph-based at all, consisting instead of single large 3D worlds. However, they usually have multiple servers that could be considered nodes with very extensively-described locations, and with in-game ways of traveling between servers that could be seen as edges. Only a few of the many possible examples will be considered here, since they largely have similar IWANs.
 
 ##### Second Life ```IWAN 0x57 (Seamless, Settable, Ownable, Multiplayer Graph)```
-  - Own plots of land within the game (bought via auction from Linden Labs or other players)
-  - Multiple plots per server.
+A classic virtual world, [Second Life](#https://secondlife.com/) doesn't like to be considered a game, since it lacks set objectives. Users ("residents") can explore a huge map comprised of thousands of servers ("sims"), each a square patch of land or water 256m to a side and sometimes butting up against other sims. Much of the content in the world has been created by users from within the world itself via built-in 3D editing tools. Traveling between sims involves simply walking or flying across a sim boundary, or teleporting anywhere (a mechanism that does break the graph metaphor somewhat). Sims are subdivided into "parcels" of land that residents can purchase from [Linden Labs](#https://www.lindenlab.com/), Second Life's creator, or from other residents. Parcel owners can then modify the underlying terrain and place any objects they want on the land. However, new sims are only created at Linden Labs' discretion, only on their centralized servers, and only support the native 3D world format.
+
 ##### Wurm Online ```IWAN 0x5f (Seamless, Settable, Creatable, Ownable, Multiplayer Graph)```
-  - "Own" regions you put walls around (entirely ingame and free, but risky since others can break in)
-  - Own deeds you pay money to CodeClubAAB for.
-  - Own servers (Wurm Unlimited)
+Much less well known than its indirect descendent [Minecraft](#https://minecraft.net/en-us/), but attaining the same IWAN, [Wurm Online](#https://www.wurmonline.com/) consists of several canonical servers, each with a large land area that can be terraformed, built upon, farmed, and tunneled under. Players can "own" an area by putting a wall up around it, but with no guarantees, since other players can break into their enclosure easily enough. They can also pay game creator Code Club AB to "deed" an area, guaranteeing their ownership for a period of time. Traveling between servers happens similarly to Second Life, except server boundaries always occur in the ocean, so players must sail across them. Unlike Second Life, players can also create and host their own servers with a version of the game called Wurm Unlimited. Nevertheless, only the native 3D world format is supported, and the canonical servers many players use are centralized.
 
 ### Decentralized Ownership Games
-- Locations are user-ownable NFTs on a blockchain.
-- Locations are created and connected once, by the game owner.
-- Users can set the content that is present on each node, within a single framework.
+A very new and relevant category of games are those which record player ownership of assets on a blockchain. Most new games in the genre have focused on item ownership, while leaving their worlds, if any, as classic static locations. [Others](https://www.gamasutra.com/view/news/326433/Ubisoft_details_its_blockchainpowered_game_HashCraft.php) have taken the [No Man's Sky](https://www.nomanssky.com/) or [CryptoKitties](https://www.cryptokitties.co/) approach to game worlds, procedurally generating locations and storing the seed and future modifications on the chain. This restricts users who want to create world content to starting from a random, algorithm-limited foundation. One game shares many similarities with the Interweave Network concept, however.
 
 ##### Decentraland ```IWAN 0xd7 (Decentralized, Seamless, Settable, Ownable, Multiplayer Graph)```
-  - Inflexible in format
-  - Totally inflexible in openness: fixed number of nodes.
+Like Second Life, [Decentraland](https://decentraland.org/whitepaper.pdf) will support a virtual multiplayer world rich with user-created content. Unlike Second Life, assets will be decentralized. Its world currently consists of a 300x300 grid of user-ownable non-fungible tokens (LAND), which were purchasable from Decentraland, and now from users, using the game's MANA currency token. Owning plots of LAND gives users the right to associate content (hosted decentrally, perhaps on IPFS in the future) with the plot, which will show up within the virtual world, both when users are on that exact plot, and also in nearby plot. However, node content format, again, will be restricted to a specific 3D data type, with additional information helping discover peers for certain peer-to-peer operations Decentraland will be managing. Users will not be able to create new nodes nor change their adjacency themselves; Decentraland ownership has retained that right for themselves.
 
 ##### Interweave Network: ```IWAN 0xff (Decentralized, Seamless, Panformat, Settable, Creatable, Ownable, Multiplayer Graph)```
 
 ## Rationale
 
-Why does this project make sense to develop versus using that existing work?
+Why does this project make sense to develop versus using existing work?
 
+- Seamless (unlike WWW)
 - Decentralized, unlike everything except Decentraland. Reduces security and censorship risks.
 - Every node within the Network will be on equal footing, and can be connected with any other node. No place will need to be 'siloed' for technological or competitive reasons (more connections will almost always be desirable for both connected parties.)
 - Unlimited building potential with no arbitrary scarcity, unlike Decentraland.
@@ -113,6 +103,10 @@ Once up and running, what problems will the project solve or new capabilities wi
 
 What aspects of the project are especially risky with respect to getting it completed and working as designed?
 
+"This discovery by adjacency is at odds with having infinite land: in that scenario, users
+would  have  a  hard  time  finding  relevant  content  by  traveling  through  it.  With  scarce  
+land, developers can acquire users by purchasing land in high-traffic areas." - Decentraland whitepaper
+
 ## Summary
 
 Reword the abstract :)
@@ -143,3 +137,5 @@ A number betweem between ```0x00``` and ```0xff```, produced by bitwise-ORing to
    The application world's structure and content is owned and hosted by many different parties, and no one entity owns a majority or large minority.
 
 For example, a graph-based, multiplayer, centralized game where users could create, set, own, and seamlessly move between single-format nodes, would have an IWAN of ```0x01``` | ```0x02``` | ```0x04``` | ```0x08``` | ```0x10``` | ```0x40``` = ```0x5f```.
+
+The IWAN is intended to be used as a quick method of assessing how users may interact with and access a game's virtual world. Other attributes, like support for items, NPCs, combat, quests, scripting, in-game item creating, etc. are not considered because they are encapsulated by the "settable" and "panformat" attributes. If users can set content for nodes with any format, then they can choose content for their nodes that is formatted to support the above attributes (or any others).
