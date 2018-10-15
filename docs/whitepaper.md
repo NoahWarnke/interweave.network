@@ -13,6 +13,18 @@ The end goal of the project is to interweave every virtual place possible, exist
 
 ## Table of Contents
 1. [Existing Work](#existing-work)
+   1. [Interactive Fiction](#interactive-fiction)
+      - [Colossal Cave Adventure](#colossal-cave-adventure)
+      - [Multi-User Dungeons](#multi-user-dungeons)
+   2. [Hyperlinked Applications](#hyperlinked-applications)
+      - [HyperStudio](#hyperstudio)
+      - [World Wide Web](#world-wide-web)
+      - [OpenCroquet and OpenCobalt](#opencroquet-and-opencobalt)
+   3. [Multiplayer Sandbox Games](#multiplayer-sandbox-games)
+      - [Second Life](#second-life)
+      - [Wurm Online](#wurm-online)
+   4. [Decentralized Ownership Games](#decentralized-ownership-games)
+      - [Decentraland](#decentraland)
 2. [Rationale](#rationale)
 3. [Philosophy](#philosophy)
 4. [Architecture](#architecture)
@@ -43,7 +55,7 @@ An early example of such a hyperlinked application was [HyperStudio](http://www.
 ##### World Wide Web ```IWAN 0x3f (Panformat, Settable, Creatable, Ownable, Multiplayer Graph)```
 By far the most popular and successful implementation of hyperlinking has been the [World Wide Web](https://www.w3.org/). Its genius was to specify a document format (HTML) which could contain links intermixed with other content, to provide an initial implementation of a web browser that could parse HTML files, and to define locations on the Internet called URLs where resources (including HTML files) could be accessed via a new protocol (HTTP). Each URL is a node, and each link an edge, on a massive globe-spanning graph. Users can, with varying degrees of difficulty, create and set the content, in any arbitrary format, for URLs that they have control over (by owning the root domain name). Soon many other web browsers sprang up, supporting an increasing array of data formats and methods for adjusting presentation and scripting behavior. Links do not specify transitions between nodes, however (usually they are as instantaneous as possible). While the Web as a whole is very decentralized, a large fraction of present-day Web traffic, especially for important operations like registering or resolving domain names, passes through or depends on a relatively small set of monolithic domains, making that traffic vulnerable to [security flaws](https://www.nytimes.com/2018/09/28/technology/facebook-hack-data-breach.html), [accidents](https://aws.amazon.com/message/41926/), and [censorship](https://en.wikipedia.org/wiki/Censorship_by_Google#China) on the part of those centralized entities.
 
-##### OpenCroquet/OpenCobalt ```IWAN 0x5f (Seamless, Settable, Creatable, Ownable, Multiplayer Graph)```
+##### OpenCroquet and OpenCobalt ```IWAN 0x5f (Seamless, Settable, Creatable, Ownable, Multiplayer Graph)```
 An interesting project in the hyperlinking genre was [OpenCroquet](http://wiki.c2.com/?OpenCroquet) and successor [OpenCobalt](http://www.opencobalt.net/). These involved the production of a "virtual world browser" which let users create and live-edit 3D virtual worlds, and seamlessly walk between them via see-through "portals". Other content could be embedded and edited within virtual worlds, including the code for the world itself, but the 3D world was the core node format, and the "portal" the edge format. In contrast to the World Wide Web, OpenCroquet/Cobalt gave up the panformat property in return for the seamless property, but also made setting node content much easier. Sadly, these projects never took off.
 
 ### Multiplayer Sandbox Games
