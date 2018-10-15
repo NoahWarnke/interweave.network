@@ -171,7 +171,7 @@ class Web3Handler {
   async updateNonDapp() {
     
     if (this.infuraProvider === undefined) {
-      this.infuraProvider = new Web3.providers.WebsocketProvider("wss://ropsten.infura.io/ws");
+      this.infuraProvider = new Web3.providers.WebsocketProvider("wss://rinkeby.infura.io/ws");
     }
     
     if (this.provider !== this.infuraProvider) {
@@ -182,7 +182,7 @@ class Web3Handler {
       this.updateState("accountAccessEnabled", false);
       this.updateState("accountAccessRejected", false);
       this.updateState("account", undefined);
-      this.updateState("networkId", 3);
+      this.updateState("networkId", 4);
       this.updateState("network", this.mapNetworkString(3));
     }
     console.log("Non/not logged in");

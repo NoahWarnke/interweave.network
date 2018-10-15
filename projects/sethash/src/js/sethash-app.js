@@ -30,7 +30,7 @@ async function startup() {
         app.closeTxWindow(); // The submission form is hidden if a transaction is already open, but just in case.
         app.transactionInProgress = true;
         try {
-          app.myStoreLinkContractHandler.setLink(this.account, this.formInput)
+          app.mySetHashContractHandler.setHash(this.account, this.formInput)
             .on("transactionHash", (hash) => {
               if (!app.transactionInProgress) {
                 return;
@@ -72,14 +72,14 @@ async function startup() {
         if (this.browserType === "nondapp" || !this.loggedIn) {
           console.log("callGet nodapp: " + this.enteredAccount);
           try {
-            this.value = await this.myStoreLinkContractHandler.getLink(this.enteredAccount);
+            this.value = await this.mySetHashContractHandler.getHash(this.enteredAccount);
           }
           catch (error) {
-            console.log("Error calling getLink: " + e);
+            console.log("Error calling getHash: " + e);
           }
         }
         else if (this.loggedIn) {
-          this.value = await this.myStoreLinkContractHandler.getLink(this.account);
+          this.value = await this.mySetHashContractHandler.getHash(this.account);
         }
         else {
           // Not logged in, but not a non-dapp browser, so do nothing.
@@ -88,7 +88,7 @@ async function startup() {
       status: function() {
         if (this.browserType === "nondapp") {
           this.statusCol = "warn";
-          return "No MetaMask detected; dapp connected to Ropsten via Infura in view-only mode.";
+          return "No MetaMask detected; dapp connected to Rinkeby via Infura in view-only mode.";
         }
         if (!this.accountAvailable) {
           if (!this.accountAccessEnabled && !this.accountAccessRejected) {
@@ -101,7 +101,7 @@ async function startup() {
           }
           if (!this.contractReady) {
             this.statusCol = "error";
-            return "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode, but no contract available on this network. Try Ropsten.";
+            return "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode, but no contract available on this network. Try Rinkeby.";
           }
           this.statusCol = "warn";
           return "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode.";
@@ -109,7 +109,7 @@ async function startup() {
         }
         else if (!this.contractReady) {
           this.statusCol = "error";
-          return "Connected to " + app.network + " but no contract available on this network. Try Ropsten.";
+          return "Connected to " + app.network + " but no contract available on this network. Try Rinkeby.";
         }
         this.statusCol = "good";
         return "Connected to " + this.network + "!";
@@ -144,12 +144,12 @@ async function startup() {
   // Initialize the Web3Handler, checking for web3 state and then watching for changes.
   await myWeb3Handler.initialize();
   
-  // Instantiate StoreLinkContractHandler.
-  app.myStoreLinkContractHandler = new StoreLinkContractHandler();
+  // Instantiate SetHashContractHandler.
+  app.mySetHashContractHandler = new SetHashContractHandler();
   
   // Attempt to initialize the ContractHandler. If not available on the current network, will throw an error.
   try {
-    await app.myStoreLinkContractHandler.initialize(myWeb3Handler);
+    await app.mySetHashContractHandler.initialize(myWeb3Handler);
     console.log("Contract ready.");
     app.contractReady = true;
     await app.callGet(); // Get value for the default account.
