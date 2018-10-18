@@ -38,33 +38,51 @@ contract InterweaveGraph {
     event NodeCreated(address nodeAddr, address ownerAddr);
     
     /// @notice A Node was deleted from the graph.
-    /// @param nodeAddr The address of the Node that was deleted.
+    /// @param nodeAddr The address of the deleted Node.
     /// @param ownerAddr The Ethereum address of the deleted Node's Owner.
     event NodeDeleted(address nodeAddr, address ownerAddr);
     
+    /// @notice A HalfEdge was created on the graph.
+    /// @param halfEdgeAddr The address of the created HalfEdge.
+    /// @param ownerAddr The Ethereum address of the created HalfEdge's Owner.
     event HalfEdgeCreated(address halfEdgeAddr, address ownerAddr);
     
-    event HalfEdgeDeleted(address halfEdge, address ownerAddr);
+    /// @notice A HalfEdge was deleted from the graph.
+    /// @param halfEdgeAddr The address of the deleted HalfEdge.
+    /// @param ownerAddr The Ethereum address of the deleted HalfEdge's Owner.
+    event HalfEdgeDeleted(address halfEdgeAddr, address ownerAddr);
     
-    event EdgeProposalCreated(address edgeProposalAddr, address createrAddr);
+    /// @notice An EdgeProposal was created.
+    /// @param edgeProposalAddr The address of the created EdgeProposal.
+    /// @param proposerAddr The Ethereum address of the Owner who created the EdgeProposal.
+    /// @param proposedToAddr The Ethereum address of the Owner who is the counterparty on the EdgeProposal.
+    event EdgeProposalCreated(address edgeProposalAddr, address proposerAddr, address indexed proposedToAddr);
     
-    event EdgeProposalAccepted(address nodeAddr0, address nodeAddr1, address accepterAddr);
+    /// @notice An EdgeProposal was accepted, connecting or disconnecting two Nodes.
+    /// @param edgeProposalAddr The address of the accepted EdgeProposal (which will have been deleted).
+    /// @param accepterAddr The Ethereum address of the Owner who accepted the EdgeProposal.
+    /// @param acceptedAddr The Ethereum address of the Owner whose EdgeProposal was accepted.
+    event EdgeProposalAccepted(address edgeProposalAddr, address accepterAddr, address indexed acceptedAddr);
     
-    event EdgeProposalRejected(address nodeAddr0, address nodeAddr1, address rejecterAddr);
+    /// @notice An EdgeProposal was rejected.
+    /// @param edgeProposalAddr The address of the rejected EdgeProposal (which will have been deleted).
+    /// @param rejecterAddr The Ethereum address of the Owner who rejected the EdgeProposal.
+    /// @param rejectedAddr The Ethereum address of the Owner who was the counterparty on the EdgeProposal.
+    event EdgeProposalRejected(address edgeProposalAddr, address rejecterAddr, address indexed rejectedAddr);
     
-    /// @notice A Mapping allowing lookup of Nodes by their address.
+    /// @notice A Mapping allowing lookup of Nodes by their addresses.
     /// @dev Node addresses = kekkac(ipfsHash)
     mapping (address => Node) public nodeLookup;
     
-    /// @notice A mapping allowing lookup of HalfEdges by their address.
+    /// @notice A mapping allowing lookup of HalfEdges by their addresses.
     /// @dev HalfEdge addresses = kekkac(ipfsHash)
     mapping (address => HalfEdge) public halfEdgeLookup;
     
-    /// @notice A mapping allowing lookup of EdgeProposals by their address.
+    /// @notice A mapping allowing lookup of EdgeProposals by their addresses.
     /// @dev EdgeProposal addresses = kekkac(halfEdgeAddr0, halfEdgeAddr1)
     mapping (address => EdgeProposal) public edgeProposalLookup;
     
-    /// @notice A mapping allowing lookup of Owners by their (Ethereum) address.
+    /// @notice A mapping allowing lookup of Owners by their (Ethereum) addresses.
     mapping (address => Owner) private ownerLookup;
     
     function createNode(bytes32 _ipfs, uint32 _format) external returns (address) {
