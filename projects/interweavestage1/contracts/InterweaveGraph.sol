@@ -279,6 +279,9 @@ contract InterweaveGraph {
     // ...Get that array as storage because we'll be using it several times, modifying it, and want the changes to stick.
     address[] storage halfEdgeAddrs = node.halfEdgeAddrs;
     
+    // ...Check invariant: Nodes always have <= 6 HalfEdges.
+    assert(halfEdgeAddrs.length <= 6);
+    
     // ...Iterate (up to 6 times) to find index of _halfEdgeAddr in halfEdgeAddrs.
     uint8 index = 0;
     for (uint8 i = 0; i < halfEdgeAddrs.length; i++) {
@@ -303,6 +306,45 @@ contract InterweaveGraph {
     
     // Log the deletion.
     emit HalfEdgeDeleted(_halfEdgeAddr, node.ownerAddr);
+  }
+  
+  /// @notice Get all the addresses of the HalfEdge belonging to the Node with the given address. Returns 0x0 for empty HalfEdge slots.
+  /// @param _nodeAddr The address of the Node to get the HalfEdge addresses for.
+  /// @return halfEdgeAddr0 The address of the 0th HalfEdge, or 0x0 if < 1 HalfEdges.
+  /// @return halfEdgeAddr1 The address of the 1st HalfEdge, or 0x0 if < 2 HalfEdges.
+  /// @return halfEdgeAddr2 The address of the 2nd HalfEdge, or 0x0 if < 3 HalfEdges.
+  /// @return halfEdgeAddr3 The address of the 3rd HalfEdge, or 0x0 if < 4 HalfEdges.
+  /// @return halfEdgeAddr4 The address of the 4th HalfEdge, or 0x0 if < 5 HalfEdges.
+  /// @return halfEdgeAddr5 The address of the 5th HalfEdge, or 0x0 if < 6 HalfEdges.
+  /// @dev Callers are responsible for noticing empty HalfEdge addresses. Someday when dynamic return lengths are possible, this will just return the set of HalfEdge addresses without empty slots...
+  function getNodeHalfEdgeAddrs(address _nodeAddr) external view returns (
+    address halfEdgeAddr0,
+    address halfEdgeAddr1,
+    address halfEdgeAddr2,
+    address halfEdgeAddr3,
+    address halfEdgeAddr4,
+    address halfEdgeAddr5
+  ) {
+    
+    // Look up the Node in question.
+    Node memory node = nodeLookup[_nodeAddr];
+    
+    // Make sure it exists.
+    require(
+        uint(node.ownerAddr) != 0,
+        "Node does not exist."
+    );
+    
+    // Count how many halfEdgeAddrs it has.
+    uint8 len = uint8(node.halfEdgeAddrs.length);
+    
+    // Set our return values: the addresss of each of the up-to-six HalfEdges, or 0x0 if that slot is empty.
+    halfEdgeAddr0 = len > 0 ? node.halfEdgeAddrs[0] : address(0);
+    halfEdgeAddr1 = len > 1 ? node.halfEdgeAddrs[1] : address(0);
+    halfEdgeAddr2 = len > 2 ? node.halfEdgeAddrs[2] : address(0);
+    halfEdgeAddr3 = len > 3 ? node.halfEdgeAddrs[3] : address(0);
+    halfEdgeAddr4 = len > 4 ? node.halfEdgeAddrs[4] : address(0);
+    halfEdgeAddr5 = len > 5 ? node.halfEdgeAddrs[5] : address(0);
   }
   
   function createEdgeProposal(address _halfEdgeAddr0, address _halfEdgeAddr1) external returns (address) { }
