@@ -82,16 +82,11 @@ class Web3Handler {
   /** Update the Web3Handler's state given this is a modern dapp browser (with window.ethereum set). */
   async updateModern() {
     
-    // Want to notice this, just in case web3 becomes totally deprecated.
-    if (this.web3 === undefined) {
-      throw new Error("window.ethereum defined but not window.web3");
-    }
-    
     // If the current provider isn't window.ethereum, upgrade to that.
     if (this.provider !== window.ethereum) {
       console.log("Setting provider to window.ethereum [modern].");
       this.updateState("provider", window.ethereum);
-      this.updateState("localWeb3", new this.Web3js(this.provider));
+      this.updateState("localWeb3", new Web3(this.provider));
       this.updateState("browser", "modern");
       this.updateState("accountAccessEnabled", false);
       this.updateState("accountAccessRejected", false);
@@ -107,7 +102,7 @@ class Web3Handler {
       try {
         
         // Request user account access...
-        let accounts = await this.ethereum.enable();
+        let accounts = await window.ethereum.enable();
         
         // No errors, so they granted access.
         this.updateState("accountAccessEnabled", true);
