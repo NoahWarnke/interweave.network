@@ -1,10 +1,10 @@
-pragma solidity ^0.4.25;
+pragma solidity ^0.4.24;
 
 /// @title A very simple contract that can set one ipfs hash (a string) for each Eth address.
 /// @author interweaver
 contract SetHash {
     
-    /// @notice The mapping that goes from addresses to hashes (strings). 
+    /// @notice The mapping that goes from addresses to hashes (strings).
     mapping(address => string) private hashOf;
     
     /// @notice An event that fires when a hash is changed.
@@ -16,7 +16,7 @@ contract SetHash {
     /// @param _hash The new value of the hash. Must be 46 characters long.
     function setHash(string _hash) public {
         
-        // Enforce byte-length to be 46 
+        // Enforce byte-length to be 46
         require(bytes(_hash).length == 46, "IPFS hashes must be 46 characters long.");
         
         // Save the hash.
