@@ -53,32 +53,49 @@ contract InterweaveGraph {
   /// @notice A mapping allowing lookup of Owners by their (Ethereum) addresses.
   mapping (address => Owner) internal ownerLookup;
   
+  /// @notice A function to generate a unique address (for a Node or HalfEdge) from a given address (of the owner) and IPFS hash.
+  /// @param _addr The address to use to generate the new address.
+  /// @param _ipfs A bytes32[2] to use to generate the new address.
+  function addressFromAddressAndIpfs(address _addr, bytes32[2] _ipfs) public pure returns (address) {
+    return address(
+      keccak256(
+        abi.encodePacked(
+          _addr,
+          _ipfs[0],
+          _ipfs[1]
+        )
+      )
+    );
+  }
+  
   /// @notice Create a new Node on the graph.
   /// @param _ipfs The IPFS hash string of the Node's content file, in two bytes32. Must be unique for this address's Nodes in the graph.
   /// @param _format The format identifier of the Node's content. Must match with the file at the given IPFS hash, or viewers won't be able to interpret the content.
   /// @return The Address of the new Node.
   function createNode(bytes32[2] _ipfs, uint64 _format) external returns (address) {
     
-    // Generate Node's address from the msg.sender + the IPFS hash.
-    address newNodeAddress = address(keccak256(abi.encodePacked(
-      msg.sender,
-      _ipfs[0],
-      _ipfs[1]
-    )));
+    // Make sure there's something other than 0 in the first chunk of the ipfs hash.
+    require(
+      uint(_ipfs[0]) != 0,
+      "_ipfs[0] was empty!"
+    );
+    
+    // Generate Node's address.
+    address newNodeAddress = addressFromAddressAndIpfs(msg.sender, _ipfs);
     
     // There must not already be a node at that address with the same owner.
     // Your maze of twisty little passages must *not* be all alike.
     require(
-        uint(nodeLookup[newNodeAddress].ipfs.length) == 0,
-        "You already own a node with _ipfs!"
+      uint(nodeLookup[newNodeAddress].ipfs[0]) == 0,
+      "You already own a node with _ipfs!"
     );
     
     // Instantiate and save the new Node at its address.
     nodeLookup[newNodeAddress] = Node({
-        ipfs: _ipfs,
-        format: _format,
-        ownerNodesIndex: uint64(ownerLookup[msg.sender].nodeAddrs.length), // We're gonna push it onto the end.
-        halfEdgeAddrs: new address[](0)
+      ipfs: _ipfs,
+      format: _format,
+      ownerNodesIndex: uint64(ownerLookup[msg.sender].nodeAddrs.length), // We're gonna push it onto the end.
+      halfEdgeAddrs: new address[](0)
     });
     
     // Also save the new Node's address in its Owner's list of nodes (don't need to create it)
@@ -100,7 +117,7 @@ contract InterweaveGraph {
     
     // Make sure the Node exists and belongs to msg.sender (can do both checks at once).
     require(
-      _nodeAddr == address(keccak256(abi.encodePacked(msg.sender, node.ipfs[0], node.ipfs[1]))),
+      _nodeAddr == addressFromAddressAndIpfs(msg.sender, node.ipfs),
       "You must own this Node to be able to delete it."
     );
     
@@ -143,14 +160,14 @@ contract InterweaveGraph {
   
   /// @notice Get how many Nodes are owned by the sender.
   /// @return How many Nodes they own.
-  function getNodeCount() public view returns (uint) {
+  function getSenderNodeCount() public view returns (uint) {
     return ownerLookup[msg.sender].nodeAddrs.length;
   }
   
   /// @notice Get the address of the Node belonging to the sender at the given index in the sender's array of Nodes.
   /// @param _index A uint containing the index of the Node to get (must be less than the number returned by getOwnerNodeCount).
   /// @return The address of the sender's Node at the index.
-  function getNodeAddrByIndex(uint _index) public view returns (address) {
+  function getSenderNodeAddrByIndex(uint _index) public view returns (address) {
     
     // Avoid index out of bounds exceptions.
     require(
@@ -162,6 +179,44 @@ contract InterweaveGraph {
     return ownerLookup[msg.sender].nodeAddrs[_index];
   }
   
+  /// @notice Get all the relevant data for the Node with the given address: ipfs, format, whether msg.sender owns the Node, and list of HalfEdge addresses, with 0x0 for empty HalfEdge slots.
+  /// @param _nodeAddr The address of the Node to get the HalfEdge addresses for.
+  /// @return ipfs A bytes32[2] containing the IPFS hash for the Node.
+  /// @return format A uint64 containing the Node's format.
+  /// @return senderIsOwner A bool indicating if the sender owns this Node.
+  /// @return halfEdgeAddrs The addresses of each of the HalfEdges, or 0x0 if that slot is currently empty.
+  /// @dev Callers are responsible for noticing empty HalfEdge addresses. Someday when dynamic return lengths are possible, this will just return the set of HalfEdge addresses without empty slots.
+  function getNode(address _nodeAddr) external view returns (
+    bytes32[2] ipfs,
+    uint64 format,
+    bool senderIsOwner,
+    address[6] halfEdgeAddrs
+  ) {
+    
+    // Look up the Node in question.
+    Node memory node = nodeLookup[_nodeAddr];
+    
+    // Make sure it exists.
+    require(
+      uint(node.ipfs[0]) != 0,
+      "Node does not exist."
+    );
+    
+    ipfs = node.ipfs;
+    format = node.format;
+    if (_nodeAddr == addressFromAddressAndIpfs(msg.sender, node.ipfs)) {
+      senderIsOwner = true;
+    }
+    
+    // Count how many halfEdgeAddrs it has.
+    uint8 len = uint8(node.halfEdgeAddrs.length);
+    
+    // Set our return values: the addresss of each of the up-to-six HalfEdges, leaving it at 0x0 if beyond the current number of HalfEdges.
+    for (uint8 i = 0; i < len; i++) {
+      halfEdgeAddrs[i] = node.halfEdgeAddrs[i];
+    }
+  }
+  
   /// @notice Create a new HalfEdge on the graph.
   /// @param _nodeAddr The address of the Node to which this HalfEdge will belong.
   /// @param _ipfs A bytes32[2] containing the HalfEdge's IPFS hash. Must be unique for the Owner's HalfEdges in the graph. Content must have the same format as the Node.
@@ -171,7 +226,7 @@ contract InterweaveGraph {
     // Make sure msg.sender owns the Node.
     Node memory node = nodeLookup[_nodeAddr];
     require(
-      _nodeAddr == address(keccak256(abi.encodePacked(msg.sender, node.ipfs[0], node.ipfs[1]))),
+      _nodeAddr == addressFromAddressAndIpfs(msg.sender, node.ipfs),
       "You must own this Node to be able to add a HalfEdge to it."
     );
     
@@ -183,11 +238,7 @@ contract InterweaveGraph {
     
     // Make sure _ipfs isn't already used for a HalfEdge by this Owner.
     // Your paths connecting the maze of twisty little passages must *not* be all alike.
-    address newHalfEdgeAddr = address(keccak256(abi.encodePacked(
-      msg.sender,
-      _ipfs[0],
-      _ipfs[1]
-    )));
+    address newHalfEdgeAddr = addressFromAddressAndIpfs(msg.sender, _ipfs);
     require(
       uint(halfEdgeLookup[newHalfEdgeAddr].nodeAddr) == 0,
       "You already own a HalfEdge with _ipfs!"
@@ -226,7 +277,7 @@ contract InterweaveGraph {
     
     // Make sure the HalfEdge belongs to msg.sender.
     require (
-      _halfEdgeAddr == address(keccak256(abi.encodePacked(msg.sender, halfEdge.ipfs[0], halfEdge.ipfs[1]))),
+      _halfEdgeAddr == addressFromAddressAndIpfs(msg.sender, halfEdge.ipfs),
       "You must own this HalfEdge to be able to delete it."
     );
     
@@ -270,44 +321,6 @@ contract InterweaveGraph {
     
     // Log the deletion.
     emit HalfEdgeDeleted(_halfEdgeAddr);
-  }
-  
-  /// @notice Get all the relevant data for the Node with the given address: ipfs, format, whether msg.sender owns the Node, and list of HalfEdge addresses, with 0x0 for empty HalfEdge slots.
-  /// @param _nodeAddr The address of the Node to get the HalfEdge addresses for.
-  /// @return ipfs A bytes32[2] containing the IPFS hash for the Node.
-  /// @return format A uint64 containing the Node's format.
-  /// @return senderIsOwner A bool indicating if the sender owns this Node.
-  /// @return halfEdgeAddrs The addresses of each of the HalfEdges, or 0x0 if that slot is currently empty.
-  /// @dev Callers are responsible for noticing empty HalfEdge addresses. Someday when dynamic return lengths are possible, this will just return the set of HalfEdge addresses without empty slots.
-  function getNode(address _nodeAddr) external view returns (
-    bytes32[2] ipfs,
-    uint64 format,
-    bool senderIsOwner,
-    address[6] halfEdgeAddrs
-  ) {
-    
-    // Look up the Node in question.
-    Node memory node = nodeLookup[_nodeAddr];
-    
-    // Make sure it exists.
-    require(
-      uint(node.ipfs.length) == 2,
-      "Node does not exist."
-    );
-    
-    ipfs = node.ipfs;
-    format = node.format;
-    if (_nodeAddr == address(keccak256(abi.encodePacked(msg.sender, ipfs[0], ipfs[1])))) {
-      senderIsOwner = true;
-    }
-    
-    // Count how many halfEdgeAddrs it has.
-    uint8 len = uint8(node.halfEdgeAddrs.length);
-    
-    // Set our return values: the addresss of each of the up-to-six HalfEdges, leaving it at 0x0 if beyond the current number of HalfEdges.
-    for (uint8 i = 0; i < len; i++) {
-      halfEdgeAddrs[i] = node.halfEdgeAddrs[i];
-    }
   }
   
   /// @notice Get the ipfs hash, format, and node address for the HalfEdge with this address, and for its otherHalfEdge if it exists, too.

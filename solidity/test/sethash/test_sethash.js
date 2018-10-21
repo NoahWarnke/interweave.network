@@ -33,21 +33,21 @@ contract('SetHash', async (accounts) => {
   });
   
   it("should give an appropriate error when calling setHash with an empty string as the hash", async () => {
-    assert.requireEquals("IPFS hashes must be 46 characters long.", async function() {
+    await assert.requireEquals("IPFS hashes must be 46 characters long.", async function() {
       await instance.setHash("", {from: accounts[0]});
     });
     
   });
   
   it("should give an appropriate error when calling setHash with a string < 46 characters as the hash", async () => {
-    assert.requireEquals("IPFS hashes must be 46 characters long.", async function() {
+    await assert.requireEquals("IPFS hashes must be 46 characters long.", async function() {
       await instance.setHash(hashUnder46, {from: accounts[0]});
     });
     
   });
   
   it("should give an appropriate error when calling setHash with a string > 46 characters as the hash", async () => {
-    assert.requireEquals("IPFS hashes must be 46 characters long.", async function() {
+    await assert.requireEquals("IPFS hashes must be 46 characters long.", async function() {
       await instance.setHash(hashOver46, {from: accounts[0]});
     });
     
