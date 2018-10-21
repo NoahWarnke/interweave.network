@@ -28,9 +28,6 @@ contract('InterweaveGraph', async (accounts) => {
   
   // Owner has 0 nodes to start
   // Owner node lookup at 0 returns error
-  // Creating a node with too-small hash errors
-  // Creating a node with too-big hash errors
-  // Creating a node with a correctly-sized (32-64) hash does not error (note, will be bytes32[2] at some point)
   
   // After creating a node (get the result?):
   // - owner node count = 1
@@ -45,7 +42,7 @@ contract('InterweaveGraph', async (accounts) => {
   
   // After creating 1 node, creating a second with the same ipfs will fail
    
-  
+  // 
   
   
   /*
