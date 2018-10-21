@@ -7,6 +7,7 @@ contract InterweaveGraph {
     
   /// @notice Node struct represents a node in the graph (a place), with owner, representation with format, and connections to other Nodes.
   struct Node {
+    address owner;
     bytes32[2] ipfs;
     uint64 format;
     uint64 ownerNodesIndex; // Supports efficient deleting of nodes.
@@ -28,19 +29,23 @@ contract InterweaveGraph {
   
   /// @notice A new Node was created on the graph.
   /// @param nodeAddr The address of the created Node.
-  event NodeCreated(address nodeAddr);
+  /// @param ownerAddr The address of the new Node's Owner.
+  event NodeCreated(address nodeAddr, address indexed ownerAddr);
   
   /// @notice A Node was deleted from the graph.
   /// @param nodeAddr The address of the deleted Node.
-  event NodeDeleted(address nodeAddr);
+  /// @param ownerAddr The address of the old Node's Owner.
+  event NodeDeleted(address nodeAddr, address indexed ownerAddr);
   
   /// @notice A HalfEdge was created on the graph.
   /// @param halfEdgeAddr The address of the created HalfEdge.
-  event HalfEdgeCreated(address halfEdgeAddr);
+  /// @param ownerAddr The address of the new HalfEdge's Owner.
+  event HalfEdgeCreated(address halfEdgeAddr, address indexed ownerAddr);
   
   /// @notice A HalfEdge was deleted from the graph.
   /// @param halfEdgeAddr The address of the deleted HalfEdge.
-  event HalfEdgeDeleted(address halfEdgeAddr);
+  /// @param ownerAddr The address of the deleted HalfEdge's Owner.
+  event HalfEdgeDeleted(address halfEdgeAddr, address indexed ownerAddr);
   
   /// @notice A Mapping allowing lookup of Nodes by their addresses.
   /// @dev Node addresses = kekkac(owner, ipfs)
@@ -53,14 +58,12 @@ contract InterweaveGraph {
   /// @notice A mapping allowing lookup of Owners by their (Ethereum) addresses.
   mapping (address => Owner) internal ownerLookup;
   
-  /// @notice A function to generate a unique address (for a Node or HalfEdge) from a given address (of the owner) and IPFS hash.
-  /// @param _addr The address to use to generate the new address.
+  /// @notice A function to generate a unique address (for a Node or HalfEdge) from a given IPFS hash.
   /// @param _ipfs A bytes32[2] to use to generate the new address.
-  function addressFromAddressAndIpfs(address _addr, bytes32[2] _ipfs) public pure returns (address) {
+  function addressFromIpfs(bytes32[2] _ipfs) public pure returns (address) {
     return address(
       keccak256(
         abi.encodePacked(
-          _addr,
           _ipfs[0],
           _ipfs[1]
         )
@@ -81,28 +84,29 @@ contract InterweaveGraph {
     );
     
     // Generate Node's address.
-    address newNodeAddress = addressFromAddressAndIpfs(msg.sender, _ipfs);
+    address newNodeAddress = addressFromIpfs(_ipfs);
     
-    // There must not already be a node at that address with the same owner.
-    // Your maze of twisty little passages must *not* be all alike.
+    // There must not already be a node at that address.
+    // The maze of twisty little passages must *not* be all alike.
     require(
       uint(nodeLookup[newNodeAddress].ipfs[0]) == 0,
-      "You already own a node with _ipfs!"
+      "A Node with _ipfs already exists!"
     );
     
     // Instantiate and save the new Node at its address.
     nodeLookup[newNodeAddress] = Node({
+      owner: msg.sender,
       ipfs: _ipfs,
       format: _format,
       ownerNodesIndex: uint64(ownerLookup[msg.sender].nodeAddrs.length), // We're gonna push it onto the end.
       halfEdgeAddrs: new address[](0)
     });
     
-    // Also save the new Node's address in its Owner's list of nodes (don't need to create it)
+    // Also save the new Node's address in its Owner's list of nodes (don't need to create the Owner).
     ownerLookup[msg.sender].nodeAddrs.push(newNodeAddress);
     
     // Log the Node creation.
-    emit NodeCreated(newNodeAddress);
+    emit NodeCreated(newNodeAddress, msg.sender);
     
     // Finally, hand back the new Node's address to the caller.
     return newNodeAddress;
@@ -115,9 +119,9 @@ contract InterweaveGraph {
     // Get the Node being deleted.
     Node memory node = nodeLookup[_nodeAddr];
     
-    // Make sure the Node exists and belongs to msg.sender (can do both checks at once).
+    // Make sure the Node exists and belongs to msg.sender (can do both checks at once, since if node doesn't exist, node.owner = 0x0).
     require(
-      _nodeAddr == addressFromAddressAndIpfs(msg.sender, node.ipfs),
+      msg.sender == node.owner,
       "You must own this Node to be able to delete it."
     );
     
@@ -155,7 +159,7 @@ contract InterweaveGraph {
     delete nodeLookup[_nodeAddr];
     
     // Log the Node deletion.
-    emit NodeDeleted(_nodeAddr);
+    emit NodeDeleted(_nodeAddr, msg.sender);
   }
   
   /// @notice Get how many Nodes are owned by the sender.
@@ -179,17 +183,18 @@ contract InterweaveGraph {
     return ownerLookup[msg.sender].nodeAddrs[_index];
   }
   
-  /// @notice Get all the relevant data for the Node with the given address: ipfs, format, whether msg.sender owns the Node, and list of HalfEdge addresses, with 0x0 for empty HalfEdge slots.
+  /// @notice Get all the relevant data for the Node with the given address: owner, ipfs, format, whether msg.sender owns the Node, and list of HalfEdge addresses, with 0x0 for empty HalfEdge slots.
   /// @param _nodeAddr The address of the Node to get the HalfEdge addresses for.
+  /// @return owner The address of the Node's owner.
   /// @return ipfs A bytes32[2] containing the IPFS hash for the Node.
   /// @return format A uint64 containing the Node's format.
   /// @return senderIsOwner A bool indicating if the sender owns this Node.
   /// @return halfEdgeAddrs The addresses of each of the HalfEdges, or 0x0 if that slot is currently empty.
   /// @dev Callers are responsible for noticing empty HalfEdge addresses. Someday when dynamic return lengths are possible, this will just return the set of HalfEdge addresses without empty slots.
   function getNode(address _nodeAddr) external view returns (
+    address owner,
     bytes32[2] ipfs,
     uint64 format,
-    bool senderIsOwner,
     address[6] halfEdgeAddrs
   ) {
     
@@ -198,15 +203,13 @@ contract InterweaveGraph {
     
     // Make sure it exists.
     require(
-      uint(node.ipfs[0]) != 0,
+      uint(node.owner) != 0,
       "Node does not exist."
     );
     
+    owner = node.owner;
     ipfs = node.ipfs;
     format = node.format;
-    if (_nodeAddr == addressFromAddressAndIpfs(msg.sender, node.ipfs)) {
-      senderIsOwner = true;
-    }
     
     // Count how many halfEdgeAddrs it has.
     uint8 len = uint8(node.halfEdgeAddrs.length);
@@ -223,10 +226,11 @@ contract InterweaveGraph {
   /// @return The address of the new HalfEdge.
   function createHalfEdge(address _nodeAddr, bytes32[2] _ipfs) external returns (address) {
     
-    // Make sure msg.sender owns the Node.
     Node memory node = nodeLookup[_nodeAddr];
+    
+    // Make sure msg.sender owns the Node.
     require(
-      _nodeAddr == addressFromAddressAndIpfs(msg.sender, node.ipfs),
+      msg.sender == node.owner,
       "You must own this Node to be able to add a HalfEdge to it."
     );
     
@@ -236,12 +240,12 @@ contract InterweaveGraph {
       "You cannot have more than 6 HalfEdges on one Node."
     );
     
-    // Make sure _ipfs isn't already used for a HalfEdge by this Owner.
-    // Your paths connecting the maze of twisty little passages must *not* be all alike.
-    address newHalfEdgeAddr = addressFromAddressAndIpfs(msg.sender, _ipfs);
+    // Make sure _ipfs isn't already used for a HalfEdge
+    // The paths connecting the maze of twisty little passages must *not* be all alike.
+    address newHalfEdgeAddr = addressFromIpfs(_ipfs);
     require(
       uint(halfEdgeLookup[newHalfEdgeAddr].nodeAddr) == 0,
-      "You already own a HalfEdge with _ipfs!"
+      "A HalfEdge with _ipfs already exists!"
     );
     
     // Instantiate and save the new HalfEdge at its address.
@@ -255,7 +259,7 @@ contract InterweaveGraph {
     nodeLookup[_nodeAddr].halfEdgeAddrs.push(newHalfEdgeAddr);
     
     // Log the creation.
-    emit HalfEdgeCreated(newHalfEdgeAddr);
+    emit HalfEdgeCreated(newHalfEdgeAddr, msg.sender);
     
     // Finally, hand back the new HalfEdge's address to the caller.
     return newHalfEdgeAddr;
@@ -274,13 +278,6 @@ contract InterweaveGraph {
       "The HalfEdge must exist in order to be deleted."
     );
     
-    
-    // Make sure the HalfEdge belongs to msg.sender.
-    require (
-      _halfEdgeAddr == addressFromAddressAndIpfs(msg.sender, halfEdge.ipfs),
-      "You must own this HalfEdge to be able to delete it."
-    );
-    
     // Make sure the HalfEdge isn't connected to another.
     require (
       uint(halfEdge.otherHalfEdgeAddr) == 0,
@@ -289,6 +286,12 @@ contract InterweaveGraph {
     
     // Get the Node of the HalfEdge being deleted. Will be changing its halfEdgeAddrs array, so storage. (unless halfEdgeAddrs storage later makes this unneeded???)
     Node storage node = nodeLookup[halfEdge.nodeAddr];
+    
+    // Make sure the HalfEdge belongs to msg.sender.
+    require (
+      msg.sender == node.owner,
+      "You must own this HalfEdge to be able to delete it."
+    );
     
     // Delete the HalfEdge from its Node's halfEdgeAddrs array:
     // ...Get that array as storage because we'll be using it several times, modifying it, and want the changes to stick.
@@ -320,7 +323,7 @@ contract InterweaveGraph {
     delete halfEdgeLookup[_halfEdgeAddr];
     
     // Log the deletion.
-    emit HalfEdgeDeleted(_halfEdgeAddr);
+    emit HalfEdgeDeleted(_halfEdgeAddr, msg.sender);
   }
   
   /// @notice Get the ipfs hash, format, and node address for the HalfEdge with this address, and for its otherHalfEdge if it exists, too.
