@@ -187,12 +187,14 @@ contract InterweaveGraph {
   /// @return ipfs A bytes32[2] containing the IPFS hash for the Node.
   /// @return format A uint64 containing the Node's format.
   /// @return halfEdgeKeys The keys of each of the HalfEdges, or 0 if that slot is currently empty.
-  /// @dev Callers are responsible for noticing 0-valued HalfEdge keys. Someday when dynamic return lengths are possible, this will just return the set of 0-6 HalfEdge keys without empty slots.
+  /// @return halfEdgeCount A uint8 containing the number of HalfEdges, 0-6.
+  /// @dev Callers are responsible for ignoring 0-valued HalfEdge keys. Someday when dynamic return lengths are possible, this will just return the set of 0-6 HalfEdge keys without empty slots.
   function getNode(uint256 _nodeKey) external view returns (
     address owner,
     bytes32[2] ipfs,
     uint64 format,
-    uint256[6] halfEdgeKeys
+    uint256[6] halfEdgeKeys,
+    uint8 halfEdgeCount
   ) {
     
     // Look up the Node in question.
@@ -209,10 +211,10 @@ contract InterweaveGraph {
     format = node.format;
     
     // Count how many halfEdgeKeys it has.
-    uint8 len = uint8(node.halfEdgeKeys.length);
+    halfEdgeCount = uint8(node.halfEdgeKeys.length);
     
     // Set our return values: the keys of each of the up-to-six HalfEdges, leaving it at 0 if beyond the current number of HalfEdges.
-    for (uint8 i = 0; i < len; i++) {
+    for (uint8 i = 0; i < halfEdgeCount; i++) {
       halfEdgeKeys[i] = node.halfEdgeKeys[i];
     }
   }
@@ -221,6 +223,12 @@ contract InterweaveGraph {
   /// @param _nodeKey The uint256 key of the Node to which this HalfEdge will belong.
   /// @param _ipfs A bytes32[2] containing the HalfEdge's IPFS hash. Must be unique among all HalfEdges in the graph. Content must have the same format as the Node.
   function createHalfEdge(uint256 _nodeKey, bytes32[2] _ipfs) external {
+    
+    // Make sure there's something other than 0 in the first chunk of the ipfs hash.
+    require(
+      uint(_ipfs[0]) != 0,
+      "_ipfs[0] was empty!"
+    );
     
     Node memory node = nodeLookup[_nodeKey];
     

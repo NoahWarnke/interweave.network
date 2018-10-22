@@ -13,7 +13,7 @@ assert.requireEquals = async function(expectedError, funcToTest) {
   assert.equal(error, "Error: VM Exception while processing transaction: revert " + expectedError);
 }
 
-contract('InterweaveGraph', async (accounts) => {
+contract('InterweaveGraphNodes', async (accounts) => {
   
   let instance = undefined;
   
