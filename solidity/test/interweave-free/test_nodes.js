@@ -17,7 +17,7 @@ contract('InterweaveGraph', async (accounts) => {
   
   let instance = undefined;
   
-  const emptyAddr = "0x0000000000000000000000000000000000000000";
+  const emptyKey = 0;
   
   const emptyHash = [
     "0x0000000000000000000000000000000000000000000000000000000000000000",
@@ -55,13 +55,13 @@ contract('InterweaveGraph', async (accounts) => {
     
     it("should give an error when you try to access the sender's 0th Node", async () => {
       await assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async() => {
-        let nodeAddr = await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[0]});
+        let nodeKey = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[0]});
       });
     });
     
-    it("should give an error when you try to access a Node at address 0x0", async () => {
+    it("should give an error when you try to access a Node at key 0", async () => {
       assert.requireEquals("Node does not exist.", async () => {
-        let node = await instance.getNode.call(emptyAddr, {from: accounts[0]});
+        let node = await instance.getNode.call(emptyKey, {from: accounts[0]});
       });
     });
   });
@@ -76,13 +76,13 @@ contract('InterweaveGraph', async (accounts) => {
   });
   
   contract("Creating 1 Node", async () => {
-    let nodeAddr = undefined;
+    let nodeKey = undefined;
     
     before("create Node", async () => {
-      // Grab the address of the new Node that will be created.
-      nodeAddr = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
+      // Grab the key of the new Node that will be created.
+      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
       
-      // Then actually run the function, which will create the node with the address we just calculated.
+      // Then actually run the function, which will create the node with the key we just calculated.
       await instance.createNode(hash0, 42, {from: accounts[0]});
     });
     
@@ -91,14 +91,14 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(numNodes, 1);
     });
     
-    it("should have getSenderNodeAddrByIndex give the same address as the one returned by createNode", async () => {
-      let senderNodeAddr0 = await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[0]});
-      assert.equal(senderNodeAddr0, nodeAddr);
+    it("should have getSenderNodeKeyByIndex give the same key as the one returned by createNode", async () => {
+      let senderNodeKey0 = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[0]});
+      assert.equal(senderNodeKey0.toString(), nodeKey.toString());
     });
     
     it("should have getNode return the same information that we sent when we created the Node", async () => {
       
-      let node = await instance.getNode.call(nodeAddr, {from: accounts[0]});
+      let node = await instance.getNode.call(nodeKey, {from: accounts[0]});
       let owner = node[0];
       let ipfs = node[1];
       let format = node[2];
@@ -108,19 +108,19 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(ipfs[1], hash0[1]);
       assert.equal(format, 42);
       
-      // No comment on the halfEdgeAddrs. See test_halfedges.js for that.
+      // No comment on the halfEdgeKeys. See test_halfedges.js for that.
     });
   });
   
   contract("Creating a second Node with the same ipfs", async () => {
-    let nodeAddr0 = undefined;
-    let nodeAddr1 = undefined;
+    let nodeKey0 = undefined;
+    let nodeKey1 = undefined;
     
     before("create Node", async () => {
-      // Grab the address of the new Nodes that will be created.
-      nodeAddr0 = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
+      // Grab the key of the new Node that will be created.
+      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
       
-      // Then actually run the function twice, which will create the Nodes with the addresses we just calculated.
+      // Then actually run the function, which will create the Node with the key we just calculated.
       await instance.createNode(hash0, 42, {from: accounts[0]});
     });
     
@@ -148,15 +148,15 @@ contract('InterweaveGraph', async (accounts) => {
   });
   
   contract("Creating 2 different Nodes for the same owner", async () => {
-    let nodeAddr0 = undefined;
-    let nodeAddr1 = undefined;
+    let nodeKey0 = undefined;
+    let nodeKey1 = undefined;
     
     before("create Nodes", async () => {
-      // Grab the address of the new Nodes that will be created.
-      nodeAddr0 = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
-      nodeAddr1 = await instance.addressFromIpfs.call(hash1, {from: accounts[0]});
+      // Grab the keys of the new Nodes that will be created.
+      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[0]});
       
-      // Then actually run the function twice, which will create the Nodes with the addresses we just calculated.
+      // Then actually run the function twice, which will create the Nodes with the keys we just calculated.
       await instance.createNode(hash0, 42, {from: accounts[0]});
       await instance.createNode(hash1, 44, {from: accounts[0]});
     });
@@ -166,16 +166,16 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(numNodes, 2);
     });
     
-    it("should have getSenderNodeAddrByIndex give the correct nodeAddrs after calling createNode twice", async () => {
-      let senderNodeAddr0 = await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[0]});
-      let senderNodeAddr1 = await instance.getSenderNodeAddrByIndex.call(1, {from: accounts[0]});
-      assert.equal(senderNodeAddr0, nodeAddr0);
-      assert.equal(senderNodeAddr1, nodeAddr1);
+    it("should have getSenderNodeKeyByIndex give the correct nodeKeys after calling createNode twice", async () => {
+      let senderNodeKey0 = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[0]});
+      let senderNodeKey1 = await instance.getSenderNodeKeyByIndex.call(1, {from: accounts[0]});
+      assert.equal(senderNodeKey0.toString(), nodeKey0.toString());
+      assert.equal(senderNodeKey1.toString(), nodeKey1.toString());
     });
     
     it("should have getNode return the same information for each Node that we sent when we created them", async () => {
       
-      let node = await instance.getNode.call(nodeAddr0, {from: accounts[0]});
+      let node = await instance.getNode.call(nodeKey0, {from: accounts[0]});
       let owner = node[0];
       let ipfs = node[1];
       let format = node[2];
@@ -185,7 +185,7 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(ipfs[1], hash0[1]);
       assert.equal(format, 42);
       
-      node = await instance.getNode.call(nodeAddr1, {from: accounts[0]});
+      node = await instance.getNode.call(nodeKey1, {from: accounts[0]});
       owner = node[0];
       ipfs = node[1];
       format = node[2];
@@ -195,20 +195,18 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(ipfs[1], hash1[1]);
       assert.equal(format, 44);
       
-      // No comment on the halfEdgeAddrs. See test_halfedges.js for that.
+      // No comment on the halfEdgeKeys. See test_halfedges.js for that.
     });
   });
   
   contract("Creating 2 different Nodes with different owners", async () => {
-    let nodeAddr0 = undefined;
-    let nodeAddr1 = undefined;
+    let nodeKey0 = undefined;
+    let nodeKey1 = undefined;
     
     before("create Nodes", async () => {
-      // Grab the address of the new Nodes that will be created.
-      nodeAddr0 = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
-      nodeAddr1 = await instance.addressFromIpfs.call(hash1, {from: accounts[1]});
+      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[1]});
       
-      // Then actually run the function twice, which will create the Nodes with the addresses we just calculated.
       await instance.createNode(hash0, 42, {from: accounts[0]});
       await instance.createNode(hash1, 44, {from: accounts[1]});
     });
@@ -220,16 +218,16 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(numNodes1, 1);
     });
     
-    it("should have getSenderNodeAddrByIndex give the correct nodeAddrs at 0 for each owner", async () => {
-      let senderNodeAddr0 = await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[0]});
-      let senderNodeAddr1 = await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[1]});
-      assert.equal(senderNodeAddr0, nodeAddr0);
-      assert.equal(senderNodeAddr1, nodeAddr1);
+    it("should have getSenderNodeKeyByIndex give the correct nodeKeys at 0 for each owner", async () => {
+      let senderNodeKey0 = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[0]});
+      let senderNodeKey1 = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[1]});
+      assert.equal(senderNodeKey0.toString(), nodeKey0.toString());
+      assert.equal(senderNodeKey1.toString(), nodeKey1.toString());
     });
     
     it("should have getNode return the same information for each Node that we sent when we created them", async () => {
       
-      let node = await instance.getNode.call(nodeAddr0, {from: accounts[0]});
+      let node = await instance.getNode.call(nodeKey0, {from: accounts[0]});
       let owner = node[0];
       let ipfs = node[1];
       let format = node[2];
@@ -239,7 +237,7 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(ipfs[1], hash0[1]);
       assert.equal(format, 42);
       
-      node = await instance.getNode.call(nodeAddr1, {from: accounts[1]});
+      node = await instance.getNode.call(nodeKey1, {from: accounts[1]});
       owner = node[0];
       ipfs = node[1];
       format = node[2];
@@ -249,18 +247,18 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(ipfs[1], hash1[1]);
       assert.equal(format, 44);
       
-      // No comment on the halfEdgeAddrs. See test_halfedges.js for that.
+      // No comment on the halfEdgeKeys. See test_halfedges.js for that.
     });
   });
   
   contract("Deleting Nodes you don't own", async () => {
-    let nodeAddr0 = undefined;
-    let nodeAddr1 = undefined;
+    let nodeKey0 = undefined;
+    let nodeKey1 = undefined;
     
     before("create Node", async () => {
-      // Grab the address of the new Nodes that could be created.
-      nodeAddr0 = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
-      nodeAddr1 = await instance.addressFromIpfs.call(hash1, {from: accounts[1]});
+      // Grab the keys of the new Nodes that could be created.
+      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[1]});
       
       // Then actually run the function just once, for the account[1] one.
       await instance.createNode(hash1, 44, {from: accounts[1]});
@@ -268,31 +266,31 @@ contract('InterweaveGraph', async (accounts) => {
     
     it("should give an error when you try to delete a non-existant Node", async () => {
       await assert.requireEquals("You must own this Node to be able to delete it.", async () => {
-        await instance.deleteNode(nodeAddr0, {from: accounts[0]});
+        await instance.deleteNode(nodeKey0, {from: accounts[0]});
       });
     });
     
-    it("should give an error when you try to delete a Node at address 0x0", async () => {
+    it("should give an error when you try to delete a Node at key 0", async () => {
       await assert.requireEquals("You must own this Node to be able to delete it.", async () => {
-        await instance.deleteNode(emptyAddr, {from: accounts[0]});
+        await instance.deleteNode(emptyKey, {from: accounts[0]});
       });
     });
     
     it("should give an error when you try to delete someone else's Node", async () => {
       await assert.requireEquals("You must own this Node to be able to delete it.", async () => {
-        await instance.deleteNode(nodeAddr1, {from: accounts[0]});
+        await instance.deleteNode(nodeKey1, {from: accounts[0]});
       });
     });
   });
   
   contract("Deleting 1 Node after creating it", async () => {
-    let nodeAddr = undefined;
+    let nodeKey = undefined;
     
     before("create and delete Node", async () => {
-      // Same pattern as above: grab address from the pure addressFromIpfs function, and then create the Node (at that address).
-      nodeAddr = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
+      // Same pattern as above: grab keys from the pure keyFromIpfs function, and then create the Node (at that key).
+      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
       await instance.createNode(hash0, 44, {from: accounts[0]});
-      await instance.deleteNode(nodeAddr, {from: accounts[0]})
+      await instance.deleteNode(nodeKey, {from: accounts[0]})
     });
     
     it("should have getSenderNodeCount give 0 as the number of sender Nodes", async () => {
@@ -300,27 +298,26 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(count, 0);
     });
     
-    it("should have getSenderNodeAddrByIndex give an error for the Node at index 0", async () => {
+    it("should have getSenderNodeKeyByIndex give an error for the Node at index 0", async () => {
       await assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async () => {
-        await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[0]});
+        await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[0]});
       });
     });
     
-    it("should have getNode return an error when called for the address of the deleted Node", async () => {
+    it("should have getNode return an error when called for the key of the deleted Node", async () => {
       await assert.requireEquals("Node does not exist.", async () => {
-        await instance.getNode.call(nodeAddr, {from: accounts[0]});
+        await instance.getNode.call(nodeKey, {from: accounts[0]});
       });
     });
   });
   
   contract("Recreating your deleted Node", async () => {
-    let nodeAddr = undefined;
+    let nodeKey = undefined;
     
     before("create and delete Node", async () => {
-      // Same pattern as above: grab address from the pure addressFromIpfs function, and then create the Node (at that address).
-      nodeAddr = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
       await instance.createNode(hash0, 44, {from: accounts[0]});
-      await instance.deleteNode(nodeAddr, {from: accounts[0]})
+      await instance.deleteNode(nodeKey, {from: accounts[0]})
     });
     
     it("should not give any errors when recreating the same Node after deleting it", async () => {
@@ -330,13 +327,12 @@ contract('InterweaveGraph', async (accounts) => {
   });
   
   contract("Recreating someone else's deleted Node", async () => {
-    let nodeAddr = undefined;
+    let nodeKey = undefined;
     
     before("create and delete Node", async () => {
-      // Same pattern as above: grab address from the pure addressFromIpfs function, and then create the Node (at that address).
-      nodeAddr = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
       await instance.createNode(hash0, 44, {from: accounts[0]});
-      await instance.deleteNode(nodeAddr, {from: accounts[0]})
+      await instance.deleteNode(nodeKey, {from: accounts[0]})
     });
     
     it("should not give any errors when recreating the same Node after deleting it", async () => {
@@ -346,14 +342,14 @@ contract('InterweaveGraph', async (accounts) => {
   });
   
   contract("Creating and deleting 3 Nodes with the same account", async () => {
-    let nodeAddr0 = undefined;
-    let nodeAddr1 = undefined;
-    let nodeAddr2 = undefined;
+    let nodeKey0 = undefined;
+    let nodeKey1 = undefined;
+    let nodeKey2 = undefined;
     
     before("create the 3 Nodes", async () => {
-      nodeAddr0 = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
-      nodeAddr1 = await instance.addressFromIpfs.call(hash1, {from: accounts[0]});
-      nodeAddr2 = await instance.addressFromIpfs.call(hash2, {from: accounts[0]});
+      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[0]});
+      nodeKey2 = await instance.keyFromIpfs.call(hash2, {from: accounts[0]});
       await instance.createNode(hash0, 42, {from: accounts[0]});
       await instance.createNode(hash1, 42, {from: accounts[0]});
       await instance.createNode(hash2, 42, {from: accounts[0]});
@@ -366,42 +362,42 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(count, 3);
       
       // Delete the first Node, in this case, from the beginning of the list (0).
-      await instance.deleteNode(nodeAddr0, {from: accounts[0]});
+      await instance.deleteNode(nodeKey0, {from: accounts[0]});
       
       // Make sure count decreases to 2.
       count = await instance.getSenderNodeCount.call({from: accounts[0]});
       assert.equal(count, 2);
       
-      // Make sure the remaining nodeAddrs belonging to the sender are still there (the order doesn't matter).
-      let nodeAddrAt0 = await instance.getSenderNodeAddrByIndex(0, {from: accounts[0]});
-      let nodeAddrAt1 = await instance.getSenderNodeAddrByIndex(1, {from: accounts[0]});
-      assert.equal([nodeAddr1, nodeAddr2].includes(nodeAddrAt0), true);
-      assert.equal([nodeAddr1, nodeAddr2].includes(nodeAddrAt1), true);
-      assert.notEqual(nodeAddrAt0, nodeAddrAt1);
+      // Make sure the remaining nodeKeys belonging to the sender are still there (the order doesn't matter).
+      let nodeKeyAt0 = await instance.getSenderNodeKeyByIndex(0, {from: accounts[0]});
+      let nodeKeyAt1 = await instance.getSenderNodeKeyByIndex(1, {from: accounts[0]});
+      assert.equal([nodeKey1.toString(), nodeKey2.toString()].includes(nodeKeyAt0.toString()), true);
+      assert.equal([nodeKey1.toString(), nodeKey2.toString()].includes(nodeKeyAt1.toString()), true);
+      assert.notEqual(nodeKeyAt0.toString(), nodeKeyAt1.toString());
       
       // Make sure we can't get the sender's Node at index 2 any more.
       assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async () => {
-        await instance.getSenderNodeAddrByIndex(2, {from: accounts[0]});
+        await instance.getSenderNodeKeyByIndex(2, {from: accounts[0]});
       });
       
       // Delete another Node, this time from the end (2).
-      await instance.deleteNode(nodeAddr2, {from: accounts[0]});
+      await instance.deleteNode(nodeKey2, {from: accounts[0]});
       
       // Make sure count decreases to 1.
       count = await instance.getSenderNodeCount.call({from: accounts[0]});
       assert.equal(count, 1);
       
-      // Make sure the remaining nodeAddr (1) is now at index 0.
-      nodeAddrAt0 = await instance.getSenderNodeAddrByIndex(0, {from: accounts[0]});
-      assert.equal(nodeAddrAt0, nodeAddr1);
+      // Make sure the remaining nodeKey (1) is now at index 0.
+      nodeKeyAt0 = await instance.getSenderNodeKeyByIndex(0, {from: accounts[0]});
+      assert.equal(nodeKeyAt0.toString(), nodeKey1.toString());
       
       // Make sure we can't get the sender's Node at index 1 any more.
       assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async () => {
-        await instance.getSenderNodeAddrByIndex(1, {from: accounts[0]});
+        await instance.getSenderNodeKeyByIndex(1, {from: accounts[0]});
       });
       
       // Delete the last Node (1).
-      await instance.deleteNode(nodeAddr1, {from: accounts[0]});
+      await instance.deleteNode(nodeKey1, {from: accounts[0]});
       
       // Make sure count decreases to 0.
       count = await instance.getSenderNodeCount.call({from: accounts[0]});
@@ -409,21 +405,21 @@ contract('InterweaveGraph', async (accounts) => {
       
       // Make sure we can't get the sender's Node at index 0 any more.
       assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async () => {
-        await instance.getSenderNodeAddrByIndex(0, {from: accounts[0]});
+        await instance.getSenderNodeKeyByIndex(0, {from: accounts[0]});
       });
       
     });
   });
   
   contract("Creating and deleting several Nodes with different accounts", async () => {
-    let nodeAddr0 = undefined;
-    let nodeAddr1 = undefined;
-    let nodeAddr2 = undefined;
+    let nodeKey0 = undefined;
+    let nodeKey1 = undefined;
+    let nodeKey2 = undefined;
     
     before("create the 3 Nodes", async () => {
-      nodeAddr0 = await instance.addressFromIpfs.call(hash0, {from: accounts[0]});
-      nodeAddr1 = await instance.addressFromIpfs.call(hash1, {from: accounts[0]});
-      nodeAddr2 = await instance.addressFromIpfs.call(hash2, {from: accounts[0]});
+      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[0]});
+      nodeKey2 = await instance.keyFromIpfs.call(hash2, {from: accounts[0]});
       
       // Wee, random sequence of (sometimes only attempted) creates and deletes.
       
@@ -449,31 +445,31 @@ contract('InterweaveGraph', async (accounts) => {
       catch (err) { }
       
       // 6) a0 owns n2
-      await instance.deleteNode(nodeAddr0, {from: accounts[0]});
+      await instance.deleteNode(nodeKey0, {from: accounts[0]});
       
       // 7) a1 owns n1, n0 (a1 sniped deleted n0)
       await instance.createNode(hash0, 2, {from: accounts[1]});
       
       // 8) rejected
       try {
-        await instance.deleteNode(nodeAddr1, {from: accounts[0]});
+        await instance.deleteNode(nodeKey1, {from: accounts[0]});
       }
       catch (err) { }
       
       // 9) a0 owns nothing
-      await instance.deleteNode(nodeAddr2, {from: accounts[0]});
+      await instance.deleteNode(nodeKey2, {from: accounts[0]});
       
       // 10) a1 owns n1, n0, n2
       await instance.createNode(hash2, 56, {from: accounts[1]});
       
       // 11) rejected
       try {
-        await instance.deleteNode(nodeAddr0, {from: accounts[0]});
+        await instance.deleteNode(nodeKey0, {from: accounts[0]});
       }
       catch (err) { }
       
       // 12) a1 owns n0, n2
-      await instance.deleteNode(nodeAddr1, {from: accounts[1]});
+      await instance.deleteNode(nodeKey1, {from: accounts[1]});
       
       // 13) a0 owns n1 (a0 sniped deleted n1)
       await instance.createNode(hash1, 94, {from: accounts[0]});
@@ -489,31 +485,31 @@ contract('InterweaveGraph', async (accounts) => {
       assert.equal(count1, 2);
     });
     
-    it("should have the correct owner Node addresses at the end", async () => {
+    it("should have the correct owner Node keys at the end", async () => {
       
-      let owner0addr0 = await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[0]});
+      let owner0key0 = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[0]});
       assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async () => {
-        let owner0addr1 = await instance.getSenderNodeAddrByIndex.call(1, {from: accounts[0]});
+        let owner0key1 = await instance.getSenderNodeKeyByIndex.call(1, {from: accounts[0]});
       });
-      let owner1addr0 = await instance.getSenderNodeAddrByIndex.call(0, {from: accounts[1]});
-      let owner1addr1 = await instance.getSenderNodeAddrByIndex.call(1, {from: accounts[1]});
+      let owner1key0 = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[1]});
+      let owner1key1 = await instance.getSenderNodeKeyByIndex.call(1, {from: accounts[1]});
       assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async () => {
-        let owner1addr2 = await instance.getSenderNodeAddrByIndex.call(2, {from: accounts[1]});
+        let owner1addr2 = await instance.getSenderNodeKeyByIndex.call(2, {from: accounts[1]});
       });
       
       // a0 owns n1
-      assert.equal(owner0addr0, nodeAddr1);
+      assert.equal(owner0key0.toString(), nodeKey1.toString());
       
       // a1 owns n0, n2
-      assert.equal([nodeAddr0, nodeAddr2].includes(owner1addr0), true);
-      assert.equal([nodeAddr0, nodeAddr2].includes(owner1addr1), true);
-      assert.notEqual(owner1addr0, owner1addr1);
+      assert.equal([nodeKey0.toString(), nodeKey2.toString()].includes(owner1key0.toString()), true);
+      assert.equal([nodeKey0.toString(), nodeKey2.toString()].includes(owner1key1.toString()), true);
+      assert.notEqual(owner1key0.toString(), owner1key1.toString());
     });
     
     it("should have the correct Node data at the end", async () => {
-      let node0 = await instance.getNode.call(nodeAddr0, {from: accounts[0]});
-      let node1 = await instance.getNode.call(nodeAddr1, {from: accounts[0]});
-      let node2 = await instance.getNode.call(nodeAddr2, {from: accounts[0]});
+      let node0 = await instance.getNode.call(nodeKey0, {from: accounts[0]});
+      let node1 = await instance.getNode.call(nodeKey1, {from: accounts[0]});
+      let node2 = await instance.getNode.call(nodeKey2, {from: accounts[0]});
       
       let owner0 = node0[0];
       let ipfs0 = node0[1];
