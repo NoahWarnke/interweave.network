@@ -282,7 +282,7 @@ contract InterweaveGraph {
     );
     
     // Make sure the HalfEdge isn't connected to another.
-    require (
+    require(
       halfEdge.otherHalfEdgeKey == 0,
       "You must disconnect this HalfEdge from its other half before deleting it."
     );
@@ -291,7 +291,7 @@ contract InterweaveGraph {
     Node storage node = nodeLookup[halfEdge.nodeKey];
     
     // Make sure the HalfEdge belongs to msg.sender.
-    require (
+    require(
       msg.sender == node.owner,
       "You must own this HalfEdge to be able to delete it."
     );
@@ -327,6 +327,43 @@ contract InterweaveGraph {
     
     // Log the deletion.
     emit HalfEdgeDeleted(_halfEdgeKey, msg.sender);
+  }
+  
+  /// @notice Toggle whether the pair of HalfEdges with the given keys, which must be owned by msg.sender, are connected to each other or not. Will error if they are neither connected nor disconnected.
+  /// @param _halfEdgeKey0 The uint256 key of the first HalfEdge to connect to/disconnect from the second one.
+  /// @param _halfEdgeKey1 The uint256 key of the second HalfEdge to connect to/disconnect from the first one.
+  function toggleEdge(uint256 _halfEdgeKey0, uint256 _halfEdgeKey1) external {
+    
+    HalfEdge storage halfEdge0 = halfEdgeLookup[_halfEdgeKey0];
+    
+    // Make sure HalfEdge 0 exists and is owned by msg.sender.
+    require(
+      nodeLookup[halfEdge0.nodeKey].owner == msg.sender,
+      "You must own the HalfEdge at _halfEdgeKey0 in order to toggle its connection."
+    );
+    
+    HalfEdge storage halfEdge1 = halfEdgeLookup[_halfEdgeKey1];
+    
+    // Make sure HalfEdge 1 exists and is owned by msg.sender.
+    require(
+      nodeLookup[halfEdge1.nodeKey].owner == msg.sender,
+      "You must own the HalfEdge at _halfEdgeKey1 in order to toggle its connection."
+    );
+    
+    if (halfEdge0.otherHalfEdgeKey == _halfEdgeKey1 && halfEdge1.otherHalfEdgeKey == _halfEdgeKey0) {
+      // Disconnect 'em.
+      halfEdge0.otherHalfEdgeKey = 0;
+      halfEdge1.otherHalfEdgeKey = 1;
+    }
+    else if (halfEdge0.otherHalfEdgeKey == 0 && halfEdge1.otherHalfEdgeKey == 0) {
+      // Connect 'em.
+      halfEdge0.otherHalfEdgeKey = _halfEdgeKey1;
+      halfEdge1.otherHalfEdgeKey = _halfEdgeKey0;
+    }
+    else {
+      // Throwing at this point is not required, but will provide useful feedback.
+      require(false, "Your HalfEdges are neither both connected to each other nor both disconnected to any HalfEdge.");
+    }
   }
   
   /// @notice Get the ipfs hash, format, and node key for the HalfEdge with this key, and for its otherHalfEdge if it exists, too.
@@ -375,4 +412,16 @@ contract InterweaveGraph {
     }
     // Else, just return the 0-initialized values.
   }
+  
+  /*
+  - createEdge(nodeKey0, ipfs0, ipfs1, nodeKey1),
+    - createHalfEdge(nodeKey0, ipfs0)
+    - createHalfEdge(nodeKey1, ipfs1)
+    - directly connect halfEdges (toggleEdge checks are unneeded)
+  - createEdgeAndNode(nodeKey0, halfEdgeIpfs0, halfEdgeIpfs1, nodeIpfs, nodeFormat)
+    - createHalfEdge(nodeKey0, halfEdgeIpfs0)
+    - createNode(nodeIpfs, nodeFormat)
+    - createHalfEdge(newNodeKey, halfEdgeIpfs1)
+    - directly connect halfEdges (toggleEdge checks are unneeded)
+    */
 }

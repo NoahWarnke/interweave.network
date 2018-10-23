@@ -9,11 +9,46 @@
 // - getNode should contain halfEdgeKeys[0] with the halfEdgeAddr in it
 // - getEdge should contain the nodeKey, ipfs, format, and non-connected status for the HalfEdge.
 
-// creating 2 HalfEdges
+// Deleting a Node with 1 HalfEdge
+// - deleteNode should give an error
+
+// Deleting a HalfEdge when you can't
+// - HalfEdge doesn't exist: should error
+// - HalfEdge is connected (may need to implement toggleEdge first): should error
+// - Node of HalfEdge isn't owned by sender: should error
+
+// Deleting 1 HalfEdge after creating 1
+// - getNode should contain halfEdgeCount of 0
+// - getNode should contain halfEdgeKeys[0] with 0 in it
+// - getEdge should error
+ 
+// Recreating the same HalfEdge after deleting it
+// - getNode should contain halfEdgeCount of 1
+// - getNode should contain halfEdgeKeys[0] with the halfEdgeAddr in it
+// - getEdge should contain the nodeKey, ipfs, format, and non-connected status for the HalfEdge.
+
+// creating and then deleting 6+ HalfEdges on the same Node
+// - For each step i from 0 to 6:
+// - getNode should contain halfEdgecount of i
+// - getNode should contain halfEdgeKeys with all the existing HalfEdgeKeys in it, and 0s in the rest.
+// - getEdge should contain the nodeKey, ipfs, format, and non-connected status for all i HalfEdges
+// - createHalfEdge should error after 6.
+// - deleting one HalfEdge and then recreating one should work.
+// - For each step i from 6 to 0 (actual selected order could be randomish):
+// - getNode should contain halfEdgecount of i
+// - getNode should contain halfEdgeKeys with all the existing HalfEdgeKeys in it, and 0s in the rest.
+// - getEdge should contain the nodeKey, ipfs, format, and non-connected status for all i HalfEdges
+
+// Creating HalfEdges on different Nodes of the same owner
+// - Both Nodes should have separate limits of 6 and contain their separate data after going to 6.
+
+// Creating HalfEdges on different Nodes of different owners
+// - Both Nodes should have separate limits of 6 and contain their separate data after going to 6.
 
 
 
-// - deleting a node with edges should error
+
+
 
 var assert = require('assert');
 const InterweaveGraph = artifacts.require("InterweaveGraph");
