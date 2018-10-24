@@ -111,11 +111,13 @@ contract('InterweaveGraphHalfEdges', async (accounts) => {
   // - deleteNode should give an error
   contract("Deleting a Node with 1 HalfEdge", async() => {
     
-    it("should have deleteNode give an error", async () => {
+    it("should have deleteNode give an error", async () => { // TODO this is wrong. Should allow deleting up to all 6 HalfEdges, as long as they're not connected.
       
     });
     
   });
+  
+  // TODO test error with deleting Node where at least one HalfEdge is actually connected already.
   
   // Deleting a HalfEdge when you can't
   // - HalfEdge doesn't exist: should error
