@@ -80,7 +80,7 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     
     before("create Node", async () => {
       // Grab the key of the new Node that will be created.
-      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
       
       // Then actually run the function, which will create the node with the key we just calculated.
       await instance.createNode(hash0, 42, {from: accounts[0]});
@@ -118,7 +118,7 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     
     before("create Node", async () => {
       // Grab the key of the new Node that will be created.
-      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey0 = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
       
       // Then actually run the function, which will create the Node with the key we just calculated.
       await instance.createNode(hash0, 42, {from: accounts[0]});
@@ -153,8 +153,8 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     
     before("create Nodes", async () => {
       // Grab the keys of the new Nodes that will be created.
-      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
-      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[0]});
+      nodeKey0 = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.nodeKeyFromIpfs.call(hash1, {from: accounts[0]});
       
       // Then actually run the function twice, which will create the Nodes with the keys we just calculated.
       await instance.createNode(hash0, 42, {from: accounts[0]});
@@ -204,8 +204,8 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     let nodeKey1 = undefined;
     
     before("create Nodes", async () => {
-      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
-      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[1]});
+      nodeKey0 = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.nodeKeyFromIpfs.call(hash1, {from: accounts[1]});
       
       await instance.createNode(hash0, 42, {from: accounts[0]});
       await instance.createNode(hash1, 44, {from: accounts[1]});
@@ -257,8 +257,8 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     
     before("create Node", async () => {
       // Grab the keys of the new Nodes that could be created.
-      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
-      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[1]});
+      nodeKey0 = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.nodeKeyFromIpfs.call(hash1, {from: accounts[1]});
       
       // Then actually run the function just once, for the account[1] one.
       await instance.createNode(hash1, 44, {from: accounts[1]});
@@ -287,8 +287,8 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     let nodeKey = undefined;
     
     before("create and delete Node", async () => {
-      // Same pattern as above: grab keys from the pure keyFromIpfs function, and then create the Node (at that key).
-      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      // Same pattern as above: grab keys from the pure nodeKeyFromIpfs function, and then create the Node (at that key).
+      nodeKey = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
       await instance.createNode(hash0, 44, {from: accounts[0]});
       await instance.deleteNode(nodeKey, {from: accounts[0]})
     });
@@ -315,7 +315,7 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     let nodeKey = undefined;
     
     before("create and delete Node", async () => {
-      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
       await instance.createNode(hash0, 44, {from: accounts[0]});
       await instance.deleteNode(nodeKey, {from: accounts[0]})
     });
@@ -330,7 +330,7 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     let nodeKey = undefined;
     
     before("create and delete Node", async () => {
-      nodeKey = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
       await instance.createNode(hash0, 44, {from: accounts[0]});
       await instance.deleteNode(nodeKey, {from: accounts[0]})
     });
@@ -347,9 +347,9 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     let nodeKey2 = undefined;
     
     before("create the 3 Nodes", async () => {
-      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
-      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[0]});
-      nodeKey2 = await instance.keyFromIpfs.call(hash2, {from: accounts[0]});
+      nodeKey0 = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.nodeKeyFromIpfs.call(hash1, {from: accounts[0]});
+      nodeKey2 = await instance.nodeKeyFromIpfs.call(hash2, {from: accounts[0]});
       await instance.createNode(hash0, 42, {from: accounts[0]});
       await instance.createNode(hash1, 42, {from: accounts[0]});
       await instance.createNode(hash2, 42, {from: accounts[0]});
@@ -417,9 +417,9 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     let nodeKey2 = undefined;
     
     before("create the 3 Nodes", async () => {
-      nodeKey0 = await instance.keyFromIpfs.call(hash0, {from: accounts[0]});
-      nodeKey1 = await instance.keyFromIpfs.call(hash1, {from: accounts[0]});
-      nodeKey2 = await instance.keyFromIpfs.call(hash2, {from: accounts[0]});
+      nodeKey0 = await instance.nodeKeyFromIpfs.call(hash0, {from: accounts[0]});
+      nodeKey1 = await instance.nodeKeyFromIpfs.call(hash1, {from: accounts[0]});
+      nodeKey2 = await instance.nodeKeyFromIpfs.call(hash2, {from: accounts[0]});
       
       // Wee, random sequence of (sometimes only attempted) creates and deletes.
       
