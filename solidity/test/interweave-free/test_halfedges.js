@@ -43,6 +43,15 @@ contract('InterweaveGraphHalfEdges', async (accounts) => {
     instance = await InterweaveGraph.deployed();
   })
   
+  // Before connecting a Node with :
+  // - getNode should return 0 for all nodeKeys
+  // - getNode should return 0 for nodeCount
+  
+  //
+  
+  
+  
+  
   contract("Creating invalid HalfEdges", async () => {
     
     it("should give an error if the IPFS hash is empty", async () => {

@@ -238,16 +238,73 @@ contract InterweaveProposals is InterweaveGraph {
     emit EdgeProposalRejected(_edgeProposalKey, msg.sender, nodeOwnerAddrs[nodeOwnerAddrs[0] == msg.sender ? 1 : 0]);
   }
   
-  function getOwnerEdgeProposalCount(address _ownerAddr) public view returns (uint256) {
+  function getOwnerEdgeProposalCount(address _ownerAddr) external view returns (uint256) {
     return ownerLookup[_ownerAddr].edgeProposalKeys.length;
   }
   
-  function getOwnerEdgeProposalKeyByIndex(address _ownerAddr, uint256 _index) public view returns (uint256) {
+  function getOwnerEdgeProposalKeyByIndex(address _ownerAddr, uint256 _index) external view returns (uint256) {
     require(
       _index < ownerLookup[_ownerAddr].edgeProposalKeys.length,
       "The index supplied was >= the number of EdgeProposals belonging to the Owner."
     );
     
     return ownerLookup[_ownerAddr].edgeProposalKeys[_index];
+  }
+  
+  /// @notice Get the EdgeProposal at the given key.
+  /// @param _edgeProposalKey The uint256 key of the desired EdgeProposal.
+  /// @return nodeKey0 The uint256 key of the proposer's Node.
+  /// @return nodeKey1 The uint256 key of the proposee's Node.
+  /// @return slot0 The uint8 slot in the proposer's Node that would be connected/disconnected.
+  /// @return slot1 The uint8 slot in the proposee's Node that would be connected/disconnected.
+  /// @return valid A bool indicating whether this EdgeProposal is still valid.
+  /// @return connect A bool indicating whether this edgeProposal would connect (true) or disconnect the proposed Nodes. false if EdgeProposal is invalid.
+  function getEdgeProposal(uint256 _edgeProposalKey) external view returns (
+    uint256 nodeKey0,
+    uint256 nodeKey1,
+    uint8 slot0,
+    uint8 slot1,
+    bool valid,
+    bool connect
+  ) {
+    EdgeProposal memory edgeProposal = edgeProposalLookup[_edgeProposalKey];
+    
+    // Make sure it's real.
+    require(
+      edgeProposal.nodeKey0 != 0,
+      "The EdgeProposal at _edgeProposalKey must exist."
+    );
+    
+    // Return its values.
+    nodeKey0 = edgeProposal.nodeKey0;
+    nodeKey1 = edgeProposal.nodeKey1;
+    slot0 = uint8(edgeProposal.slot0);
+    slot1 = uint8(edgeProposal.slot1);
+    
+    // Also check validity and, if valid, whether the EdgeProposal would connect or disconnect the Nodes.
+    if (uint(nodeLookup[nodeKey0].ownerAddr) == 0 || uint(nodeLookup[nodeKey1].ownerAddr) == 0) {
+      // One or both of the Nodes were since deleted.
+      valid = false;
+      connect = false;
+    }
+    else {
+      // Nodes are valid - check the nodeKeys in their slots.
+      uint256 slotKey0 = nodeLookup[nodeKey0].edgeNodeKeys[slot0];
+      uint256 slotKey1 = nodeLookup[nodeKey1].edgeNodeKeys[slot1];
+      
+      if (slotKey0 == nodeKey1 && slotKey1 == nodeKey0) {
+        valid = true;
+        connect = false;
+      }
+      else if (slotKey0 == 0 && slotKey1 == 0) {
+        valid = true;
+        connect = true;
+      }
+      else {
+        // One or both of the slots were since
+        valid = false;
+        connect = false;
+      }
+    }
   }
 }
