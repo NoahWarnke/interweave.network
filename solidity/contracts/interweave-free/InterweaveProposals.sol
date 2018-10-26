@@ -14,37 +14,37 @@ contract InterweaveProposals is InterweaveGraph {
   /// @param edgeProposalKey The uint256 key of the created EdgeProposal.
   /// @param proposerAddr The Ethereum address of the Owner who created the EdgeProposal.
   /// @param proposedToAddr The Ethereum address of the Owner who is the counterparty on the EdgeProposal.
-  event EdgeProposalCreated(uint256 edgeProposalKey, address proposerAddr, address indexed proposedToAddr);
+  event EdgeProposalCreated(uint256 edgeProposalKey, address indexed proposerAddr, address indexed proposedToAddr);
   
   /// @notice An EdgeProposal was accepted, connecting or disconnecting two Nodes.
   /// @param edgeProposalKey The uint256 key of the accepted EdgeProposal (which will have been deleted).
   /// @param accepterAddr The Ethereum address of the Owner who accepted the EdgeProposal.
   /// @param acceptedAddr The Ethereum address of the Owner whose EdgeProposal was accepted.
-  event EdgeProposalAccepted(uint256 edgeProposalKey, address accepterAddr, address indexed acceptedAddr);
+  event EdgeProposalAccepted(uint256 edgeProposalKey, address indexed accepterAddr, address indexed acceptedAddr);
   
   /// @notice An EdgeProposal was rejected.
   /// @param edgeProposalKey The uint256 key of the rejected EdgeProposal (which will have been deleted).
   /// @param rejecterAddr The Ethereum address of the Owner who rejected the EdgeProposal.
   /// @param rejectedAddr The Ethereum address of the Owner who was the counterparty on the EdgeProposal.
-  event EdgeProposalRejected(uint256 edgeProposalKey, address rejecterAddr, address indexed rejectedAddr);
+  event EdgeProposalRejected(uint256 edgeProposalKey, address indexed rejecterAddr, address indexed rejectedAddr);
   
   /// @notice An edge between Nodes was created.
   /// @param nodeKey0 The uint256 key of Node 0.
+  /// @param nodeKey1 The uint256 key of Node 1.
   /// @param slot0 The uint8 slot belonging to Node 0 that was connected.
   /// @param slot1 The uint8 slot belonging to Node 1 that was connected.
-  /// @param nodeKey1 The uint256 key of Node 1.
   /// @param ownerAddr0 The address of the owner of Node 0.
   /// @param ownerAddr1 The address of the owner of Node 1.
-  event EdgeCreated(uint256 nodeKey0, uint8 slot0, uint8 slot1, uint256 nodeKey1, address indexed ownerAddr0, address indexed ownerAddr1);
+  event EdgeCreated(uint256 nodeKey0, uint256 nodeKey1, uint8 slot0, uint8 slot1, address indexed ownerAddr0, address indexed ownerAddr1);
   
   /// @notice An edge between Nodes was deleted.
   /// @param nodeKey0 The uint256 key of Node 0.
+  /// @param nodeKey1 The uint256 key of Node 1.
   /// @param slot0 The uint8 slot belonging to Node 0 that was disconnected.
   /// @param slot1 The uint8 slot belonging to Node 1 that was disconnected.
-  /// @param nodeKey1 The uint256 key of Node 1.
   /// @param ownerAddr0 The address of the owner of Node 0.
   /// @param ownerAddr1 The address of the owner of Node 1.
-  event EdgeDeleted(uint256 nodeKey0, uint8 slot0, uint8 slot1, uint256 nodeKey1, address indexed ownerAddr0, address indexed ownerAddr1);
+  event EdgeDeleted(uint256 nodeKey0, uint256 nodeKey1, uint8 slot0, uint8 slot1, address indexed ownerAddr0, address indexed ownerAddr1);
   
   /// @notice A mapping allowing lookup of EdgeProposals by their keys.
   /// @dev EdgeProposal keys = uint256(kekkac(halfEdgeKey0, halfEdgeKey1))
@@ -52,18 +52,18 @@ contract InterweaveProposals is InterweaveGraph {
   
   /// @notice A function to generate a unique key for an EdgeProposal from given Nodes and their slots.
   /// @param _nodeKey0 The uint256 key of the first Node.
+  /// @param _nodeKey1 The uint256 key of the second Node.
   /// @param _slot0 The uint8 slot of the first Node.
   /// @param _slot1 The uint8 slot of the second Node.
-  /// @param _nodeKey1 The uint256 key of the second Node.
   /// @return A uint256 key.
-  function edgeProposalKeyFromNodesAndSlots(uint256 _nodeKey0, uint8 _slot0, uint8 _slot1, uint256 _nodeKey1) public pure returns (uint256) {
+  function edgeProposalKeyFromNodesAndSlots(uint256 _nodeKey0, uint256 _nodeKey1, uint8 _slot0, uint8 _slot1) public pure returns (uint256) {
     return uint256(
       keccak256(
         abi.encodePacked(
           _nodeKey0,
+          _nodeKey1,
           _slot0,
-          _slot1,
-          _nodeKey1
+          _slot1
         )
       )
     );
@@ -114,26 +114,28 @@ contract InterweaveProposals is InterweaveGraph {
         node0.edgeNodeKeys[_slot0] = _nodeKey1;
         node1.edgeNodeKeys[_slot1] = _nodeKey0;
         
-        emit EdgeCreated(_nodeKey0, _slot0, _slot1, _nodeKey1, msg.sender, msg.sender);
+        // Log the edge creation.
+        emit EdgeCreated(_nodeKey0, _nodeKey1, _slot0, _slot1, msg.sender, msg.sender);
       }
       else {
         // Disconnect 'em.
         node0.edgeNodeKeys[_slot0] = 0;
         node1.edgeNodeKeys[_slot1] = 0;
         
-        emit EdgeDeleted(_nodeKey0, _slot0, _slot1, _nodeKey1, msg.sender, msg.sender);
+        // Log the edge deletion.
+        emit EdgeDeleted(_nodeKey0, _nodeKey1, _slot0, _slot1, msg.sender, msg.sender);
       }
       return; // Done, in either case.
     }
     
     // Node 1 is not owned by msg.sender, so continue with an actual EdgeProposal.
-    uint256 newEdgeProposalKey = edgeProposalKeyFromNodesAndSlots(_nodeKey0, _slot0, _slot1, _nodeKey1);
+    uint256 newEdgeProposalKey = edgeProposalKeyFromNodesAndSlots(_nodeKey0, _nodeKey1,  _slot0, _slot1);
     require(
       edgeProposalLookup[newEdgeProposalKey].nodeKey0 == 0,
       "This exact EdgeProposal already exists. You can reject it if you want."
     );
     
-    uint256 reverseEdgeProposalKey = edgeProposalKeyFromNodesAndSlots(_nodeKey1, _slot1, _slot0, _nodeKey0);
+    uint256 reverseEdgeProposalKey = edgeProposalKeyFromNodesAndSlots(_nodeKey1, _nodeKey0, _slot1, _slot0);
     require(
       edgeProposalLookup[reverseEdgeProposalKey].nodeKey0 == 0,
       "The reverse of this EdgeProposal already exists. You can either reject or accept it."
@@ -158,23 +160,51 @@ contract InterweaveProposals is InterweaveGraph {
   function acceptEdgeProposal(uint256 _edgeProposalKey) external {
     
     EdgeProposal memory edgeProposal = edgeProposalLookup[_edgeProposalKey];
+    uint8 slot0 = uint8(edgeProposal.messageAndSlots[30]);
+    uint8 slot1 = uint8(edgeProposal.messageAndSlots[31]);
     
+    // The EdgeProposal must exist, and you must own the nodeKey1 Node
+    Node storage node1 = nodeLookup[edgeProposal.nodeKey1];
     require(
-      edgeProposal.nodeKey0 != 0,
-      "The EdgeProposal at _edgeProposalKey must exist."
+      node1.ownerAddr == msg.sender,
+      "You must own the EdgeProposal nodeKey1 Node, or the EdgeProposal might not even exist."
     );
     
-    /*
-    - require proposalLookup[proposalKey] !== 0
-    - require NodeLookup[edgeProposalLookup[_edgeProposalKey].nodeKey0].owner !== msg.sender (you can't accept your own proposal)
-    - Delete the Proposal from proposalLookup
-    - If neither halfEdge slot contains the other:
-      - Connect them
-    - Else if both HalfEdge slots contain the other:
-      - Disconnect them
-    - Else:
-      - Situation where either or both halfEdges have already connected to other ones. Proposal is worthless, so do nothing; it's already deleted.
-    */
+    // Note: node0 could well belong to msg.sender depending on Node transactions after the EdgeProposal was created. That's fine.
+    Node storage node0 = nodeLookup[edgeProposal.nodeKey0];
+    
+    require (
+      (node0.edgeNodeKeys[slot0] == edgeProposal.nodeKey1 && node1.edgeNodeKeys[slot1] == edgeProposal.nodeKey0)
+      || (node0.edgeNodeKeys[slot0] == 0 && node1.edgeNodeKeys[slot1] == 0),
+      "The Nodes slots at _nodeKey0 _slot0 and _nodeKey1 _slot1 must be either both connected to each other or both disconnected from any Node."
+    );
+    
+    // Okay, everything checks out - let's do this!
+    
+    // Since we already confirmed they are in valid configuration, a simple check if one slot is 0 or not is enough to let us know what to do.
+    if (node0.edgeNodeKeys[slot0] == 0) {
+      // Connect 'em.
+      node0.edgeNodeKeys[slot0] = edgeProposal.nodeKey1;
+      node1.edgeNodeKeys[slot1] = edgeProposal.nodeKey0;
+      
+      // Log the edge creation.
+      emit EdgeCreated(edgeProposal.nodeKey0, edgeProposal.nodeKey1, slot0, slot1, msg.sender, msg.sender);
+    }
+    else {
+      // Disconnect 'em.
+      node0.edgeNodeKeys[slot0] = 0;
+      node1.edgeNodeKeys[slot1] = 0;
+      
+      // Log the edge deletion.
+      emit EdgeDeleted(edgeProposal.nodeKey0, edgeProposal.nodeKey1, slot0, slot1, msg.sender, msg.sender);
+    }
+    
+    // Delete teh EdgeProposal from the lookup.
+    delete edgeProposalLookup[_edgeProposalKey];
+    
+    // Log the EdgeProposal acceptance.
+    emit EdgeProposalAccepted(_edgeProposalKey, node0.ownerAddr, msg.sender);
+    
   }
   
   function rejectEdgeProposal(uint256 _edgeProposalKey) external {
