@@ -7,10 +7,7 @@ contract InterweaveProposals is InterweaveGraph {
   struct EdgeProposal {
     uint256 nodeKey0;
     uint256 nodeKey1;
-    uint64 slot0; // uint64 instead of uint8 so that these four values all fit into one uint256 storage slot.
-    uint64 slot1;
-    uint64 ownerEdgeProposalsIndex0; // These two indexes upport efficient deleting of EdgeProposals from their Owner lists.
-    uint64 ownerEdgeProposalsIndex1;
+    bytes32 messageAndSlots; // byte 30 is slot0 and byte 31 is slot1
   }
   
   /// @notice An EdgeProposal was created.
@@ -74,10 +71,11 @@ contract InterweaveProposals is InterweaveGraph {
   
   /// @notice Create an EdgeProposal, between the Nodes with the given keys, via their given slots. Simply immediately toggle an edge if both are owned by msg.sender. Will error if they are neither connected nor disconnected.
   /// @param _nodeKey0 The uint256 key of the first Node to connect to/disconnect from the second one.
+  /// @param _nodeKey1 The uint256 key of the second Node to connect to/disconnect from the first one.
   /// @param _slot0 The uint8 slot of the first Node to connect/disconnect through.
   /// @param _slot1 The uint8 slot of the second Node to connect/disconnect through.
-  /// @param _nodeKey1 The uint256 key of the second Node to connect to/disconnect from the first one.
-  function createEdgeProposal(uint256 _nodeKey0, uint8 _slot0, uint8 _slot1, uint256 _nodeKey1) external {
+  /// @param _message The bytes30 arbitrary message from the proposer to the proposee: a human-readable form of the EdgeProposal, aka the "epmess".
+  function createEdgeProposal(uint256 _nodeKey0, uint256 _nodeKey1, uint8 _slot0, uint8 _slot1, bytes30 _message) external {
     
     // Make sure slots are in a valid range.
     require(
@@ -129,38 +127,29 @@ contract InterweaveProposals is InterweaveGraph {
     }
     
     // Node 1 is not owned by msg.sender, so continue with an actual EdgeProposal.
-    
     uint256 newEdgeProposalKey = edgeProposalKeyFromNodesAndSlots(_nodeKey0, _slot0, _slot1, _nodeKey1);
-    
     require(
       edgeProposalLookup[newEdgeProposalKey].nodeKey0 == 0,
       "This exact EdgeProposal already exists. You can reject it if you want."
     );
     
     uint256 reverseEdgeProposalKey = edgeProposalKeyFromNodesAndSlots(_nodeKey1, _slot1, _slot0, _nodeKey0);
-    
     require(
       edgeProposalLookup[reverseEdgeProposalKey].nodeKey0 == 0,
       "The reverse of this EdgeProposal already exists. You can either reject or accept it."
     );
     
-    // Okay, we're clear to actually create the EdgeProposal.
-    uint256[] storage edgeProposalKeys0 = ownerLookup[msg.sender].edgeProposalKeys;
-    uint256[] storage edgeProposalKeys1 = ownerLookup[node1.ownerAddr].edgeProposalKeys;
+    // Combine the epmess and the slots into one bytes32.
+    bytes32 messageAndSlots = bytes32(_message);
+    messageAndSlots |= bytes32(byte(_slot0)) >> 240; // byte 30
+    messageAndSlots |= bytes32(byte(_slot1)) >> 248; // byte 31
     
-    EdgeProposal memory newEdgeProposal = EdgeProposal({
+    // Okay, we're clear to actually create the EdgeProposal.
+    edgeProposalLookup[newEdgeProposalKey] = EdgeProposal({
       nodeKey0: _nodeKey0,
       nodeKey1: _nodeKey1,
-      slot0: uint64(_slot0),
-      slot1: uint64(_slot1),
-      ownerEdgeProposalsIndex0: uint64(edgeProposalKeys0.length),
-      ownerEdgeProposalsIndex1: uint64(edgeProposalKeys1.length)
+      messageAndSlots: messageAndSlots
     });
-    
-    edgeProposalLookup[newEdgeProposalKey] = newEdgeProposal;
-    
-    edgeProposalKeys0.push(newEdgeProposalKey);
-    edgeProposalKeys1.push(newEdgeProposalKey);
     
     // Log the EdgeProposal creation.
     emit EdgeProposalCreated(newEdgeProposalKey, msg.sender, node1.ownerAddr);
@@ -177,9 +166,8 @@ contract InterweaveProposals is InterweaveGraph {
     
     /*
     - require proposalLookup[proposalKey] !== 0
-    - require NodeLookup[HalfEdgeLookup[proposal.halfEdgeKey0].node].owner !== msg.sender (you can't accept your own proposal)
+    - require NodeLookup[edgeProposalLookup[_edgeProposalKey].nodeKey0].owner !== msg.sender (you can't accept your own proposal)
     - Delete the Proposal from proposalLookup
-    - Delete proposalKey from, and compactify, the two OwnerLookup[msg.sender or otherNodeOwner].proposals (proposal's time is up, whatever happens next)
     - If neither halfEdge slot contains the other:
       - Connect them
     - Else if both HalfEdge slots contain the other:
@@ -206,49 +194,8 @@ contract InterweaveProposals is InterweaveGraph {
     // Delete it from the lookup.
     delete edgeProposalLookup[_edgeProposalKey]; // Free up storage
     
-    // For each of the two Owners, remove _edgeProposalKey from their edgeProposalKeys arrays, and swap the last keys into the holes, if any.
-    for (uint8 i = 0; i < 2; i++) {
-      
-      // Delete the EdgeProposal from the two Owners' edgeProposalKeys arrays:
-      // ...Get that array as storage because we'll be using it several times, modifying it, and want the changes to stick.
-      uint256[] storage edgeProposalKeys = ownerLookup[nodeOwnerAddrs[i]].edgeProposalKeys;
-      
-      // ...If the EdgeProposal is not the last element in the array, swap the last element over top of it.
-      uint64 index = (i == 0 ? edgeProposal.ownerEdgeProposalsIndex0 : edgeProposal.ownerEdgeProposalsIndex1);
-      uint64 lastIndex = uint64(edgeProposalKeys.length - 1);
-      if (index < lastIndex) {
-        uint256 movedKey = edgeProposalKeys[lastIndex];
-        
-        edgeProposalKeys[index] = movedKey; // Storage update
-        
-        if (nodeOwnerAddrs[i] == nodeLookup[edgeProposalLookup[movedKey].nodeKey0].ownerAddr) {
-          edgeProposalLookup[movedKey].ownerEdgeProposalsIndex0 = index; // Storage update.
-        }
-        else {
-          edgeProposalLookup[movedKey].ownerEdgeProposalsIndex1 = index; // Storage update.
-        }
-      }
-      
-      // ...Either way, then delete the last element and shrink the array (free up storage))
-      delete edgeProposalKeys[lastIndex];
-      edgeProposalKeys.length--;
-    }
-    
     // Log the EdgeProposal rejection.
     emit EdgeProposalRejected(_edgeProposalKey, msg.sender, nodeOwnerAddrs[nodeOwnerAddrs[0] == msg.sender ? 1 : 0]);
-  }
-  
-  function getOwnerEdgeProposalCount(address _ownerAddr) external view returns (uint256) {
-    return ownerLookup[_ownerAddr].edgeProposalKeys.length;
-  }
-  
-  function getOwnerEdgeProposalKeyByIndex(address _ownerAddr, uint256 _index) external view returns (uint256) {
-    require(
-      _index < ownerLookup[_ownerAddr].edgeProposalKeys.length,
-      "The index supplied was >= the number of EdgeProposals belonging to the Owner."
-    );
-    
-    return ownerLookup[_ownerAddr].edgeProposalKeys[_index];
   }
   
   /// @notice Get the EdgeProposal at the given key.
@@ -262,6 +209,7 @@ contract InterweaveProposals is InterweaveGraph {
   function getEdgeProposal(uint256 _edgeProposalKey) external view returns (
     uint256 nodeKey0,
     uint256 nodeKey1,
+    bytes30 message,
     uint8 slot0,
     uint8 slot1,
     bool valid,
@@ -275,11 +223,12 @@ contract InterweaveProposals is InterweaveGraph {
       "The EdgeProposal at _edgeProposalKey must exist."
     );
     
-    // Return its values.
+    // Return its set values.
     nodeKey0 = edgeProposal.nodeKey0;
     nodeKey1 = edgeProposal.nodeKey1;
-    slot0 = uint8(edgeProposal.slot0);
-    slot1 = uint8(edgeProposal.slot1);
+    message = bytes30(edgeProposal.messageAndSlots);
+    slot0 = uint8(edgeProposal.messageAndSlots[30]);
+    slot1 = uint8(edgeProposal.messageAndSlots[31]);
     
     // Also check validity and, if valid, whether the EdgeProposal would connect or disconnect the Nodes.
     if (uint(nodeLookup[nodeKey0].ownerAddr) == 0 || uint(nodeLookup[nodeKey1].ownerAddr) == 0) {

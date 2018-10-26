@@ -48,17 +48,6 @@ contract('InterweaveGraph Nodes', async (accounts) => {
   
   contract("Before creating any Nodes", async() => {
     
-    it("should give 0 nodes belonging to sender", async () => {
-      let numNodes = await instance.getSenderNodeCount.call({from: accounts[0]});
-      assert.equal(numNodes, 0);
-    });
-    
-    it("should give an error when you try to access the sender's 0th Node", async () => {
-      await assert.requireEquals("The index supplied was >= the number of the Nodes belonging to the Owner.", async() => {
-        let nodeKey = await instance.getSenderNodeKeyByIndex.call(0, {from: accounts[0]});
-      });
-    });
-    
     it("should give an error when you try to access a Node at key 0", async () => {
       assert.requireEquals("Node does not exist.", async () => {
         let node = await instance.getNode.call(emptyKey, {from: accounts[0]});
@@ -70,7 +59,7 @@ contract('InterweaveGraph Nodes', async (accounts) => {
     
     it("Should give an error", async () => {
       await assert.requireEquals("_ipfs[0] was empty!", async() => {
-        await instance.createNode(emptyHash, 42, {from: accounts[0]});
+        await instance.createNode(emptyHash, {from: accounts[0]});
       });
     });
   });
