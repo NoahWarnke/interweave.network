@@ -1,6 +1,5 @@
 body {
   background-image: linear-gradient(to bottom right, #ddffff, #88aaff);
-  height: 100%;
   font-family: Verdana,sans-serif;
 }
 
@@ -53,4 +52,5 @@ body {
   color: white;
   margin-top: 15px;
   background-color: #222222;
+  border-radius: 20px;
 }

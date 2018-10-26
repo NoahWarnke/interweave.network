@@ -30,13 +30,6 @@
           <h3><a target="_blank" v-if="value !== ''" v-bind:href="'https://ipfs.io/ipfs/' + value">{{value}}</a></h3>
           <p v-if="value === ''">(no hash set)</p>
         </div>
-        <div id="events" v-if="eventsWindowOpen && events !== undefined">
-          <button class="x" v-on:click="closeEventsWindow">X</button>
-          <span v-if="events.length === 0">No changes recorded.</span>
-          <ol>
-            <li v-for="event in events">Block {{event.block}}: <code>{{event.hash}}</code></li>
-          </ol>
-        </div>
         <div id="transaction" v-if="setTxHash !== undefined" v-bind:class="setConfirmations < 1 ? (setError === undefined ? 'warn' : 'error') : 'good'">
           <hr>
           <button class="x" v-on:click="closeTxWindow">X</button>
@@ -51,6 +44,13 @@
             <span v-if="setConfirmations > 0"> has been confirmed with {{setConfirmations + (setConfirmations === 24 ? '+' : '')}} block confirmations!</span>
             <span v-if="setError !== undefined"> failed due to an error. Check the tx link above or MetaMask for details.</span>
           </p>
+        </div>
+        <div id="events" v-if="eventsWindowOpen && events !== undefined">
+          <button class="x" v-on:click="closeEventsWindow">X</button>
+          <span v-if="events.length === 0">No changes recorded.</span>
+          <ol>
+            <li v-for="event in events">Block {{event.block}}: <code>{{event.hash}}</code></li>
+          </ol>
         </div>
       </div>
     </div>
