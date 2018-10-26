@@ -54,7 +54,7 @@ contract InterweaveGraph {
     // Generate Node's key.
     uint256 newNodeKey = nodeKeyFromIpfs(_ipfs);
     
-    // There must not already be a Node at that key`.
+    // There must not already be a Node at that key.
     // The maze of twisty little passages must *not* be all alike.
     require(
       uint(nodeLookup[newNodeKey].ipfs[0]) == 0,

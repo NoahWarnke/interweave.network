@@ -144,7 +144,7 @@ contract InterweaveProposals is InterweaveGraph {
     messageAndSlots |= bytes32(byte(_slot0)) >> 240; // byte 30
     messageAndSlots |= bytes32(byte(_slot1)) >> 248; // byte 31
     
-    // Okay, we're clear to actually create the EdgeProposal.
+    // Okay, we're clear to actually create the EdgeProposal. Set 3 storage slots: 60k of gas right there!
     edgeProposalLookup[newEdgeProposalKey] = EdgeProposal({
       nodeKey0: _nodeKey0,
       nodeKey1: _nodeKey1,
