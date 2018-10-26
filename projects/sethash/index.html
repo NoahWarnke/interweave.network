@@ -23,11 +23,19 @@
           <h3><a target="_blank" v-if="value !== ''" v-bind:href="'https://ipfs.io/ipfs/' + value">{{value}}</a></h3>
           <input type="text" v-model="formInput" v-if="!transactionInProgress" maxlength="46" size="46"></input>
           <button v-on:click="callSet" v-if="!transactionInProgress">Save {{value !== '' ? 'new ' : ''}}hash!</button>
+          <button v-on:click="getEvents" v-if="value !== ''">See all changes for this address</button>
         </div>
         <div id="nondapp" v-if="browserType === 'nondapp' || !loggedIn">
           <p>Get IPFS hash for address <input type="text" size="50" v-model="enteredAccount" v-on:change="callGet"></input></p>
           <h3><a target="_blank" v-if="value !== ''" v-bind:href="'https://ipfs.io/ipfs/' + value">{{value}}</a></h3>
           <p v-if="value === ''">(no hash set)</p>
+        </div>
+        <div id="events" v-if="eventsWindowOpen && events !== undefined">
+          <button class="x" v-on:click="closeEventsWindow">X</button>
+          <span v-if="events.length === 0">No changes recorded.</span>
+          <ol>
+            <li v-for="event in events">Block {{event.block}}: <code>{{event.hash}}</code></li>
+          </ol>
         </div>
         <div id="transaction" v-if="setTxHash !== undefined" v-bind:class="setConfirmations < 1 ? (setError === undefined ? 'warn' : 'error') : 'good'">
           <hr>

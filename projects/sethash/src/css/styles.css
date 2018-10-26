@@ -45,3 +45,12 @@ body {
 .x {
   float: right;
 }
+
+
+#events {
+  text-align: left;
+  padding: 15px;
+  color: white;
+  margin-top: 15px;
+  background-color: #222222;
+}

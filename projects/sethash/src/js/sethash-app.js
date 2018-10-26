@@ -20,7 +20,9 @@ async function startup() {
       setTxHash: undefined,
       setConfirmations: -1,
       setError: undefined,
-      transactionInProgress: false
+      transactionInProgress: false,
+      events: undefined,
+      eventsWindowOpen: false
     },
     methods: {
       callSet: function() {
@@ -113,6 +115,17 @@ async function startup() {
         }
         this.statusCol = "good";
         return "Connected to " + this.network + "!";
+      },
+      getEvents: async function() {
+        if (!this.contractReady) {
+          return;
+        }
+        this.events = await this.mySetHashContractHandler.getHashChangedEvents(this.loggedIn ? this.account : this.enteredAccount);
+        this.eventsWindowOpen = true;
+      },
+      closeEventsWindow: function() {
+        this.eventsWindowOpen = false;
+        this.events = undefined;
       }
     }
   });
@@ -135,6 +148,7 @@ async function startup() {
     if (oldVal !== newVal) {
       app.closeTxWindow();
     }
+    app.closeEventsWindow();
     app.account = newVal;
     app.accountAvailable = (newVal === undefined ? false : true);
     app.callGet();

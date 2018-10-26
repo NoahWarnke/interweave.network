@@ -18,6 +18,10 @@ class SetHashContractHandler {
       //3: "0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514"
       4: "0xB3AC9B8eF39B5feF2E68d16444e72C5878E48514"
     };
+    
+    this.contractCreationBlocks = {
+      4: 3162223
+    }
   }
   
   /**
@@ -27,9 +31,9 @@ class SetHashContractHandler {
   async initialize(web3handler) {
     
     // Get network so we can get the contract address.
-    let netId = await web3handler.networkId;
+    this.netId = await web3handler.networkId;
     
-    this.address = this.addresses[netId];
+    this.address = this.addresses[this.netId];
     if (this.address === undefined) {
       throw new Error("Contract not available on the current network.");
     }
@@ -68,5 +72,32 @@ class SetHashContractHandler {
     }
     
     return this.tokenContract.methods.setHash(newValue).send({from: ethAddress, value: 0});
+  }
+  
+  /**
+   * Get all the HashChanged events for the given Eth address.
+   * @param ethAddress the Eth address to check the logs for.
+   * @returns A list of the past hash changs, each containing the new hash and the block number.
+   */
+  async getHashChangedEvents(ethAddress) {
+    
+    let rawEvents = await this.tokenContract.getPastEvents(
+      "HashChanged",
+      {
+        filter: {
+          owner: ethAddress
+        },
+        fromBlock: this.contractCreationBlocks[this.netId],
+        toBlock: "latest"
+      }
+    )
+    
+    return rawEvents.map((rawEvent) => {
+      return {
+        block: rawEvent.blockNumber,
+        hash: rawEvent.returnValues.newHash,
+        tx: rawEvent.transactionHash
+      };
+    });
   }
 }
