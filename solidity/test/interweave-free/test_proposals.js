@@ -256,16 +256,16 @@ contract('InterweaveProposals', async (accounts) => {
       assert.eventNeverHappened(tx, "EdgeProposalCreated");
       
       // Make sure no EdgeProposal was actually created.
-      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 2, 3);
+      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 2, 3);
       
       assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
         // 1 attempts to create the reverse nodeKey1 to nodeKey1 on 2, 4 EdgeProposal
-        await instance.getEdgeProposal(hypotheticalEdgeProposalKey);
+        await instance.getEdgeProposal.call(hypotheticalEdgeProposalKey);
       });
       
       // Make sure the Nodes were connected.
-      let node0 = await instance.getNode(nodeKey[0], {from: accounts[0]});
-      let node1 = await instance.getNode(nodeKey[1], {from: accounts[0]});
+      let node0 = await instance.getNode.call(nodeKey[0], {from: accounts[0]});
+      let node1 = await instance.getNode.call(nodeKey[1], {from: accounts[0]});
       
       assert.equal(node0[2][2].toString(), nodeKey[1].toString());
       assert.equal(node1[2][3].toString(), nodeKey[0].toString());
@@ -299,16 +299,16 @@ contract('InterweaveProposals', async (accounts) => {
       assert.eventNeverHappened(tx, "EdgeProposalCreated");
       
       // Make sure no EdgeProposal was actually created.
-      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 2, 3);
+      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 2, 3);
       
       assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
         // 1 attempts to create the reverse nodeKey1 to nodeKey1 on 2, 4 EdgeProposal
-        await instance.getEdgeProposal(hypotheticalEdgeProposalKey);
+        await instance.getEdgeProposal.call(hypotheticalEdgeProposalKey);
       });
       
       // Make sure the Nodes were disconnected.
-      let node0 = await instance.getNode(nodeKey[0], {from: accounts[0]});
-      let node1 = await instance.getNode(nodeKey[1], {from: accounts[0]});
+      let node0 = await instance.getNode.call(nodeKey[0], {from: accounts[0]});
+      let node1 = await instance.getNode.call(nodeKey[1], {from: accounts[0]});
       
       assert.equal(node0[2][2].toString(), "0");
       assert.equal(node1[2][3].toString(), "0");
@@ -322,7 +322,7 @@ contract('InterweaveProposals', async (accounts) => {
       await instance.createNode(hash[1], {from: accounts[1]});
       
       // Get the edgeProposalKey
-      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 2, 3);
+      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 2, 3);
       
       // Create the EdgeProposal
       let tx = await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 3, message, {from: accounts[0]});
@@ -338,7 +338,7 @@ contract('InterweaveProposals', async (accounts) => {
       assert.eventNeverHappened(tx, "EdgeCreated");
       
       // Make sure the new EdgeProposal contains the correct values
-      let edgeProposal = await instance.getEdgeProposal(edgeProposalKey);
+      let edgeProposal = await instance.getEdgeProposal.call(edgeProposalKey);
       
       assert.equal(edgeProposal[0].toString(), nodeKey[0].toString());
       assert.equal(edgeProposal[1].toString(), nodeKey[1].toString());
@@ -349,8 +349,8 @@ contract('InterweaveProposals', async (accounts) => {
       assert.equal(edgeProposal[6], true); // connect
       
       // Make sure the Nodes were not actually changed.
-      let node0 = await instance.getNode(nodeKey[0], {from: accounts[0]});
-      let node1 = await instance.getNode(nodeKey[1], {from: accounts[0]});
+      let node0 = await instance.getNode.call(nodeKey[0], {from: accounts[0]});
+      let node1 = await instance.getNode.call(nodeKey[1], {from: accounts[0]});
       
       assert.equal(node0[2][2].toString(), "0");
       assert.equal(node1[2][3].toString(), "0");
@@ -403,10 +403,10 @@ contract('InterweaveProposals', async (accounts) => {
     it("should error if there's no EdgeProposal at _edgeProposalKey", async () => {
       
       // An EdgeProposal that straight-up doesn't exist.
-      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[5], nodeKey[7], 4, 1);
+      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[5], nodeKey[7], 4, 1);
       
       assert.requireEquals("You must own the EdgeProposal nodeKey1 Node, or the EdgeProposal might not even exist.", async () => {
-        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: address[0]});
+        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: accounts[0]});
       });
     });
     
@@ -421,7 +421,7 @@ contract('InterweaveProposals', async (accounts) => {
       await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 3, message, {from: accounts[0]});
       
       assert.requireEquals("You must own the EdgeProposal nodeKey1 Node, or the EdgeProposal might not even exist.", async () => {
-        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: address[0]});
+        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: accounts[0]});
       });
     });
     
@@ -436,7 +436,7 @@ contract('InterweaveProposals', async (accounts) => {
       await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 3, message, {from: accounts[0]});
       
       assert.requireEquals("You must own the EdgeProposal nodeKey1 Node, or the EdgeProposal might not even exist.", async () => {
-        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: address[2]});
+        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: accounts[2]});
       });
     });
     
@@ -451,7 +451,7 @@ contract('InterweaveProposals', async (accounts) => {
       await instance.createNode(hash[2], {from: accounts[0]});
       
       // Create EdgeProposal from 0's n0.2 to 1's n1.1
-      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 2, 1);
+      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 2, 1);
       await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 1, message, {from: accounts[0]});
       
       // Connect 0's n0 and n2 from n0.2 to n2.4
@@ -459,7 +459,7 @@ contract('InterweaveProposals', async (accounts) => {
       
       // Now 1 trying to accept the EdgeProposal from n0.2 to n1.1 should fail because n0.2 is now in use elsewhere.
       assert.requireEquals("The Nodes slots at _nodeKey0 _slot0 and _nodeKey1 _slot1 must be either both connected to each other or both disconnected from any Node.", async () => {
-        await instance.acceptEdgeProposal(edgeProposalKey, {from: address[1]});
+        await instance.acceptEdgeProposal(edgeProposalKey, {from: accounts[1]});
       });
     });
     
@@ -474,7 +474,7 @@ contract('InterweaveProposals', async (accounts) => {
       await instance.createNode(hash[2], {from: accounts[1]});
       
       // Create EdgeProposal from 0's n0.2 to 1's n1.1
-      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 2, 1);
+      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 2, 1);
       await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 1, message, {from: accounts[0]});
       
       // Connect 1's n1.1 to 1's n2.4
@@ -482,7 +482,7 @@ contract('InterweaveProposals', async (accounts) => {
       
       // Now 1 trying to accept the EdgeProposal from n0.2 to n1.1 should fail because n1.1 is now in use elsewhere.
       assert.requireEquals("The Nodes slots at _nodeKey0 _slot0 and _nodeKey1 _slot1 must be either both connected to each other or both disconnected from any Node.", async () => {
-        await instance.acceptEdgeProposal(edgeProposalKey, {from: address[1]});
+        await instance.acceptEdgeProposal(edgeProposalKey, {from: accounts[1]});
       });
     });
     
@@ -494,7 +494,7 @@ contract('InterweaveProposals', async (accounts) => {
       await instance.createNode(hash[1], {from: accounts[1]});
       
       // Create EdgeProposal from 0's n0.0 to 1's n1.1
-      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 0, 1);
       await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
       
       // 1 accepts the EdgeProposal
@@ -516,15 +516,15 @@ contract('InterweaveProposals', async (accounts) => {
       });
       
       // Make sure the Nodes were connected.
-      let node0 = await instance.getNode(nodeKey[0], {from: accounts[0]});
-      let node1 = await instance.getNode(nodeKey[1], {from: accounts[0]});
+      let node0 = await instance.getNode.call(nodeKey[0], {from: accounts[0]});
+      let node1 = await instance.getNode.call(nodeKey[1], {from: accounts[0]});
       
       assert.equal(node0[2][0].toString(), nodeKey[1].toString());
       assert.equal(node1[2][1].toString(), nodeKey[0].toString());
       
       // Make sure the EdgeProposal no longer exists.
       assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
-        await instance.getEdgeProposal(edgeProposalKey, {from: accounts[1]});
+        await instance.getEdgeProposal.call(edgeProposalKey, {from: accounts[1]});
       });
     });
     
@@ -536,14 +536,14 @@ contract('InterweaveProposals', async (accounts) => {
       await instance.createNode(hash[1], {from: accounts[1]});
 
       // Create EdgeProposal from 0's n0.0 to 1's n1.1
-      let edgeProposalKey0 = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+      let edgeProposalKey0 = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 0, 1);
       await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
 
       // 1 accepts the EdgeProposal, meaning the Nodes are now connected.
       await instance.acceptEdgeProposal(edgeProposalKey0, {from: accounts[1]});
       
       // Create EdgeProposal from 1's n1.1 to 0's n0.0 (note, wouldn't have to be the reverse of the earlier one - either could propose)
-      let edgeProposalKey1 = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[1], nodeKey[0], 1, 0);
+      let edgeProposalKey1 = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[1], nodeKey[0], 1, 0);
       await instance.createEdgeProposal(nodeKey[1], nodeKey[0], 1, 0, message, {from: accounts[1]});
       
       // 0 accepts the EdgeProposal, meaning the Nodes are now disconnected.
@@ -566,15 +566,15 @@ contract('InterweaveProposals', async (accounts) => {
       });
       
       // Make sure the Nodes were disconnected.
-      let node0 = await instance.getNode(nodeKey[0], {from: accounts[0]});
-      let node1 = await instance.getNode(nodeKey[1], {from: accounts[0]});
+      let node0 = await instance.getNode.call(nodeKey[0], {from: accounts[0]});
+      let node1 = await instance.getNode.call(nodeKey[1], {from: accounts[0]});
 
       assert.equal(node0[2][0].toString(), "0");
       assert.equal(node1[2][1].toString(), "0");
       
       // Make sure the EdgeProposal no longer exists.
       assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
-        await instance.getEdgeProposal(edgeProposalKey1, {from: accounts[1]});
+        await instance.getEdgeProposal.call(edgeProposalKey1, {from: accounts[1]});
       });
     });
     
@@ -585,7 +585,7 @@ contract('InterweaveProposals', async (accounts) => {
     it("should error if no EdgeProposal at _edgeProposalKey", async () => {
       instance = await InterweaveProposals.new(); // Clean start.
       assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
-        await instance.getEdgeProposal(edgeProposalKey1, {from: accounts[1]});
+        await instance.getEdgeProposal.call(edgeProposalKey1, {from: accounts[1]});
       });
       
     });
@@ -594,10 +594,10 @@ contract('InterweaveProposals', async (accounts) => {
       instance = await InterweaveProposals.new(); // Clean start.
       
       // An EdgeProposal that straight-up doesn't exist.
-      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[5], nodeKey[7], 4, 1);
+      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[5], nodeKey[7], 4, 1);
       
       assert.requireEquals("You must be either the proposer or the proposedTo to reject this EdgeProposal, or it might not even exist.", async () => {
-        await instance.rejectEdgeProposal(hypotheticalEdgeProposalKey, {from: address[0]});
+        await instance.rejectEdgeProposal(hypotheticalEdgeProposalKey, {from: accounts[0]});
       });
     });
     
@@ -616,7 +616,7 @@ contract('InterweaveProposals', async (accounts) => {
         await instance.createNode(hash[1], {from: accounts[1]});
         
         // Create EdgeProposal from 0's n0.0 to 1's n1.1
-        edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+        edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 0, 1);
         await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
         
         // 1 rejects the EdgeProposal
@@ -633,14 +633,14 @@ contract('InterweaveProposals', async (accounts) => {
       
       it("should result in getEdgeProposal on the deleted EdgeProposal erroring", async () => {
         assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
-          await instance.getEdgeProposal(edgeProposalKey, {from: address[0]});
+          await instance.getEdgeProposal.call(edgeProposalKey, {from: accounts[0]});
         });
       });
       
       it("should allow subsequent createEdgeProposals along the same edge to succeed", async () => {
         
         // Create EdgeProposal from 0's n0.0 to 1's n1.1
-        edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+        edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 0, 1);
         await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
         
         // No errors = successful.
@@ -649,37 +649,128 @@ contract('InterweaveProposals', async (accounts) => {
   });
   
   contract("getEdgeProposal", async () => {
+    let edgeProposalKeyFake = undefined;
+    let edgeProposalKey0 = undefined;
+    let edgeProposalKey1 = undefined;
+    let edgeProposalKey2 = undefined;
+    let edgeProposalKey2post = undefined;
+    let edgeProposalKey3 = undefined;
+    
+    let edgeProposal0 = undefined;
+    let edgeProposal1 = undefined;
+    let edgeProposal2 = undefined;
+    let edgeProposal3 = undefined;
     
     before("create proposals", async () => {
+      instance = await InterweaveProposals.new(); // Clean start.
       
-    })
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
+      
+      // nodeKey1 is owned by 1
+      await instance.createNode(hash[1], {from: accounts[1]});
+      
+      // nodeKey2 is owned by 2
+      await instance.createNode(hash[2], {from: accounts[2]});
+      
+      // Total spurious edgeProposal key
+      edgeProposalKeyFake = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[2], nodeKey[1], 5, 2);
+      
+      // Proposal for two Nodes (0.0, 1.0) not connected to anything
+      edgeProposalKey0 = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 0, 0);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 0, message, {from: accounts[0]});
+      
+      // Proposal for two Nodes (1.1, 2.1) already connected
+      edgeProposalKey1 = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[1], nodeKey[2], 1, 1);
+      await instance.createEdgeProposal(nodeKey[1], nodeKey[2], 1, 1, message, {from: accounts[1]});
+      await instance.acceptEdgeProposal(edgeProposalKey1, {from: accounts[2]});
+      await instance.createEdgeProposal(nodeKey[1], nodeKey[2], 1, 1, message, {from: accounts[1]}); // I changed my mind!
+      
+      // Proposal for two Nodes (0.2, 1.2) where the first (0.2) is pointing to a third (2.2)
+      // First, propose 0.2 to 1.2
+      edgeProposalKey2 = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 2, 2);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 2, message, {from: accounts[0]});
+      // Now connect 0.2 to 2.2
+      edgeProposalKey2post =  await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[2], 2, 2);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[2], 2, 2, message, {from: accounts[0]});
+      await instance.acceptEdgeProposal(edgeProposalKey2post, {from: accounts[2]});
+      
+      // Proposal for two Nodes (0.3, 2.3) where the other (2.3) is pointing to a third (1.3)
+      // First, propose 0.3 to 2.3
+      edgeProposalKey3 = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[2], 3, 3);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[2], 3, 3, message, {from: accounts[0]});
+      // Now connect 2.3 to 1.3
+      let edgeProposalKey3post = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[2], nodeKey[1], 3, 3);
+      await instance.createEdgeProposal(nodeKey[2], nodeKey[1], 3, 3, message, {from: accounts[2]});
+      await instance.acceptEdgeProposal(edgeProposalKey3post, {from: accounts[1]});
+      
+    });
     
     it("should error if no EdgeProposal at _edgeProposalKey", async () => {
+      assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
+        await instance.getEdgeProposal.call(edgeProposalKeyFake, {from: accounts[0]});
+      });
       
+      assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
+        await instance.getEdgeProposal.call(edgeProposalKey2post, {from: accounts[0]}); // this one was used up earlier
+      });
     });
     
     it("should return correct EdgeProposal nodeKey[0], nodeKey[1], slot0, slot1, and message values for real EdgeProposals", async () => {
       
-    });
-    
-    it("should return valid for an EdgeProposal referring to two Nodes connected to each other via the referenced slots", async () => {
+      edgeProposal0 = await instance.getEdgeProposal.call(edgeProposalKey0, {from: accounts[0]});
+      assert.equal(edgeProposal0[0].toString(), nodeKey[0].toString());
+      assert.equal(edgeProposal0[1].toString(), nodeKey[1].toString());
+      assert.equal(edgeProposal0[2].toString(), message);
+      assert.equal(edgeProposal0[3], 0);
+      assert.equal(edgeProposal0[4], 0);
       
+      edgeProposal1 = await instance.getEdgeProposal.call(edgeProposalKey1, {from: accounts[0]});
+      assert.equal(edgeProposal1[0].toString(), nodeKey[1].toString());
+      assert.equal(edgeProposal1[1].toString(), nodeKey[2].toString());
+      assert.equal(edgeProposal1[2].toString(), message);
+      assert.equal(edgeProposal1[3], 1);
+      assert.equal(edgeProposal1[4], 1);
+      
+      edgeProposal2 = await instance.getEdgeProposal.call(edgeProposalKey2, {from: accounts[0]});
+      assert.equal(edgeProposal2[0].toString(), nodeKey[0].toString());
+      assert.equal(edgeProposal2[1].toString(), nodeKey[1].toString());
+      assert.equal(edgeProposal2[2].toString(), message);
+      assert.equal(edgeProposal2[3], 2);
+      assert.equal(edgeProposal2[4], 2);
+      
+      edgeProposal3 = await instance.getEdgeProposal.call(edgeProposalKey3, {from: accounts[0]});
+      assert.equal(edgeProposal3[0].toString(), nodeKey[0].toString());
+      assert.equal(edgeProposal3[1].toString(), nodeKey[2].toString());
+      assert.equal(edgeProposal3[2].toString(), message);
+      assert.equal(edgeProposal3[3], 3);
+      assert.equal(edgeProposal3[4], 3);
     });
     
     it("should return valid for an EdgeProposal referring to two Nodes not connected to anything on the referenced slots", async () => {
-      
+      assert.equal(edgeProposal0[5], true);
     });
     
-    it("should return invalid for an EdgeProposal referring to two Nodes where one or the other are pointed to a third Node", async () => {
-      
+    it("should return valid for an EdgeProposal referring to two Nodes connected to each other via the referenced slots", async () => {
+      assert.equal(edgeProposal1[5], true);
+    });
+    
+    it("should return invalid for an EdgeProposal referring to two Nodes where the first is pointed to a third Node", async () => {
+      assert.equal(edgeProposal2[5], false);
+    });
+    
+    it("should return invalid for an EdgeProposal referring to two Nodes where the second is pointed to a third Node", async () => {
+      assert.equal(edgeProposal3[5], false);
     });
     
     it("should return connect = true for an EdgeProposal referring to two Nodes not connected to anything on the referenced slots", async () => {
-      
+      assert.equal(edgeProposal0[6], true);
     });
     
     it("should return connect = false for any other case, valid or otherwise", async () => {
-      
+      assert.equal(edgeProposal1[6], false);
+      assert.equal(edgeProposal2[6], false);
+      assert.equal(edgeProposal3[6], false);
     });
   });
   /*
