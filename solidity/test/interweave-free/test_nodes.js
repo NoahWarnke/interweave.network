@@ -28,7 +28,7 @@ assert.eventHappenedOnce = function(tx, eventName, expectedArgs) {
   });
 }
 
-contract('InterweaveGraph Nodes', async (accounts) => {
+contract('InterweaveGraph', async (accounts) => {
   
   let instance = undefined;
   
