@@ -188,7 +188,7 @@ contract InterweaveProposals is InterweaveGraph {
       node1.edgeNodeKeys[slot1] = edgeProposal.nodeKey0;
       
       // Log the edge creation.
-      emit EdgeCreated(edgeProposal.nodeKey0, edgeProposal.nodeKey1, slot0, slot1, msg.sender, msg.sender);
+      emit EdgeCreated(edgeProposal.nodeKey0, edgeProposal.nodeKey1, slot0, slot1, node0.ownerAddr, node1.ownerAddr);
     }
     else {
       // Disconnect 'em.
@@ -196,14 +196,14 @@ contract InterweaveProposals is InterweaveGraph {
       node1.edgeNodeKeys[slot1] = 0;
       
       // Log the edge deletion.
-      emit EdgeDeleted(edgeProposal.nodeKey0, edgeProposal.nodeKey1, slot0, slot1, msg.sender, msg.sender);
+      emit EdgeDeleted(edgeProposal.nodeKey0, edgeProposal.nodeKey1, slot0, slot1, node0.ownerAddr, node1.ownerAddr);
     }
     
     // Delete teh EdgeProposal from the lookup.
     delete edgeProposalLookup[_edgeProposalKey];
     
     // Log the EdgeProposal acceptance.
-    emit EdgeProposalAccepted(_edgeProposalKey, node0.ownerAddr, msg.sender);
+    emit EdgeProposalAccepted(_edgeProposalKey, msg.sender, node0.ownerAddr);
     
   }
   

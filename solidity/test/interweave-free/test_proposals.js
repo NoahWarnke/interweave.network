@@ -392,43 +392,189 @@ contract('InterweaveProposals', async (accounts) => {
       // No errors = success.
     });
   });
-  /*
+  
   contract("acceptEdgeProposal", async () => {
     
     it("should error if there's no EdgeProposal at _edgeProposalKey", async () => {
       
+      // An EdgeProposal that straight-up doesn't exist.
+      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[5], nodeKey[7], 4, 1);
+      
+      assert.requireEquals("You must own the EdgeProposal nodeKey1 Node, or the EdgeProposal might not even exist.", async () => {
+        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: address[0]});
+      });
     });
     
-    it("should error if msg.sender doesn't own the Node at the EdgeProposal's nodeKey1", async () => {
+    it("should error if msg.sender doesn't own the Node at the EdgeProposal's nodeKey1 (but does own the Node at nodeKey0)", async () => {
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
       
+      // nodeKey1 is owned by 1
+      await instance.createNode(hash[1], {from: accounts[1]});
+      
+      // Create EdgeProposal from n0.2 to n1.3
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 3, message, {from: accounts[0]});
+      
+      assert.requireEquals("You must own the EdgeProposal nodeKey1 Node, or the EdgeProposal might not even exist.", async () => {
+        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: address[0]});
+      });
+    });
+    
+    it("should error if msg.sender doesn't own the Node at the EdgeProposal's nodeKey1 (or the Node at nodeKey0)", async () => {
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
+      
+      // nodeKey1 is owned by 1
+      await instance.createNode(hash[1], {from: accounts[1]});
+      
+      // Create EdgeProposal from n0.2 to n1.3
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 3, message, {from: accounts[0]});
+      
+      assert.requireEquals("You must own the EdgeProposal nodeKey1 Node, or the EdgeProposal might not even exist.", async () => {
+        await instance.acceptEdgeProposal(hypotheticalEdgeProposalKey, {from: address[2]});
+      });
     });
     
     it("should error if EdgeProposal is invalid due to the Node at the EdgeProposal's nodeKey0 being connected to a third Node", async () => {
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
       
+      // nodeKey1 is owned by 1
+      await instance.createNode(hash[1], {from: accounts[1]});
+      
+      // nodeKey2 is owned by 0
+      await instance.createNode(hash[2], {from: accounts[0]});
+      
+      // Create EdgeProposal from 0's n0.2 to 1's n1.1
+      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 2, 1);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 1, message, {from: accounts[0]});
+      
+      // Connect 0's n0 and n2 from n0.2 to n2.4
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[2], 2, 4, message, {from: accounts[0]});
+      
+      // Now 1 trying to accept the EdgeProposal from n0.2 to n1.1 should fail because n0.2 is now in use elsewhere.
+      assert.requireEquals("The Nodes slots at _nodeKey0 _slot0 and _nodeKey1 _slot1 must be either both connected to each other or both disconnected from any Node.", async () => {
+        await instance.acceptEdgeProposal(edgeProposalKey, {from: address[1]});
+      });
     });
     
     it("should error if EdgeProposal is invalid due to the Node at the EdgeProposal's nodeKey1 being connected to a third Node", async () => {
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
       
+      // nodeKey1 is owned by 1
+      await instance.createNode(hash[1], {from: accounts[1]});
+      
+      // nodeKey2 is owned by 1
+      await instance.createNode(hash[2], {from: accounts[1]});
+      
+      // Create EdgeProposal from 0's n0.2 to 1's n1.1
+      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 2, 1);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 2, 1, message, {from: accounts[0]});
+      
+      // Connect 1's n1.1 to 1's n2.4
+      await instance.createEdgeProposal(nodeKey[1], nodeKey[2], 1, 4, message, {from: accounts[1]});
+      
+      // Now 1 trying to accept the EdgeProposal from n0.2 to n1.1 should fail because n1.1 is now in use elsewhere.
+      assert.requireEquals("The Nodes slots at _nodeKey0 _slot0 and _nodeKey1 _slot1 must be either both connected to each other or both disconnected from any Node.", async () => {
+        await instance.acceptEdgeProposal(edgeProposalKey, {from: address[1]});
+      });
     });
     
-    it("should disconnect the Nodes if they are currently connected and emit an EdgeDeleted event with the correct values", async () => {
+    it("should connect the Nodes if they are currently disconnected and emit EdgeCreated and EdgeProposalAccepted events with the correct values", async () => {
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
       
+      // nodeKey1 is owned by 1
+      await instance.createNode(hash[1], {from: accounts[1]});
+      
+      // Create EdgeProposal from 0's n0.0 to 1's n1.1
+      let edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
+      
+      // 1 accepts the EdgeProposal
+      let tx = await instance.acceptEdgeProposal(edgeProposalKey, {from: accounts[1]});
+      
+      assert.eventHappenedOnce(tx, "EdgeProposalAccepted", {
+        edgeProposalKey: edgeProposalKey,
+        accepterAddr: accounts[1],
+        acceptedAddr: accounts[0]
+      });
+      
+      assert.eventHappenedOnce(tx, "EdgeCreated", {
+        nodeKey0: nodeKey[0],
+        nodeKey1: nodeKey[1],
+        slot0: 0,
+        slot1: 1,
+        ownerAddr0: accounts[0],
+        ownerAddr1: accounts[1]
+      });
+      
+      // Make sure the Nodes were connected.
+      let node0 = await instance.getNode(nodeKey[0], {from: accounts[0]});
+      let node1 = await instance.getNode(nodeKey[1], {from: accounts[0]});
+      
+      assert.equal(node0[2][0].toString(), nodeKey[1].toString());
+      assert.equal(node1[2][1].toString(), nodeKey[0].toString());
+      
+      // Make sure the EdgeProposal no longer exists.
+      assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
+        await instance.getEdgeProposal(edgeProposalKey, {from: accounts[1]});
+      });
     });
     
-    it("should connect the Nodes if they are currently disconnected and emit an EdgeCreated event with the correct values", async () => {
+    it("should disconnect the Nodes if they are currently connected and emit EdgeProposalAccepted and EdgeDeleted events with the correct values", async () => {
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
+
+      // nodeKey1 is owned by 1
+      await instance.createNode(hash[1], {from: accounts[1]});
+
+      // Create EdgeProposal from 0's n0.0 to 1's n1.1
+      let edgeProposalKey0 = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
+
+      // 1 accepts the EdgeProposal, meaning the Nodes are now connected.
+      await instance.acceptEdgeProposal(edgeProposalKey0, {from: accounts[1]});
       
-    });
-    
-    it("should result in getEdgeProposal erroring for _edgeProposalKey due to having been deleted from edgeProposalLookup", async () => {
+      // Create EdgeProposal from 1's n1.1 to 0's n0.0 (note, wouldn't have to be the reverse of the earlier one - either could propose)
+      let edgeProposalKey1 = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[1], nodeKey[0], 1, 0);
+      await instance.createEdgeProposal(nodeKey[1], nodeKey[0], 1, 0, message, {from: accounts[1]});
       
-    });
-    
-    it("should result in an EdgeProposalAccepted event with correct values", async () => {
+      // 0 accepts the EdgeProposal, meaning the Nodes are now disconnected.
+      let tx = await instance.acceptEdgeProposal(edgeProposalKey1, {from: accounts[0]});
       
+      // Make sure the events were correct.
+      assert.eventHappenedOnce(tx, "EdgeProposalAccepted", {
+        edgeProposalKey: edgeProposalKey1,
+        accepterAddr: accounts[0],
+        acceptedAddr: accounts[1]
+      });
+      
+      assert.eventHappenedOnce(tx, "EdgeDeleted", {
+        nodeKey0: nodeKey[1],
+        nodeKey1: nodeKey[0],
+        slot0: 1,
+        slot1: 0,
+        ownerAddr0: accounts[1],
+        ownerAddr1: accounts[0]
+      });
+      
+      // Make sure the Nodes were disconnected.
+      let node0 = await instance.getNode(nodeKey[0], {from: accounts[0]});
+      let node1 = await instance.getNode(nodeKey[1], {from: accounts[0]});
+
+      assert.equal(node0[2][0].toString(), "0");
+      assert.equal(node1[2][1].toString(), "0");
+      
+      // Make sure the EdgeProposal no longer exists.
+      assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
+        await instance.getEdgeProposal(edgeProposalKey1, {from: accounts[1]});
+      });
     });
     
   });
-  
+  /*
   contract("rejectEdgeProposal", async() => {
     
     it("should error if no EdgeProposal at _edgeProposalKey", async () => {
