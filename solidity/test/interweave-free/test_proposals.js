@@ -78,11 +78,11 @@ contract('InterweaveProposals', async (accounts) => {
     }
   });
   
-  beforeEach("set up contract instance", async () => {
-    instance = await InterweaveProposals.new(); // Clean start.
-  });
-  
   contract("createEdgeProposal", async () => {
+    
+    beforeEach("set up contract instance", async () => {
+      instance = await InterweaveProposals.new(); // Clean start.
+    });
     
     it("should error if _slot0 > 5", async () => {
       assert.requireEquals("Both slots must be in the range 0-5.", async () => {
@@ -395,6 +395,11 @@ contract('InterweaveProposals', async (accounts) => {
   
   contract("acceptEdgeProposal", async () => {
     
+    
+    beforeEach("set up contract instance", async () => {
+      instance = await InterweaveProposals.new(); // Clean start.
+    });
+    
     it("should error if there's no EdgeProposal at _edgeProposalKey", async () => {
       
       // An EdgeProposal that straight-up doesn't exist.
@@ -574,38 +579,86 @@ contract('InterweaveProposals', async (accounts) => {
     });
     
   });
-  /*
+  
   contract("rejectEdgeProposal", async() => {
     
     it("should error if no EdgeProposal at _edgeProposalKey", async () => {
+      instance = await InterweaveProposals.new(); // Clean start.
+      assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
+        await instance.getEdgeProposal(edgeProposalKey1, {from: accounts[1]});
+      });
       
     });
     
     it("should error if neither of the Nodes at the EdgeProposal's nodeKeys is owned by msg.sender ", async () => {
+      instance = await InterweaveProposals.new(); // Clean start.
       
+      // An EdgeProposal that straight-up doesn't exist.
+      let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[5], nodeKey[7], 4, 1);
+      
+      assert.requireEquals("You must be either the proposer or the proposedTo to reject this EdgeProposal, or it might not even exist.", async () => {
+        await instance.rejectEdgeProposal(hypotheticalEdgeProposalKey, {from: address[0]});
+      });
     });
     
-    it("should, when successful, emit an EdgeProposalRejected event with the correct values", async () => {
+    contract("when successful", async () => {
       
-    });
-    
-    it("should, when successful, result in getEdgeProposal on the deleted EdgeProposal erroring", async () => {
+      let edgeProposalKey = undefined;
+      let tx = undefined;
       
-    });
-    
-    it("should, when successful, allow subsequent createEdgeProposals along the same edge to succeed", async () => {
+      before("run the function", async () => {
+        instance = await InterweaveProposals.new(); // Clean start.
+        
+        // nodeKey0 is owned by 0
+        await instance.createNode(hash[0], {from: accounts[0]});
+        
+        // nodeKey1 is owned by 1
+        await instance.createNode(hash[1], {from: accounts[1]});
+        
+        // Create EdgeProposal from 0's n0.0 to 1's n1.1
+        edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+        await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
+        
+        // 1 rejects the EdgeProposal
+        tx = await instance.rejectEdgeProposal(edgeProposalKey, {from: accounts[1]});
+      });
       
+      it("should emit an EdgeProposalRejected event with the correct values", async () => {
+        assert.eventHappenedOnce(tx, "EdgeProposalRejected", {
+          edgeProposalKey: edgeProposalKey,
+          rejecterAddr: accounts[1],
+          rejectedAddr: accounts[0]
+        });
+      });
+      
+      it("should result in getEdgeProposal on the deleted EdgeProposal erroring", async () => {
+        assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
+          await instance.getEdgeProposal(edgeProposalKey, {from: address[0]});
+        });
+      });
+      
+      it("should allow subsequent createEdgeProposals along the same edge to succeed", async () => {
+        
+        // Create EdgeProposal from 0's n0.0 to 1's n1.1
+        edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots(nodeKey[0], nodeKey[1], 0, 1);
+        await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 0, 1, message, {from: accounts[0]});
+        
+        // No errors = successful.
+      });
     });
-    
   });
   
-  contract("getEdgeProposal", async() => {
+  contract("getEdgeProposal", async () => {
+    
+    before("create proposals", async () => {
+      
+    })
     
     it("should error if no EdgeProposal at _edgeProposalKey", async () => {
       
     });
     
-    it("should return correct EdgeProposal nodeKey[0], nodeKey[1], slot0, slot1, and message values for several EdgeProposals", async () => {
+    it("should return correct EdgeProposal nodeKey[0], nodeKey[1], slot0, slot1, and message values for real EdgeProposals", async () => {
       
     });
     
@@ -629,7 +682,7 @@ contract('InterweaveProposals', async (accounts) => {
       
     });
   });
-  
+  /*
   contract("deleteNode", async() => {
     
     it("should, when a valid deletion, not give errors even if the Node has EdgeProposals", async () => {

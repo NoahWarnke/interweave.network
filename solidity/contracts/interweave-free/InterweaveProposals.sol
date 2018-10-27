@@ -218,7 +218,7 @@ contract InterweaveProposals is InterweaveGraph {
     ];
     require(
       nodeOwnerAddrs[0] == msg.sender || nodeOwnerAddrs[1] == msg.sender,
-      "You must be either the proposer or the proposee to reject this EdgeProposal, or it might not even exist."
+      "You must be either the proposer or the proposedTo to reject this EdgeProposal, or it might not even exist."
     );
     
     // Delete it from the lookup.
