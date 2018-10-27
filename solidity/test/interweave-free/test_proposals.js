@@ -718,6 +718,7 @@ contract('InterweaveProposals', async (accounts) => {
     
     it("should return correct EdgeProposal nodeKey[0], nodeKey[1], slot0, slot1, and message values for real EdgeProposals", async () => {
       
+      // Proposal is for 0.0 to 1.0
       edgeProposal0 = await instance.getEdgeProposal.call(edgeProposalKey0, {from: accounts[0]});
       assert.equal(edgeProposal0[0].toString(), nodeKey[0].toString());
       assert.equal(edgeProposal0[1].toString(), nodeKey[1].toString());
@@ -725,6 +726,7 @@ contract('InterweaveProposals', async (accounts) => {
       assert.equal(edgeProposal0[3], 0);
       assert.equal(edgeProposal0[4], 0);
       
+      // Proposal is for 1.1 to 2.1
       edgeProposal1 = await instance.getEdgeProposal.call(edgeProposalKey1, {from: accounts[0]});
       assert.equal(edgeProposal1[0].toString(), nodeKey[1].toString());
       assert.equal(edgeProposal1[1].toString(), nodeKey[2].toString());
@@ -732,6 +734,7 @@ contract('InterweaveProposals', async (accounts) => {
       assert.equal(edgeProposal1[3], 1);
       assert.equal(edgeProposal1[4], 1);
       
+      // Proposal is for 0.2 to 2.2
       edgeProposal2 = await instance.getEdgeProposal.call(edgeProposalKey2, {from: accounts[0]});
       assert.equal(edgeProposal2[0].toString(), nodeKey[0].toString());
       assert.equal(edgeProposal2[1].toString(), nodeKey[1].toString());
@@ -739,6 +742,7 @@ contract('InterweaveProposals', async (accounts) => {
       assert.equal(edgeProposal2[3], 2);
       assert.equal(edgeProposal2[4], 2);
       
+      // Proposal is for 0.3 to 2.3
       edgeProposal3 = await instance.getEdgeProposal.call(edgeProposalKey3, {from: accounts[0]});
       assert.equal(edgeProposal3[0].toString(), nodeKey[0].toString());
       assert.equal(edgeProposal3[1].toString(), nodeKey[2].toString());
@@ -773,23 +777,83 @@ contract('InterweaveProposals', async (accounts) => {
       assert.equal(edgeProposal3[6], false);
     });
   });
-  /*
-  contract("deleteNode", async() => {
+  
+  
+  contract("createNode", async() => {
     
-    it("should, when a valid deletion, not give errors even if the Node has EdgeProposals", async () => {
+    it("should create a Node with all of its edgeNodeKeys empty to start with", async () => {
+      instance = await InterweaveProposals.new(); // Clean start.
       
+      // Create Node
+      await instance.createNode(hash[0], {from: accounts[0]});
+      
+      let node = await instance.getNode.call(nodeKey[0], {from: accounts[0]});
+      
+      for (var i = 0; i < 6; i++) {
+        assert.equal(node[2][i].toString(), "0");
+      }
     });
     
-    it("should result in getEdgeProposal returning invalid afterwards", async () => {
-      
-    });
-    
-    it("should give an error if the Node at _nodeKey has >0 edgeNodeKeys set to nonzero values", async () => {
-      
-    });
   });
   
-  // createNode
-  // - getNode afterwards should contain all six edgeNodeKeys as 0.
-  */
+  contract("deleteNode", async() => {
+    
+    it("should give an error if the Node at _nodeKey has >0 edgeNodeKeys set to nonzero values", async () => {
+      instance = await InterweaveProposals.new(); // Clean start.
+      
+      // nodeKey0 is owned by 0
+      await instance.createNode(hash[0], {from: accounts[0]});
+      
+      // nodeKey1 is owned by 0
+      await instance.createNode(hash[1], {from: accounts[0]});
+      
+      // Insta-connect because both Nodes are owned by 0
+      await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 1, 1, message, {from: accounts[0]});
+      
+      assert.requireEquals("You must disconnect this Node from all other Nodes before deleting it.", async () => {
+        await instance.deleteNode(nodeKey[0], {from: accounts[0]});
+      });
+      
+      assert.requireEquals("You must disconnect this Node from all other Nodes before deleting it.", async () => {
+        await instance.deleteNode(nodeKey[1], {from: accounts[0]});
+      });
+    });
+    
+    contract("when successful", async () => {
+      
+      let edgeProposalKey = undefined;
+      
+      before("create node with an EdgeProposal", async () => {
+        instance = await InterweaveProposals.new(); // Clean start.
+        
+        // nodeKey0 is owned by 0
+        await instance.createNode(hash[0], {from: accounts[0]});
+        
+        // nodeKey1 is owned by 1
+        await instance.createNode(hash[1], {from: accounts[1]});
+        
+        // Actually creates an EdgeProposal because node1 is owned by 1, not 0.
+        edgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[0], nodeKey[1], 1, 1, {from: accounts[0]});
+        await instance.createEdgeProposal(nodeKey[0], nodeKey[1], 1, 1, message, {from: accounts[0]});
+        
+      });
+      
+      it("should, when a valid deletion, not give errors even if the Node has EdgeProposals", async () => {
+        
+        await instance.deleteNode(nodeKey[0], {from: accounts[0]});
+        // No errors = success.
+      });
+      
+      it("should result in getEdgeProposal returning invalid afterwards", async () => {
+        
+        let edgeProposal = await instance.getEdgeProposal.call(edgeProposalKey, {from: accounts[0]});
+        
+        assert.equal(edgeProposal[5], false);
+        
+      });
+      
+    });
+    
+  });
+  
 });
