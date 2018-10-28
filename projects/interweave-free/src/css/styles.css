@@ -1,0 +1,56 @@
+body {
+  background-image: linear-gradient(to bottom right, #ddffff, #88aaff);
+  font-family: Verdana,sans-serif;
+}
+
+#status {
+  padding: 15px;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.good {
+  background-color: #00cc00;
+}
+
+.warn {
+  background-color: #cc7500;
+}
+
+.error {
+  background-color: #cc0000;
+}
+
+#viewables {
+  width: 720px;
+  height: 255px;
+  background-color: #6d6d6d47;
+  border-radius: 20px;
+  padding: 10px;
+  position: absolute;
+  left: 0; right: 0;
+  top: 0; bottom: 0;
+  margin: auto;
+  max-width: 100%;
+  max-height: 100%;
+  overflow: auto;
+  text-align: center;
+}
+
+.center {
+  text-align: center;
+}
+
+.x {
+  float: right;
+}
+
+
+#events {
+  text-align: left;
+  padding: 15px;
+  color: white;
+  margin-top: 15px;
+  background-color: #222222;
+  border-radius: 20px;
+}

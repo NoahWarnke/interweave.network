@@ -1,9 +1,9 @@
 pragma solidity ^0.4.24;
 
-/// @title The Interweave Network graph contract.
+/// @title The Interweave Free graph contract.
 /// @author interweaver
 /// @notice This is still a development version, but for now, is intended to represent a full graph.
-contract InterweaveGraph {
+contract InterweaveFreeGraph {
     
   /// @notice Node struct represents a node in the graph (a place), with owner, representation with format, and connections to other Nodes.
   struct Node {

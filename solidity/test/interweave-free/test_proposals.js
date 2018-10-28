@@ -1,5 +1,5 @@
 var assert = require('assert');
-const InterweaveProposals = artifacts.require("InterweaveProposals");
+const InterweaveFreeProposals = artifacts.require("InterweaveFreeProposals");
 
 /** A function that lets you assert that some called contract function (wrapped in another async function) experiences a given require error. */
 assert.requireEquals = async function(expectedError, funcToTest) {
@@ -37,7 +37,7 @@ assert.eventNeverHappened = function(tx, eventName) {
   );
 }
 
-contract('InterweaveProposals', async (accounts) => {
+contract('InterweaveFreeProposals', async (accounts) => {
   
   let instance = undefined;
   
@@ -69,7 +69,7 @@ contract('InterweaveProposals', async (accounts) => {
   let nodeKey = [];
   
   before("Get nodeKeys", async() => {
-    instance = await InterweaveProposals.new();
+    instance = await InterweaveFreeProposals.new();
     
     nodeKeyFake = await instance.nodeKeyFromIpfs.call(emptyHash, {from: accounts[0]});
     
@@ -81,7 +81,7 @@ contract('InterweaveProposals', async (accounts) => {
   contract("createEdgeProposal", async () => {
     
     beforeEach("set up contract instance", async () => {
-      instance = await InterweaveProposals.new(); // Clean start.
+      instance = await InterweaveFreeProposals.new(); // Clean start.
     });
     
     it("should error if _slot0 > 5", async () => {
@@ -397,7 +397,7 @@ contract('InterweaveProposals', async (accounts) => {
     
     
     beforeEach("set up contract instance", async () => {
-      instance = await InterweaveProposals.new(); // Clean start.
+      instance = await InterweaveFreeProposals.new(); // Clean start.
     });
     
     it("should error if there's no EdgeProposal at _edgeProposalKey", async () => {
@@ -583,7 +583,7 @@ contract('InterweaveProposals', async (accounts) => {
   contract("rejectEdgeProposal", async() => {
     
     it("should error if no EdgeProposal at _edgeProposalKey", async () => {
-      instance = await InterweaveProposals.new(); // Clean start.
+      instance = await InterweaveFreeProposals.new(); // Clean start.
       assert.requireEquals("The EdgeProposal at _edgeProposalKey must exist.", async () => {
         await instance.getEdgeProposal.call(edgeProposalKey1, {from: accounts[1]});
       });
@@ -591,7 +591,7 @@ contract('InterweaveProposals', async (accounts) => {
     });
     
     it("should error if neither of the Nodes at the EdgeProposal's nodeKeys is owned by msg.sender ", async () => {
-      instance = await InterweaveProposals.new(); // Clean start.
+      instance = await InterweaveFreeProposals.new(); // Clean start.
       
       // An EdgeProposal that straight-up doesn't exist.
       let hypotheticalEdgeProposalKey = await instance.edgeProposalKeyFromNodesAndSlots.call(nodeKey[5], nodeKey[7], 4, 1);
@@ -607,7 +607,7 @@ contract('InterweaveProposals', async (accounts) => {
       let tx = undefined;
       
       before("run the function", async () => {
-        instance = await InterweaveProposals.new(); // Clean start.
+        instance = await InterweaveFreeProposals.new(); // Clean start.
         
         // nodeKey0 is owned by 0
         await instance.createNode(hash[0], {from: accounts[0]});
@@ -662,7 +662,7 @@ contract('InterweaveProposals', async (accounts) => {
     let edgeProposal3 = undefined;
     
     before("create proposals", async () => {
-      instance = await InterweaveProposals.new(); // Clean start.
+      instance = await InterweaveFreeProposals.new(); // Clean start.
       
       // nodeKey0 is owned by 0
       await instance.createNode(hash[0], {from: accounts[0]});
@@ -782,7 +782,7 @@ contract('InterweaveProposals', async (accounts) => {
   contract("createNode", async() => {
     
     it("should create a Node with all of its edgeNodeKeys empty to start with", async () => {
-      instance = await InterweaveProposals.new(); // Clean start.
+      instance = await InterweaveFreeProposals.new(); // Clean start.
       
       // Create Node
       await instance.createNode(hash[0], {from: accounts[0]});
@@ -799,7 +799,7 @@ contract('InterweaveProposals', async (accounts) => {
   contract("deleteNode", async() => {
     
     it("should give an error if the Node at _nodeKey has >0 edgeNodeKeys set to nonzero values", async () => {
-      instance = await InterweaveProposals.new(); // Clean start.
+      instance = await InterweaveFreeProposals.new(); // Clean start.
       
       // nodeKey0 is owned by 0
       await instance.createNode(hash[0], {from: accounts[0]});
@@ -824,7 +824,7 @@ contract('InterweaveProposals', async (accounts) => {
       let edgeProposalKey = undefined;
       
       before("create node with an EdgeProposal", async () => {
-        instance = await InterweaveProposals.new(); // Clean start.
+        instance = await InterweaveFreeProposals.new(); // Clean start.
         
         // nodeKey0 is owned by 0
         await instance.createNode(hash[0], {from: accounts[0]});

@@ -2,10 +2,22 @@
   <head>
     <meta charset="UTF-8">
     <title>Interweave Network</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
+    <script src="src/js/web3Handler.js"></script>
+    <script src="src/js/interweaveFreeHandler.js"></script>
+    <script src="src/js/interweaveFreeApp.js"></script>
+    <link rel="stylesheet" href="src/css/styles.css">
     <link rel="shortcut icon" type="image/png" href="assets/icon-32x32.png"/>
   </head>
   <body>
-    <h1>Interweave Network</h1>
-    <p>In progress :D</p>
+    <div id="interweave-app">
+      <p id="status" v-bind:class="statusCol">{{status()}}</p>
+      <h2 class="center">Interewave Network Free Edition</h2>
+      <p class="center">Explore the network! Then build it!</p>
+      <div id="viewables" v-if="contractReady">
+        Contract ready!
+      </div>
+    </div>
   </body>
 </html>

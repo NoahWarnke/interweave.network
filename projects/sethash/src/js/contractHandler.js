@@ -15,13 +15,15 @@ class SetHashContractHandler {
     ];
     
     this.addresses = {
-      //3: "0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514"
-      4: "0xB3AC9B8eF39B5feF2E68d16444e72C5878E48514"
+      //3: "0xb3ac9b8ef39b5fef2e68d16444e72c5878e48514",
+      4: "0xB3AC9B8eF39B5feF2E68d16444e72C5878E48514",
+      5777: "0x26e9de161aaebbb6a6b15c69591300edd8a8be25"
     };
     
     this.contractCreationBlocks = {
-      4: 3162223
-    }
+      4: 3162223,
+      5777: 44
+    };
   }
   
   /**

@@ -1,7 +1,10 @@
 pragma solidity ^0.4.24;
-import "./InterweaveGraph.sol";
+import "./InterweaveFreeGraph.sol";
 
-contract InterweaveProposals is InterweaveGraph {
+/// @title The Interweave Free proposals contract.
+/// @author interweaver
+/// @notice This represents proposals for creating edges between Nodes. They can either be accepted (not by the proposer) or rejected (by either proposer or proposee).
+contract InterweaveFreeProposals is InterweaveFreeGraph {
   
   /// @notice EdgeProposal struct represents a proposal to connect or disconnect two Nodes via specific slots. The Node at nodeKey0 belongs to the proposer.
   struct EdgeProposal {

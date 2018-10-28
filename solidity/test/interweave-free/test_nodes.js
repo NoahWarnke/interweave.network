@@ -1,5 +1,5 @@
 var assert = require('assert');
-const InterweaveGraph = artifacts.require("InterweaveGraph");
+const InterweaveFreeGraph = artifacts.require("InterweaveFreeGraph");
 
 /** A function that lets you assert that some called contract function (wrapped in another async function) experiences a given require error. */
 assert.requireEquals = async function(expectedError, funcToTest) {
@@ -28,7 +28,7 @@ assert.eventHappenedOnce = function(tx, eventName, expectedArgs) {
   });
 }
 
-contract('InterweaveGraph', async (accounts) => {
+contract('InterweaveFreeGraph', async (accounts) => {
   
   let instance = undefined;
   
@@ -58,7 +58,7 @@ contract('InterweaveGraph', async (accounts) => {
   ];
   
   beforeEach("set up contract instance", async () => {
-    instance = await InterweaveGraph.deployed();
+    instance = await InterweaveFreeGraph.deployed();
   })
   
   contract("Before creating any Nodes", async() => {
