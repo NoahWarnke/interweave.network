@@ -133,21 +133,50 @@ class InterweaveFreeHandler {
   }
   
   /**
-   * Create a Node!.
+   * Create a Node!
    * @param ipfs The IPFS hash string to create the Node from.
    * @param addr The Ethereum address of the sender (the account creating the Node.)
+   * @returns A Promise wrapping the tx.
    */
   async createNode(ipfs, addr) {
+    if (this.contract === undefined) {
+      throw new Error("Contract not initialized.");
+    }
+    
     return await this.contract.methods.createNode(this.stringToBytes322(ipfs)).send({from: addr});
   }
   
   /**
-   * Call the createNode function on the InterweaveFreeGraph contract.
-   * @param ipfs The IPFS hash string to create the Node from.
+   * Delete a Node.
+   * @param nodeKey The key of the Node to delete.
    * @param addr The Ethereum address of the sender (the account creating the Node.)
+   * @returns A Promise wrapping the tx.
    */
   async deleteNode(nodeKey, addr) {
+    if (this.contract === undefined) {
+      throw new Error("Contract not initialized.");
+    }
+    
     return await this.contract.methods.deleteNode(nodeKey).send({from: addr});
+  }
+  
+  /**
+   * Get the data for a Node.
+   * @param nodeKey The key of the Node to get the data for.
+   * @returns An object containing the Node data: ipfs string, owner address, and an array of the 6 edgeNodeKeys.
+   */
+  async getNode(nodeKey) {
+    if (this.contract === undefined) {
+      throw new Error("Contract not initialized.");
+    }
+    
+    let rawData = await this.contract.methods.getNode(nodeKey).call();
+    
+    return {
+      ownerAddr: rawData[0],
+      ipfs: this.bytes32ArrayToString(rawData[1]),
+      edgeNodeKeys: rawData[2]
+    };
   }
   
   /**
