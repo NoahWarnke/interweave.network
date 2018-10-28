@@ -44,6 +44,9 @@ class InterweaveFreeHandler {
    */
   async initialize(web3handler) {
     
+    // Save the Web3 instance
+    this.Web3Instance = web3handler.Web3Instance;
+    
     // Get network so we can get the contract address.
     this.netId = await web3handler.networkId;
     
@@ -53,7 +56,72 @@ class InterweaveFreeHandler {
     }
     
     // Create the contract object!
-    this.contract = new web3handler.localWeb3.eth.Contract(this.abi, this.address);
+    this.contract = new this.Web3Instance.eth.Contract(this.abi, this.address);
+  }
+  
+  /**
+   * Convert from ascii to an array of Bytes32 (string-encoded).
+   * @param ascii The ASCII string to encode.
+   * @returns an array of strings, each the string representation of a Bytes32.
+   */
+  asciiToBytes32Array(ascii) {
+    let bytesString = this.Web3Instance.utils.fromAscii(ascii);
+    
+    let result = [];
+    
+    while (bytesString.length > 66) {
+      result.push(bytesString.substr(0, 66));
+      bytesString = "0x" + bytesString.substr(66);
+    }
+    result.push(bytesString + "0".repeat(66 - bytesString.length));
+    
+    return result;
+  }
+  
+  /**
+   * Convert from an array of Bytes32 (string-encoded) to an ASCII string.
+   * @param bytes32Array An array of strings, each the string representation of a Bytes32.
+   * @returns The ASCII string.
+   */
+  bytes32ArrayToAscii(bytes32Array) {
+    
+    // Trim trailing 0s
+    let i = 64;
+    let lastBytes32 = bytes32Array[bytes32Array.length - 1];
+    while (i > -2 && lastBytes32.substr(i, 2) == "00") {
+      i-= 2;
+    }
+    bytes32Array[bytes32Array.length - 1] = lastBytes32.substr(0, i + 2);
+    
+    let result = "";
+    
+    // Convert each Bytes32 to a string and tag it to the end of the result string.
+    for (i = 0; i < bytes32Array.length; i++) {
+      result += this.Web3Instance.utils.toAscii(bytes32Array[i]);
+    }
+    
+    return result;
+  }
+  /**
+   * Call the nodeKeyFromIpfs function on the InterweaveFreeGraph contract (or rather, the InterweaveFreeProposals contract that inherits from it).
+   * @param ipfs The IPFS hash (in String form) to get the nodeKey from.
+   * @returns A Promise wrapping the nodeKey (a string representation of a uint256).
+   */
+  nodeKeyFromIpfs(ipfs) {
+    if (this.contract === undefined) {
+      throw new Error("Contract not initialized.");
+    }
+    
+    // Convert to array and make sure it's 2 long.
+    let bytes32Array = this.asciiToBytes32Array(ipfs);
+    if (bytes32Array.length === 1) {
+      bytes32Array.push("0x0000000000000000000000000000000000000000000000000000000000000000");
+    }
+    else if (bytes32Array.length > 2) {
+      throw new Error("Ipfs string was too long - it needs to fit into only 2 bytes32s.");
+    }
+    
+    return this.contract.methods.nodeKeyFromIpfs(bytes32Array).call();
   }
   
   /**

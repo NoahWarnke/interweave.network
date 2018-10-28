@@ -8,7 +8,7 @@ class Web3Handler {
   constructor() {
     
     this.provider = undefined;
-    this.localWeb3 = undefined;
+    this.Web3Instance = undefined;
     this.browser = undefined;
     this.loggedIn = undefined;
     this.accountAccessEnabled = false;
@@ -86,7 +86,7 @@ class Web3Handler {
     if (this.provider !== window.ethereum) {
       console.log("Setting provider to window.ethereum [modern].");
       this.updateState("provider", window.ethereum);
-      this.updateState("localWeb3", new Web3(this.provider));
+      this.updateState("Web3Instance", new Web3(this.provider));
       this.updateState("browser", "modern");
       this.updateState("accountAccessEnabled", false);
       this.updateState("accountAccessRejected", false);
@@ -138,7 +138,7 @@ class Web3Handler {
     if (this.provider !== window.web3.currentProvider) {
       console.log("Setting provider to web3.currentProvider [legacy].");
       this.updateState("provider", window.web3.currentProvider);
-      this.updateState("localWeb3", new Web3(this.provider));
+      this.updateState("Web3Instance", new Web3(this.provider));
       this.updateState("browser", "legacy");
       this.updateState("accountAccessEnabled", true); // Legacy gives account access always.
       this.updateState("accountAccessRejected", false);
@@ -172,7 +172,7 @@ class Web3Handler {
     if (this.provider !== this.infuraProvider) {
       console.log("Setting provider to infura.io [non-dapp browser].");
       this.updateState("provider", this.infuraProvider);
-      this.updateState("localWeb3", new Web3(this.provider));
+      this.updateState("Web3Instance", new Web3(this.provider));
       this.updateState("browser", "nondapp");
       this.updateState("accountAccessEnabled", false);
       this.updateState("accountAccessRejected", false);
