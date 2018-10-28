@@ -76,6 +76,7 @@ contract InterweaveProposals is InterweaveGraph {
   /// @param _slot1 The uint8 slot of the second Node to connect/disconnect through.
   /// @param _message The bytes30 arbitrary message from the proposer to the proposee: a human-readable form of the EdgeProposal, aka the "epmess".
   function createEdgeProposal(uint256 _nodeKey0, uint256 _nodeKey1, uint8 _slot0, uint8 _slot1, bytes30 _message) external {
+    assert(msg.data.length >= 100); // 32 bytes per uint256 * 2 uint256 + 1 byte per uint8 * 2 uint8 + 30 bytes per bytes30 (duh) + 4 = 100
     
     // Make sure slots are in a valid range.
     require(
@@ -100,7 +101,7 @@ contract InterweaveProposals is InterweaveGraph {
     );
     
     // Make sure Nodes and their slots are in valid connect or disconnect configuration.
-    require (
+    require(
       (node0.edgeNodeKeys[_slot0] == _nodeKey1 && node1.edgeNodeKeys[_slot1] == _nodeKey0)
       || (node0.edgeNodeKeys[_slot0] == 0 && node1.edgeNodeKeys[_slot1] == 0),
       "The Nodes slots at _nodeKey0 _slot0 and _nodeKey1 _slot1 must be either both connected to each other or both disconnected from any Node."
@@ -157,7 +158,10 @@ contract InterweaveProposals is InterweaveGraph {
     emit EdgeProposalCreated(newEdgeProposalKey, msg.sender, node1.ownerAddr);
   }
   
+  /// @notice Accept an EdgeProposal, if you are the proposedTo party.
+  /// @param _edgeProposalKey The uint256 key of the EdgeProposal that you would like to accept. The Node at its nodeKey1 must belong to msg.sender.
   function acceptEdgeProposal(uint256 _edgeProposalKey) external {
+    assert(msg.data.length >= 36); // 32 bytes per uint256 + 4 = 36
     
     EdgeProposal memory edgeProposal = edgeProposalLookup[_edgeProposalKey];
     uint8 slot0 = uint8(edgeProposal.messageAndSlots[30]);
@@ -173,13 +177,16 @@ contract InterweaveProposals is InterweaveGraph {
     // Note: node0 could well belong to msg.sender depending on Node transactions after the EdgeProposal was created. That's fine.
     Node storage node0 = nodeLookup[edgeProposal.nodeKey0];
     
-    require (
+    require(
       (node0.edgeNodeKeys[slot0] == edgeProposal.nodeKey1 && node1.edgeNodeKeys[slot1] == edgeProposal.nodeKey0)
       || (node0.edgeNodeKeys[slot0] == 0 && node1.edgeNodeKeys[slot1] == 0),
       "The Nodes slots at _nodeKey0 _slot0 and _nodeKey1 _slot1 must be either both connected to each other or both disconnected from any Node."
     );
     
     // Okay, everything checks out - let's do this!
+    
+    // Delete the EdgeProposal from the lookup.
+    delete edgeProposalLookup[_edgeProposalKey];
     
     // Since we already confirmed they are in valid configuration, a simple check if one slot is 0 or not is enough to let us know what to do.
     if (node0.edgeNodeKeys[slot0] == 0) {
@@ -199,15 +206,14 @@ contract InterweaveProposals is InterweaveGraph {
       emit EdgeDeleted(edgeProposal.nodeKey0, edgeProposal.nodeKey1, slot0, slot1, node0.ownerAddr, node1.ownerAddr);
     }
     
-    // Delete teh EdgeProposal from the lookup.
-    delete edgeProposalLookup[_edgeProposalKey];
-    
     // Log the EdgeProposal acceptance.
     emit EdgeProposalAccepted(_edgeProposalKey, msg.sender, node0.ownerAddr);
-    
   }
   
+  /// @notice Reject an EdgeProposal, if you are either of the parties involved.
+  /// @param _edgeProposalKey The uint256 key of the EdgeProposal that you would like to reject. The Node at at least one of its nodeKey0 or nodeKey1 must belong to msg.sender.
   function rejectEdgeProposal(uint256 _edgeProposalKey) external {
+    assert(msg.data.length >= 36); // 32 bytes per uint256 + 4 = 36
     
     EdgeProposal memory edgeProposal = edgeProposalLookup[_edgeProposalKey];
     

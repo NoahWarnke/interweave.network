@@ -44,6 +44,7 @@ contract InterweaveGraph {
   /// @param _ipfs The IPFS hash string of the Node's content file, in two bytes32. Must be unique across all Nodes in the graph.
   /// @dev If the caller wants to know the key of their new Node, they can always call nodeKeyFromIpfs on their IPFS hash, before or after Node creation (assuming it doesn't fail.)
   function createNode(bytes32[2] _ipfs) external {
+    assert(msg.data.length >= 68); // 32 bytes per bytes32 (duh) * 2 bytes32 + 4 = 68
     
     // Make sure there's something other than 0 in the first chunk of the ipfs hash.
     require(
@@ -54,7 +55,7 @@ contract InterweaveGraph {
     // Generate Node's key.
     uint256 newNodeKey = nodeKeyFromIpfs(_ipfs);
     
-    // There must not already be a Node at that key.
+    // There must not already be a Node at that key`.
     // The maze of twisty little passages must *not* be all alike.
     require(
       uint(nodeLookup[newNodeKey].ipfs[0]) == 0,
@@ -66,7 +67,7 @@ contract InterweaveGraph {
     newNode.ownerAddr = msg.sender;
     newNode.ipfs = _ipfs;
     
-    nodeLookup[newNodeKey] = newNode; // Set 3 slots of storage: 60k gas right there!
+    nodeLookup[newNodeKey] = newNode; // Set 3 slots of storage: 60k gas
     
     // Log the Node creation.
     emit NodeCreated(newNodeKey, msg.sender);
@@ -75,6 +76,7 @@ contract InterweaveGraph {
   /// @notice Delete a Node from the graph.
   /// @param _nodeKey The key of the Node to delete from the graph.
   function deleteNode(uint256 _nodeKey) external {
+    assert(msg.data.length >= 36); // 32 bytes per uint256 + 4 = 36
     
     // Get the Node being deleted.
     Node memory node = nodeLookup[_nodeKey];
