@@ -209,7 +209,7 @@ class Web3Handler {
       case 3: return "Ropsten";
       case 4: return "Rinkeby";
       case 42: return "Kovan";
-      default: return "Unknown";
+      default: return "Unknown Network (ID " + networkId + ")";
     }
   }
 }
