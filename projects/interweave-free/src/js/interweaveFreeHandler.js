@@ -60,12 +60,12 @@ class InterweaveFreeHandler {
   }
   
   /**
-   * Convert from ascii to an array of Bytes32 (string-encoded).
-   * @param ascii The ASCII string to encode.
+   * Convert from string to an array of Bytes32 (string-encoded).
+   * @param ascii The string to encode.
    * @returns an array of strings, each the string representation of a Bytes32.
    */
-  asciiToBytes32Array(ascii) {
-    let bytesString = this.Web3Instance.utils.fromAscii(ascii);
+  stringToBytes32Array(str) {
+    let bytesString = this.Web3Instance.utils.fromAscii(str);
     
     let result = [];
     
@@ -79,11 +79,11 @@ class InterweaveFreeHandler {
   }
   
   /**
-   * Convert from an array of Bytes32 (string-encoded) to an ASCII string.
+   * Convert from an array of Bytes32 (string-encoded) to a string.
    * @param bytes32Array An array of strings, each the string representation of a Bytes32.
-   * @returns The ASCII string.
+   * @returns The string.
    */
-  bytes32ArrayToAscii(bytes32Array) {
+  bytes32ArrayToString(bytes32Array) {
     
     // Trim trailing 0s
     let i = 64;
@@ -102,26 +102,52 @@ class InterweaveFreeHandler {
     
     return result;
   }
+  
   /**
-   * Call the nodeKeyFromIpfs function on the InterweaveFreeGraph contract (or rather, the InterweaveFreeProposals contract that inherits from it).
-   * @param ipfs The IPFS hash (in String form) to get the nodeKey from.
+   * Convert a string to a Bytes32[2] array, and throw an error if the string is too long for this.
+   * @param str The string to convert.
+   * @returns An array of 2 strings, each the string representation of a Bytes32.
+   */
+  stringToBytes322(str) {
+    let result = this.stringToBytes32Array(str);
+    if (result.length === 1) {
+      result.push("0x0000000000000000000000000000000000000000000000000000000000000000");
+    }
+    else if (result.length > 2) {
+      throw new Error("Ipfs string was too long - it needs to fit into only 2 bytes32s.");
+    }
+    return result;
+  }
+  
+  /**
+   * Get the key for a Node with the given IPFS hash.
+   * @param ipfs The IPFS hash string to get the nodeKey from.
    * @returns A Promise wrapping the nodeKey (a string representation of a uint256).
    */
-  nodeKeyFromIpfs(ipfs) {
+  async nodeKeyFromIpfs(ipfs) {
     if (this.contract === undefined) {
       throw new Error("Contract not initialized.");
     }
     
-    // Convert to array and make sure it's 2 long.
-    let bytes32Array = this.asciiToBytes32Array(ipfs);
-    if (bytes32Array.length === 1) {
-      bytes32Array.push("0x0000000000000000000000000000000000000000000000000000000000000000");
-    }
-    else if (bytes32Array.length > 2) {
-      throw new Error("Ipfs string was too long - it needs to fit into only 2 bytes32s.");
-    }
-    
-    return this.contract.methods.nodeKeyFromIpfs(bytes32Array).call();
+    return await this.contract.methods.nodeKeyFromIpfs(this.stringToBytes322(ipfs)).call();
+  }
+  
+  /**
+   * Create a Node!.
+   * @param ipfs The IPFS hash string to create the Node from.
+   * @param addr The Ethereum address of the sender (the account creating the Node.)
+   */
+  async createNode(ipfs, addr) {
+    return await this.contract.methods.createNode(this.stringToBytes322(ipfs)).send({from: addr});
+  }
+  
+  /**
+   * Call the createNode function on the InterweaveFreeGraph contract.
+   * @param ipfs The IPFS hash string to create the Node from.
+   * @param addr The Ethereum address of the sender (the account creating the Node.)
+   */
+  async deleteNode(nodeKey, addr) {
+    return await this.contract.methods.deleteNode(nodeKey).send({from: addr});
   }
   
   /**
