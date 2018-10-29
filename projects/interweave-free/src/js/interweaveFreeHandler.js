@@ -30,7 +30,7 @@ class InterweaveFreeHandler {
     ];
     
     this.addresses = {
-      5777: "0xd9b3369c84f4bd30e00ad296d359b791a24a60e2"
+      5777: "0xd9b3369c84f4bd30e00ad296d359b791a24a60e2" // Interweaver's local.
     };
     
     this.contractCreationBlocks = {
@@ -119,15 +119,20 @@ class InterweaveFreeHandler {
     return result;
   }
   
+  /** Simply throw an error if the contract is not initialized. */
+  contractMustBeInitialized() {
+    if (this.contract === undefined) {
+      throw new Error("Contract not initialized.");
+    }
+  }
+  
   /**
    * Get the key for a Node with the given IPFS hash.
    * @param ipfs The IPFS hash string to get the nodeKey from.
    * @returns A Promise wrapping the nodeKey (a string representation of a uint256).
    */
   async nodeKeyFromIpfs(ipfs) {
-    if (this.contract === undefined) {
-      throw new Error("Contract not initialized.");
-    }
+    this.contractMustBeInitialized();
     
     return await this.contract.methods.nodeKeyFromIpfs(this.stringToBytes322(ipfs)).call();
   }
@@ -139,9 +144,7 @@ class InterweaveFreeHandler {
    * @returns A Promise wrapping the tx.
    */
   async createNode(ipfs, addr) {
-    if (this.contract === undefined) {
-      throw new Error("Contract not initialized.");
-    }
+    this.contractMustBeInitialized();
     
     return await this.contract.methods.createNode(this.stringToBytes322(ipfs)).send({from: addr});
   }
@@ -153,9 +156,7 @@ class InterweaveFreeHandler {
    * @returns A Promise wrapping the tx.
    */
   async deleteNode(nodeKey, addr) {
-    if (this.contract === undefined) {
-      throw new Error("Contract not initialized.");
-    }
+    this.contractMustBeInitialized();
     
     return await this.contract.methods.deleteNode(nodeKey).send({from: addr});
   }
@@ -166,9 +167,7 @@ class InterweaveFreeHandler {
    * @returns An object containing the Node data: ipfs string, owner address, and an array of the 6 edgeNodeKeys.
    */
   async getNode(nodeKey) {
-    if (this.contract === undefined) {
-      throw new Error("Contract not initialized.");
-    }
+    this.contractMustBeInitialized();
     
     let rawData = await this.contract.methods.getNode(nodeKey).call();
     
@@ -180,39 +179,62 @@ class InterweaveFreeHandler {
   }
   
   /**
-   * Call the getHash function on the test contract.
-   * @param ethAddress the Eth address to look up in the contract.
-   * @returns a Promise wrapping the IPFS hash the Eth address maps to in the contract (may be "" if not set.)
+   * Get a list of the keys of all the Nodes currently belonging to the given Ethereum address.
+   * @param addr The Ethereum address to check for Nodes.
+   * @returns An array of Node keys.
    */
-   /*
-  getHash(ethAddress) {
+  async getNodesBelongingTo(addr) {
+    this.contractMustBeInitialized();
     
-    if (this.contract === undefined) {
-      throw new Error("Contract not initialized, can't call getHash function.");
-    }
+    // Get all created and deleted events in parallel using await, Promise.all, and array destructuring :) Yay ES6.
+    let [rawCreatedEvents, rawDeletedEvents] = await Promise.all([
+      this.contract.getPastEvents(
+        "NodeCreated",
+        {
+          filter: {
+            ownerAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      ),
+      this.contract.getPastEvents(
+        "NodeDeleted",
+        {
+          filter: {
+            ownerAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      )
+    ]);
     
-    return this.contract.methods.getHash(ethAddress).call();
+    // TODO For full Interweave Network, also check transfer events!
+    
+    // Add all the created Nodes, and subtract all the deleted Nodes.
+    let resultNodes = {};
+    rawCreatedEvents.forEach((event) => {
+      if (resultNodes[event.returnValues.nodeKey] == undefined) {
+        resultNodes[event.returnValues.nodeKey] = 1;
+      }
+      else {
+        resultNodes[event.returnValues.nodeKey]++;
+      }
+    });
+    
+    rawDeletedEvents.forEach((event) => {
+      if (resultNodes[event.returnValues.nodeKey] == 1) {
+        delete resultNodes[event.returnValues.nodeKey];
+      }
+      else {
+        resultNodes[event.returnValues.nodeKey]--;
+      }
+    });
+    
+    return Object.keys(resultNodes);
   }
-  */
-  /**
-   * Send a new transaction calling the setHash function on the test contract.
-   * @param ethAddress the Eth address to set the value for in the contract.
-   * @param newValue the new hash (must be 46 characters) to set the value to.
-   * @returns a PromiEvent for the assorted tx events. If successful, 'receipt' will be the transaction receipt.
-   */
-   /*
-  setHash(ethAddress, newValue) {
-    if (newValue.length !== 46) {
-      throw new Error("String not 46 characters.");
-    }
-    
-    if (this.contract === undefined) {
-      throw new Error("Contract not initialized, can't call setHash function.");
-    }
-    
-    return this.contract.methods.setHash(newValue).send({from: ethAddress, value: 0});
-  }
-  */
+  
   
   /**
    * Get all the HashChanged events for the given Eth address.
