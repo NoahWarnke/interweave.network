@@ -119,6 +119,45 @@ class InterweaveFreeHandler {
     return result;
   }
   
+  /**
+   * Convert a string to a bytes30 (in string form).
+   * @param str The string to convert.
+   * @returns A bytes30 (in string form).
+   */
+  stringToBytes30(str) {
+    let bytesString = this.Web3Instance.utils.fromAscii(str);
+    
+    if (bytesString.length > 62) { // 2 characters per byte * 30 bytes + 2 extra characters for the "0x".
+      throw new Error("String was too long - it needs to fit into 30 bytes.");
+    }
+    
+    // Pad if it isn't 62 long.
+    bytesString = bytesString + "0".repeat(62 - bytesString.length);
+    
+    return bytesString;
+  }
+  
+  /**
+   * Convert a bytes30 (in string form) to a string.
+   * @param bytes30 The bytes30, duh.
+   * @returns The string.
+   */
+  bytes30ToString(bytes30) {
+    if (bytes30.length !== 62) {
+      throw new Error("bytes30 was not 30 bytes!");
+    }
+    
+    // Trim trailing 0s.
+    let i = 60;
+    while (i > -2 && bytes30.substr(i, 2) == "00") {
+      i-= 2;
+    }
+    bytes30 = bytes30.substr(0, i + 2);
+    
+    // Finally, convert back to an ascii string.
+    return this.Web3Instance.utils.toAscii(bytes30);
+  }
+  
   /** Simply throw an error if the contract is not initialized. */
   contractMustBeInitialized() {
     if (this.contract === undefined) {
@@ -253,5 +292,27 @@ class InterweaveFreeHandler {
     this.contractMustBeInitialized();
     
     return await this.contract.methods.edgeProposalKeyFromNodesAndSlots(nodeKey0, nodeKey1, slot0, slot1).call();
+  }
+  
+  /**
+   * Create an EdgeProposal!
+   * @param nodeKey0 The key for your Node0.
+   * @param nodeKey1 The key for the Node1 (maybe yours, maybe not.)
+   * @param slot0 The slot for Node0.
+   * @param slot1 The slot for Node1.
+   * @param message The epmess :) (A <= 30-character message from you, the proposer, to the proposee.)
+   * @param addr The Ethereum address of the sender (the account wanting to link the Nodes.)
+   * @returns A Promise wrapping the tx.
+   */
+  async createEdgeProposal(nodeKey0, nodeKey1, slot0, slot1, message, addr) {
+    this.contractMustBeInitialized();
+    
+    return await this.contract.methods.createEdgeProposal(
+      nodeKey0,
+      nodeKey1,
+      slot0,
+      slot1,
+      this.stringToBytes30(message)
+    ).send({from: addr});
   }
 }
