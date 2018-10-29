@@ -213,6 +213,8 @@ class InterweaveFreeHandler {
     // TODO For full Interweave Network, also check transfer events!
     
     // Add all the created Nodes, and subtract all the deleted Nodes.
+    // The logic here is that you may have created and deleted the same Node multiple times,
+    // so only if creations + deletions = 0 for a node does it not exist. It should only ever be 0 or 1 in sum, though, lol!
     let resultNodes = {};
     rawCreatedEvents.forEach((event) => {
       if (resultNodes[event.returnValues.nodeKey] == undefined) {
@@ -227,6 +229,10 @@ class InterweaveFreeHandler {
       if (resultNodes[event.returnValues.nodeKey] == 1) {
         delete resultNodes[event.returnValues.nodeKey];
       }
+      else if (resultNodes[event.returnValues.nodeKey] == 0) {
+        // Check for that invariant, just in case!
+        throw new Error("Um, number of Node creations - deletions went negative for nodeKey " + event.returnValues.nodeKey + "???");
+      }
       else {
         resultNodes[event.returnValues.nodeKey]--;
       }
@@ -235,33 +241,17 @@ class InterweaveFreeHandler {
     return Object.keys(resultNodes);
   }
   
-  
   /**
-   * Get all the HashChanged events for the given Eth address.
-   * @param ethAddress the Eth address to check the logs for.
-   * @returns A list of the past hash changs, each containing the new hash and the block number.
+   * Get the key for an EdgeProposal with the given nodeKeys and slots.
+   * @param nodeKey0 The key of Node 0.
+   * @param nodeKey1 The key of Node 1.
+   * @param slot0 The slot (0-5) of Node 0.
+   * @param slot1 The slot (0-5) of Node 1.
+   * @returns A Promise wrapping the edgeProposalKey (a string representation of a uint256).
    */
-   /*
-  async getHashChangedEvents(ethAddress) {
+  async edgeProposalKeyFromNodesAndSlots(nodeKey0, nodeKey1, slot0, slot1) {
+    this.contractMustBeInitialized();
     
-    let rawEvents = await this.contract.getPastEvents(
-      "HashChanged",
-      {
-        filter: {
-          owner: ethAddress
-        },
-        fromBlock: this.contractCreationBlocks[this.netId],
-        toBlock: "latest"
-      }
-    )
-    
-    return rawEvents.map((rawEvent) => {
-      return {
-        block: rawEvent.blockNumber,
-        hash: rawEvent.returnValues.newHash,
-        tx: rawEvent.transactionHash
-      };
-    });
+    return await this.contract.methods.edgeProposalKeyFromNodesAndSlots(nodeKey0, nodeKey1, slot0, slot1).call();
   }
-  */
 }
