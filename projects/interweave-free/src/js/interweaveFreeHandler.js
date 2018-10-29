@@ -296,11 +296,11 @@ class InterweaveFreeHandler {
   
   /**
    * Create an EdgeProposal!
-   * @param nodeKey0 The key for your Node0.
-   * @param nodeKey1 The key for the Node1 (maybe yours, maybe not.)
+   * @param nodeKey0 The key for addr's Node0.
+   * @param nodeKey1 The key for the Node1 (maybe addr's, maybe not.)
    * @param slot0 The slot for Node0.
    * @param slot1 The slot for Node1.
-   * @param message The epmess :) (A <= 30-character message from you, the proposer, to the proposee.)
+   * @param message The epmess :) (A <= 30-character message from addr, the proposer, to the proposee.)
    * @param addr The Ethereum address of the sender (the account wanting to link the Nodes.)
    * @returns A Promise wrapping the tx.
    */
@@ -314,5 +314,29 @@ class InterweaveFreeHandler {
       slot1,
       this.stringToBytes30(message)
     ).send({from: addr});
+  }
+  
+  /**
+   * Accept an EdgeProposal.
+   * @param edgeProposalKey The key of the EdgeProposal to accept (addr must be the proposee.)
+   * @param addr The Ethereum address of the sender.
+   * @returns A Promise wrapping the tx.
+   */
+  async acceptEdgeProposal(edgeProposalKey, addr) {
+    this.contractMustBeInitialized();
+    
+    return await this.contract.methods.acceptEdgeProposal(edgeProposalKey).send({from: addr});
+  }
+  
+  /**
+   * Reject an EdgeProposal.
+   * @param edgeProposalKey The key of the EdgeProposal reject accept (addr must be the proposer or the proposee.)
+   * @param addr The Ethereum address of the sender.
+   * @returns A Promise wrapping the tx.
+   */
+  async rejectEdgeProposal(edgeProposalKey, addr) {
+    this.contractMustBeInitialized();
+    
+    return await this.contract.methods.rejectEdgeProposal(edgeProposalKey).send({from: addr});
   }
 }
