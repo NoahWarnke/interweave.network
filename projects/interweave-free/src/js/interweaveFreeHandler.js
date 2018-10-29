@@ -201,7 +201,7 @@ class InterweaveFreeHandler {
   }
   
   /**
-   * Get the data for a Node.
+   * Get the data for a Node by key.
    * @param nodeKey The key of the Node to get the data for.
    * @returns An object containing the Node data: ipfs string, owner address, and an array of the 6 edgeNodeKeys.
    */
@@ -338,5 +338,26 @@ class InterweaveFreeHandler {
     this.contractMustBeInitialized();
     
     return await this.contract.methods.rejectEdgeProposal(edgeProposalKey).send({from: addr});
+  }
+  
+  /**
+   * Get the data for an EdgeProposal by key.
+   * @param edgeProposalKey The key for the EdgeProposal.
+   * @returns The EdgeProposal data. Includes nodeKey0, nodeKey1, message, slot0, slot1, and valid, and connect bools.
+   */
+  async getEdgeProposal(edgeProposalKey) {
+    this.contractMustBeInitialized();
+    
+    let rawEdgeProposal = await this.contract.methods.getEdgeProposal(edgeProposalKey).call();
+    
+    return {
+      nodeKey0: rawEdgeProposal[0],
+      nodeKey1: rawEdgeProposal[1],
+      message: this.bytes30ToString(rawEdgeProposal[2]),
+      slot0: rawEdgeProposal[3],
+      slot1: rawEdgeProposal[4],
+      valid: rawEdgeProposal[5],
+      connect: rawEdgeProposal[6]
+    };
   }
 }
