@@ -360,4 +360,119 @@ class InterweaveFreeHandler {
       connect: rawEdgeProposal[6]
     };
   }
+  
+  /**
+   * Get a list of the keys of all the EdgeProposals currently co-belonging to the given Ethereum address.
+   * @param addr The Ethereum address to check for Nodes.
+   * @returns An array of EdgeProposal keys.
+   */
+  async getEdgeProposalsBelongingTo(addr) {
+    this.contractMustBeInitialized();
+    
+    // Get all creation, acceptance, and rejection events in parallel using await, Promise.all, and array destructuring :) Yay ES6.
+    let [rawProposerEvents, rawProposedToEvents, rawAccepterEvents, rawAcceptedEvents, rawRejecterEvents, rawRejectedEvents] = await Promise.all([
+      this.contract.getPastEvents(
+        "EdgeProposalCreated",
+        {
+          filter: {
+            proposerAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      ),
+      this.contract.getPastEvents(
+        "EdgeProposalCreated",
+        {
+          filter: {
+            proposedToAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      ),
+      this.contract.getPastEvents(
+        "EdgeProposalAccepted",
+        {
+          filter: {
+            accepterAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      ),
+      this.contract.getPastEvents(
+        "EdgeProposalAccepted",
+        {
+          filter: {
+            acceptedAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      ),
+      this.contract.getPastEvents(
+        "EdgeProposalRejected",
+        {
+          filter: {
+            rejecterAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      ),
+      this.contract.getPastEvents(
+        "EdgeProposalRejected",
+        {
+          filter: {
+            rejectedAddr: addr
+          },
+          fromBlock: this.contractCreationBlocks[this.netId],
+          toBlock: "latest"
+        }
+      )
+    ]);
+    
+    // Add all the created EdgeProposals, and subtract all the accepted/rejected EdgeProposals.
+    // Similar logic to the code for Nodes, but more complex because of the two-sided ownership of EdgeProposals (so make some helper functions.)
+    let resultEdgeProposals = {};
+    
+    function addEp(arr, resultEdgeProposals) {
+      arr.forEach((event) => {
+        if (resultEdgeProposals[event.returnValues.edgeProposalKey] == undefined) {
+          resultEdgeProposals[event.returnValues.edgeProposalKey] = 1;
+        }
+        else {
+          resultEdgeProposals[event.returnValues.edgeProposalKey]++;
+        }
+      });
+    }
+    
+    function subEp(arr, resultEdgeProposals) {
+      arr.forEach((event) => {
+        if (resultEdgeProposals[event.returnValues.edgeProposalKey] == 1) {
+          delete resultEdgeProposals[event.returnValues.edgeProposalKey];
+        }
+        else if (resultEdgeProposals[event.returnValues.edgeProposalKey] == 0) {
+          // Check for that invariant, just in case!
+          throw new Error("Um, number of EdgeProposal creations - deletions went negative for edgeProposalKey " + event.returnValues.edgeProposalKey + "???");
+        }
+        else {
+          resultEdgeProposals[event.returnValues.edgeProposalKey]--;
+        }
+      });
+    }
+    
+    // First, add up all the proposer/proposedTo events involving this address. They will be in either one or the other for any given EdgeProposal creation, not both.
+    addEp(rawProposerEvents, resultEdgeProposals);
+    addEp(rawProposedToEvents, resultEdgeProposals);
+    
+    // Second, subtract all the accepter/accepted events involving this address. Again, any given EdgeProposal acceptance will have them in one or the other, not both.
+    subEp(rawAccepterEvents, resultEdgeProposals);
+    subEp(rawAcceptedEvents, resultEdgeProposals);
+    subEp(rawRejecterEvents, resultEdgeProposals);
+    subEp(rawRejectedEvents, resultEdgeProposals);
+    
+    return Object.keys(resultEdgeProposals);
+  }
 }
