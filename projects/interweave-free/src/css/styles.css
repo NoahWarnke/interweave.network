@@ -1,6 +1,51 @@
 body {
-  background-image: linear-gradient(to bottom right, #ddffff, #88aaff);
+  height: 100%;
+  margin: 0px;
   font-family: Verdana,sans-serif;
+}
+
+#interweave-app {
+  display: flex;
+  flex-flow: column;
+  height: 100%;
+}
+
+#navbar {
+  padding: 8px;
+  margin: 0px;
+  flex: 0 1 auto;
+  background-image: linear-gradient(to bottom, #dddddd, #bbbbbb);
+  border-bottom: 2px solid grey;
+  text-align: center;
+}
+
+#render-pane {
+  flex: 1 1 auto;
+  background-color: black;
+  color: white;
+}
+
+.navbar-button {
+  width: 80px;
+  height: 50px;
+  border-radius: 15px;
+  background-color: white;
+}
+
+.edge-button {
+  display: inline-block;
+}
+
+#home {
+  float: left;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#status-build {
+  float: right;
 }
 
 #status {
@@ -21,36 +66,34 @@ body {
   background-color: #cc0000;
 }
 
-#viewables {
-  width: 720px;
-  height: 255px;
-  background-color: #6d6d6d47;
-  border-radius: 20px;
-  padding: 10px;
-  position: absolute;
-  left: 0; right: 0;
-  top: 0; bottom: 0;
-  margin: auto;
-  max-width: 100%;
-  max-height: 100%;
-  overflow: auto;
-  text-align: center;
-}
-
 .center {
   text-align: center;
 }
 
 .x {
+  color: #aaa;
   float: right;
+  font-size: 28px;
+  font-weight: bold;
 }
 
+#info-modal {
+  position: fixed; /* Stay in place */
+  z-index: 3; /* Sit on top */
+  left: 0;
+  top: 0;
+  width: 100%; /* Full width */
+  height: 100%; /* Full height */
+  overflow: auto; /* Enable scroll if needed */
+  background-color: rgb(0,0,0); /* Fallback color */
+  background-color: rgba(0,0,0,0.6); /* Black w/ opacity */
+}
 
-#events {
-  text-align: left;
-  padding: 15px;
-  color: white;
-  margin-top: 15px;
-  background-color: #222222;
-  border-radius: 20px;
+.modal-content {
+  background-color: #fefefe;
+  margin: 15% auto; /* 15% from the top and centered */
+  padding: 20px;
+  border-radius: 10px;
+  border: 1px solid #888;
+  width: 80%; /* Could be more or less, depending on screen size */
 }

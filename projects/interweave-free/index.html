@@ -12,12 +12,20 @@
   </head>
   <body>
     <div id="interweave-app">
-      <p id="status" v-bind:class="statusCol">{{status()}}</p>
-      <h2 class="center">Interweave Network Free Edition</h2>
-      <p class="center">Welcome! Please explore the network, and when you're ready, add to it.</p>
-      <div id="viewables" v-if="contractReady">
+      <div id="navbar">
+        <a role="button" id="home" class="navbar-button" href="../../">Home</a>
+        <button class="edge-button navbar-button" v-if="currentNodeEdges !== undefined" v-for="edge in currentNodeEdges">{{edge.num}}</button>
+        <button id="status-build" class="navbar-button" v-on:click="statusBuildClick" v-bind:class="statusCol">Build</a>
+      </div>
+      <!--<p id="status" v-bind:class="statusCol">{{status()}}</p>-->
+      <div id="render-pane">
         Contract ready! dApp still coming :)
       </div>
+      <div id="info-modal" v-if="modalOpen">
+        <div class="modal-content">
+          <button class="x" v-on:click="modalOpen=false">&times;</button>
+          {{modalContent}}
+        </div>
     </div>
   </body>
 </html>

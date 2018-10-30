@@ -13,37 +13,61 @@ async function startup() {
       accountAvailable: false,
       contractReady: false,
       account: undefined,
-      statusCol: "good"
+      statusCol: "good",
+      status: 0,
+      statusDescription: "",
+      modalOpen: false,
+      modalContent: "",
+      currentNodeEdges: [{num: 0}, {num: 1}, {num: 2}, {num: 3}, {num: 4}, {num: 5}]
     },
     methods: {
-      status: function() {
+      updateState: function() {
+        this.updateStatus();
+      },
+      updateStatus: function() {
         if (this.browserType === "nondapp") {
           this.statusCol = "warn";
-          return "No MetaMask detected; dapp connected to Rinkeby via Infura in view-only mode.";
+          this.status = 1;
+          this.statusDescription = "No MetaMask detected; dapp connected to " + this.network + " via Infura in view-only mode.";
         }
-        if (!this.accountAvailable) {
+        else if (!this.accountAvailable) {
           if (!this.accountAccessEnabled && !this.accountAccessRejected) {
             this.statusCol = "warn";
-            return "Please accept the connect request for this dapp in MetaMask.";
+            this.status = 2;
+            this.statusDescription = "Please accept the connect request for this dapp in MetaMask.";
           }
-          if (this.accountAccessRejected) {
+          else if (this.accountAccessRejected) {
             this.statusCol = "error";
-            return "You rejected the connect request for this dapp in MetaMask. Please accept it.";
+            this.status = 3;
+            this.statusDescription = "You rejected the connect request for this dapp in MetaMask. Please accept it.";
           }
-          if (!this.contractReady) {
+          else if (!this.contractReady) {
             this.statusCol = "error";
-            return "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode, but no contract available on this network. Try Rinkeby.";
+            this.status = 4;
+            this.statusDescription = "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode, but no contract available on this network.";
           }
-          this.statusCol = "warn";
-          return "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode.";
-          
+          else {
+            this.statusCol = "warn";
+            this.status = 5;
+            this.statusDescription = "Not signed in to MetaMask; dapp connected to " + app.network + " in view-only mode.";
+          }
         }
         else if (!this.contractReady) {
           this.statusCol = "error";
-          return "Connected to " + app.network + " but no contract available on this network. Try Rinkeby.";
+          this.status = 6;
+          this.statusDescription = "Connected to " + app.network + " but no contract available on this network.";
         }
-        this.statusCol = "good";
-        return "Connected to " + this.network + "!";
+        else {
+          this.statusCol = "good";
+          this.status = 7;
+          this.statusDescription = "Connected to " + this.network + "!";
+        }
+      },
+      statusBuildClick: function() {
+        if (this.status !== 7) {
+          this.modalOpen = true;
+          this.modalContent = this.statusDescription;
+        }
       }
     }
   });
@@ -55,17 +79,17 @@ async function startup() {
   window.myWeb3Handler = new Web3Handler();
   
   // Register to listen for web3 state changes.
-  myWeb3Handler.registerListener("browserTypeChanged", (oldVal, newVal) => {app.browserType = newVal; app.$forceUpdate();});
-  myWeb3Handler.registerListener("networkChanged", (oldVal, newVal) => {app.network = newVal; app.$forceUpdate();});
-  myWeb3Handler.registerListener("loggedInStatusChanged", (oldVal, newVal) => {app.loggedIn = newVal; app.$forceUpdate();});
-  myWeb3Handler.registerListener("accessEnabledChanged", (oldVal, newVal) => {app.accountAccessEnabled = newVal; app.$forceUpdate();});
-  myWeb3Handler.registerListener("accessRejectedChanged", (oldVal, newVal) => {app.accountAccessRejected = newVal; app.$forceUpdate();});
-  myWeb3Handler.registerListener("accessEnabledChanged", (oldVal, newVal) => {app.accountAccessEnabled = newVal; app.$forceUpdate();});
+  myWeb3Handler.registerListener("browserTypeChanged", (oldVal, newVal) => {app.browserType = newVal; app.updateState();});
+  myWeb3Handler.registerListener("networkChanged", (oldVal, newVal) => {app.network = newVal; app.updateState();});
+  myWeb3Handler.registerListener("loggedInStatusChanged", (oldVal, newVal) => {app.loggedIn = newVal; app.updateState();});
+  myWeb3Handler.registerListener("accessEnabledChanged", (oldVal, newVal) => {app.accountAccessEnabled = newVal; app.updateState();});
+  myWeb3Handler.registerListener("accessRejectedChanged", (oldVal, newVal) => {app.accountAccessRejected = newVal; app.updateState();});
+  myWeb3Handler.registerListener("accessEnabledChanged", (oldVal, newVal) => {app.accountAccessEnabled = newVal; app.updateState();});
   
   myWeb3Handler.registerListener("accountChanged", (oldVal, newVal) => {
     app.account = newVal;
     app.accountAvailable = (newVal === undefined ? false : true);
-    app.$forceUpdate();
+    app.updateState();
   });
   
   // Initialize the Web3Handler, checking for web3 state and then watching for changes.
