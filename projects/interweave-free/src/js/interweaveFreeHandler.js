@@ -30,10 +30,12 @@ class InterweaveFreeHandler {
     ];
     
     this.addresses = {
+      4: "0xaC22849453aA5eDc684c4Fc35EfE6250d1DC2F11",   // Rinkeby
       5777: "0xd9b3369c84f4bd30e00ad296d359b791a24a60e2" // Interweaver's local.
     };
     
     this.contractCreationBlocks = {
+      4: 3249396,
       5777: 0
     };
   }

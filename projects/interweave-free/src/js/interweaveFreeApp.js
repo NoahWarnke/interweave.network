@@ -18,7 +18,12 @@ async function startup() {
       statusDescription: "",
       modalOpen: false,
       modalContent: "",
-      currentNodeEdges: [{num: 0}, {num: 1}, {num: 2}, {num: 3}, {num: 4}, {num: 5}]
+      currentNode: {
+        key: "6425788636526616286741869931615606349765969179734729515957019907323234972557",
+        ipfs: undefined,
+        ownerAddr: undefined,
+        edgeNodeKeys: []
+      }
     },
     methods: {
       updateState: function() {
@@ -102,6 +107,11 @@ async function startup() {
   try {
     await app.InterweaveFreeHandler.initialize(myWeb3Handler);
     app.contractReady = true;
+    app.updateState();
+    let nodeData = await app.InterweaveFreeHandler.getNode(app.currentNode.key);
+    app.currentNode.owneraddr = nodeData.ownerAddr;
+    app.currentNode.ipfs = nodeData.ipfs;
+    app.currentNode.edgeNodeKeys = nodeData.edgeNodeKeys;
   }
   catch (error) {
     console.log(error);
