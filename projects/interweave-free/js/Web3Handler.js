@@ -1,6 +1,6 @@
 
 /** A class that handles interaction with web3. */
-class Web3Handler {
+export default class Web3Handler {
   
   /**
    * Constructor for an instance of Web3Handler. Doesn't do too much.
@@ -84,7 +84,6 @@ class Web3Handler {
     
     // If the current provider isn't window.ethereum, upgrade to that.
     if (this.provider !== window.ethereum) {
-      console.log("Setting provider to window.ethereum [modern].");
       this.updateState("provider", window.ethereum);
       this.updateState("Web3Instance", new Web3(this.provider));
       this.updateState("browser", "modern");
@@ -111,13 +110,11 @@ class Web3Handler {
         if (accounts.length === 0) {
           this.updateState("loggedIn", false);
           this.updateState("account", undefined);
-          console.log("Modern/access granted/not logged in");
         }
         else {
           // Default account available (user signed in)
           this.updateState("loggedIn", true);
           this.updateState("account", accounts[0]);
-          console.log("Modern/access granted/logged in");
         }
       }
       // User rejected account access.
@@ -126,7 +123,6 @@ class Web3Handler {
         this.updateState("accountAccessEnabled", false);
         this.updateState("accountAccessRejected", true);
         this.updateState("account", undefined);
-        console.log("Modern/access rejected: " + error);
       }
     }
   }
@@ -136,7 +132,6 @@ class Web3Handler {
     
     // If the current provider isn't web3.currentProvider, set to that.
     if (this.provider !== window.web3.currentProvider) {
-      console.log("Setting provider to web3.currentProvider [legacy].");
       this.updateState("provider", window.web3.currentProvider);
       this.updateState("Web3Instance", new Web3(this.provider));
       this.updateState("browser", "legacy");
@@ -153,12 +148,10 @@ class Web3Handler {
     if (window.web3.eth.defaultAccount !== undefined) {
       this.updateState("loggedIn", true);
       this.updateState("account", window.web3.eth.defaultAccount);
-      console.log("Legacy/logged in");
     }
     else {
       this.updateState("loggedIn", false);
       this.updateState("account", undefined);
-      console.log("Legacy/not logged in");
     }
   }
   
@@ -170,7 +163,6 @@ class Web3Handler {
     }
     
     if (this.provider !== this.infuraProvider) {
-      console.log("Setting provider to infura.io [non-dapp browser].");
       this.updateState("provider", this.infuraProvider);
       this.updateState("Web3Instance", new Web3(this.provider));
       this.updateState("browser", "nondapp");
@@ -180,7 +172,6 @@ class Web3Handler {
       this.updateState("networkId", 4);
       this.updateState("network", this.mapNetworkString(3));
     }
-    console.log("Non/not logged in");
   }
   
   /** @returns the current result of getNetwork, wrapped in a Promise. */

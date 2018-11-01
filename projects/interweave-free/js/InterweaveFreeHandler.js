@@ -1,7 +1,7 @@
 /**
  * Represents an interface with the InterweaveFreeProposals smart contract.
  */
-class InterweaveFreeHandler {
+export default class InterweaveFreeHandler {
   
   /**
    * Constructor for a new SetHashContractHandler object, which wraps a contract.
