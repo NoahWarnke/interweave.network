@@ -6,7 +6,6 @@ export default {
   name: 'App',
   template: `
     <div id="app">
-      <link rel="stylesheet" href="css/App.css">
       <the-navbar></the-navbar>
       <the-render-area></the-render-area>
       <modal-info v-if="false"></modal-info>

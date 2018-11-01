@@ -6,3 +6,10 @@
   border-bottom: 2px solid grey;
   text-align: center;
 }
+
+#navbar .navbar-button {
+  width: 80px;
+  height: 50px;
+  border-radius: 15px;
+  background-color: white;
+}

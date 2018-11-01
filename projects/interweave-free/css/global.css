@@ -1,0 +1,21 @@
+body {
+  height: 100%;
+  margin: 0px;
+  font-family: Verdana,sans-serif;
+}
+
+.good {
+  background-color: #00cc00;
+}
+
+.warn {
+  background-color: #cc7500;
+}
+
+.error {
+  background-color: #cc0000;
+}
+
+.center {
+  text-align: center;
+}
