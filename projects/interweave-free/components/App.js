@@ -36,8 +36,6 @@ export default {
       this.web3Handler = new Web3Handler();
       await this.web3Handler.initialize();
       
-      
-      
       this.contract = new InterweaveFreeHandler();
       
       try {
@@ -47,7 +45,7 @@ export default {
         let nodeData = await this.contract.getNode(this.currentNode.key);
         this.currentNode.owneraddr = nodeData.ownerAddr;
         this.currentNode.ipfs = nodeData.ipfs;
-        this.currentNode.edgeNodeKeys = nodeData.edgeNodeKeys;
+        this.currentNode.edgeNodeKeys = ["0", "1", "2"];//nodeData.edgeNodeKeys;
         
       }
       catch (error) {
