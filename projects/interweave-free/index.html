@@ -4,31 +4,16 @@
     <title>Interweave Network</title>
     <script src="https://cdn.jsdelivr.net/npm/vue@2.5.17/dist/vue.min.js"></script>
     <script src="https://cdn.jsdelivr.net/gh/ethereum/web3.js@1.0.0-beta.36/dist/web3.min.js"></script>
-    <script src="src/js/web3Handler.js"></script>
-    <script src="src/js/interweaveFreeHandler.js"></script>
-    <script src="src/js/interweaveFreeApp.js"></script>
-    <link rel="stylesheet" href="src/css/styles.css">
+    <script src="main.js" type="module"></script>
+    <!--
+    <script src="js/web3Handler.js"></script>
+    <script src="js/interweaveFreeHandler.js"></script>
+    <script src="js/interweaveFreeApp.js"></script>
+    -->
+    <link rel="stylesheet" href="css/styles.css">
     <link rel="shortcut icon" type="image/png" href="assets/icon-32x32.png"/>
   </head>
   <body>
-    <div id="interweave-app">
-      <div id="navbar">
-        <a role="button" id="home" class="navbar-button" href="../../">Home</a>
-        <button class="edge-button navbar-button" v-if="currentNode.edges !== undefined" v-for="edge in currentNode.edges">{{edge}}</button>
-        <button id="status-build" class="navbar-button" v-on:click="statusBuildClick" v-bind:class="statusCol">Build</a>
-      </div>
-      <!--<p id="status" v-bind:class="statusCol">{{status()}}</p>-->
-      <div id="render">
-        <div id="norender-info" v-if="currentNode.ipfs !== undefined">
-          <p>Current node key: {{currentNode.key}}</p>
-          <p>Current node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + currentNode.ipfs">{{currentNode.ipfs}}</a></p>
-        </div>
-      </div>
-      <div id="info-modal" v-if="modalOpen">
-        <div class="modal-content">
-          <button class="x" v-on:click="modalOpen=false">&times;</button>
-          {{modalContent}}
-        </div>
-    </div>
+    <div id="app"></div>
   </body>
 </html>

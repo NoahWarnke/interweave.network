@@ -1,0 +1,8 @@
+#navbar {
+  padding: 8px;
+  margin: 0px;
+  flex: 0 1 auto;
+  background-image: linear-gradient(to bottom, #dddddd, #bbbbbb);
+  border-bottom: 2px solid grey;
+  text-align: center;
+}
