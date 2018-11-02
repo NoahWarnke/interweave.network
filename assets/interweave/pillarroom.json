@@ -1,0 +1,65 @@
+{
+  "format": 1,
+  "name": "Hexagonal Pillar Chamber",
+  "shortDesc": "You are standing in a cavern whose walls, floor, and ceiling are made of hexagonal rock pillars, with everything lit by electric lamps. There are three exits here: one at floor level, and two reachable by climbing some of the stairlike pillars.",
+  "edges": {
+    "0": {
+      "names": ["floor tunnel"],
+      "verbs": ["go", "go into", "enter"],
+      "leaveDesc": "",
+      "enterDesc": ""
+    },
+    "1": {
+      "names": [],
+      "verbs": ["go", "go into", "enter"],
+      "leaveDesc": "",
+      "enterDesc": ""
+    },
+    "2": {
+      "names": [],
+      "verbs": ["go", "go into", "enter"],
+      "leaveDesc": "",
+      "enterDesc": ""
+    }
+  },
+  "examine": [
+    {
+      "names": ["", "room", "chamber", "cavern"],
+      "desc": "You stand in the middle of a roughly circular underground chamber composed entirely of hexagonal pillars of some type of igneous rock, about half your height in diameter. The walls are made up of parts of these pillars all joined together and stretching floor to ceiling, a height of around eight times yours, while the floor and ceiling are composed of uneven, jagged stumps of these pillars, seeming to have been broken off. A series of these broken floor pillars get higher and higher along the wall to your left, forming a very crude stairway. There are two openings amid the pillars there, one midway up the stairway at about your ten o'clock position, and another right up next to the roof, at about three o-clock. Behind where you stand on one of the pillar stumps, another tunnel opens into the wall at floor level. Everything is lit by several electric lights suspended from a black wire running out of the upper tunnel entrance, down the wall next to the staircase, and reaching into the tunnel behind you."
+    },
+    {
+      "names": ["walls", "floor", "ceiling", "pillars", "rocks", "igneous rocks", "rock pillars", "hexagonal pillars", "hexagonal rocks"],
+      "desc": "The hexagonal pillars composing every natural surface in the room are made of a fine-grained basaltic rock, likely of igneous origin. The flat vertical faces of the tightly-connected pillars give the walls a striped, faceted appearance, stark in the electric lighting. The rough ends of the pillars forming the floor and ceiling are uneven, with some sticking up past the others, making walking in the chamber difficult. Small gravel of the same rock is present, but the absence of larger chunks indicates that this room was not carved by a natural process."
+    },
+    {
+      "names": ["stairway", "stairs"],
+      "desc": "The uneven floor pillars begin to rise just to your left, creating steps about as wide as you are tall, and of a height rather difficult to climb, wrapping around the curve of the chamber wall and reaching to the ceiling by the time they have covered about two-thirds of the wall."
+    },
+    {
+      "names": ["tunnel"],
+      "desc": "Do you mean the floor tunnel, the wall tunnel, or the ceiling tunnel?"
+    },
+    {
+      "names": ["floor tunnel"],
+      "desc": "Several of the pillars are missing in the wall behind you, creating an opening just about as tall as you are, through which the electric lights can be seen receding into the well-lit distance."
+    },
+    {
+      "names": ["wall tunnel", "ten o-clock tunnel"],
+      "desc": "A few pillars are missing about midway up the stairway, creating a dark opening with the wire of electric lights passing along the wall above it."
+    },
+    {
+      "names": ["ceiling tunnel", "three o-clock tunnel"],
+      "desc": "Through a hole in the wall and ceiling of this chamber, perhaps twice your width and height, the stairway essentially seems to continue up into the ceiling high above you to your right. The cable of electric lights emerges from there."
+    },
+    {
+      "names": ["lights", "electric lights", "wire", "cable", "electrical wire"],
+      "desc": "A black-rubber-insulated cable about as thick as your pinky finger has been tacked along the wall with metal spikes. Brass-caged LED lightbulbs emerge perhaps every four paces, and emit an almost harsh bright white light."
+    }
+  ],
+  "listen": [
+    {
+        "names": ["", "lights", "electric lights"],
+        "desc": "There is a very faint electrical hum from the lights, but otherwise this chamber is dead silent apart from your breathing."
+    }
+  ]
+}

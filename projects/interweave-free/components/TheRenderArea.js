@@ -9,5 +9,10 @@ export default {
   `,
   props: {
     node: Object
+  },
+  computed: {
+    ipfsFile: function() {
+      return 1;
+    }
   }
 }

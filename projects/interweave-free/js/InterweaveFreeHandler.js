@@ -213,6 +213,7 @@ export default class InterweaveFreeHandler {
     let rawData = await this.contract.methods.getNode(nodeKey).call();
     
     return {
+      key: nodeKey,
       ownerAddr: rawData[0],
       ipfs: this.bytes32ArrayToString(rawData[1]),
       edgeNodeKeys: rawData[2]

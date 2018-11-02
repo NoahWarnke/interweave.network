@@ -23,35 +23,33 @@ export default {
     return {
       web3Handler: undefined,
       contract: undefined,
-      currentNode: {
-        key: "6425788636526616286741869931615606349765969179734729515957019907323234972557",
-        ipfs: undefined,
-        ownerAddr: undefined,
-        edgeNodeKeys: []
-      }
+      currentNode: {}
     }
   },
   methods: {
     init: async function() {
-      this.web3Handler = new Web3Handler();
-      await this.web3Handler.initialize();
-      
-      this.contract = new InterweaveFreeHandler();
-      
       try {
+        this.web3Handler = new Web3Handler();
+        await this.web3Handler.initialize();
+        
+        this.contract = new InterweaveFreeHandler();
         await this.contract.initialize(this.web3Handler);
         
-        // Grab node data.
-        let nodeData = await this.contract.getNode(this.currentNode.key);
-        this.currentNode.owneraddr = nodeData.ownerAddr;
-        this.currentNode.ipfs = nodeData.ipfs;
-        this.currentNode.edgeNodeKeys = ["0", "1", "2"];//nodeData.edgeNodeKeys;
-        
+        // Grab starting node data.
+        this.updateNode("6425788636526616286741869931615606349765969179734729515957019907323234972557");
       }
       catch (error) {
         console.log(error);
       }
-      
+    },
+    updateNode: async function(nodeKey) {
+      try {
+        this.currentNode = await this.contract.getNode(nodeKey);
+        this.currentNode.edgeNodeKeys = [1, 2, 3, 0, 0, 0]; // TODO remove
+      }
+      catch (error) {
+        console.log(error);
+      }
     }
   },
   created: function() {
