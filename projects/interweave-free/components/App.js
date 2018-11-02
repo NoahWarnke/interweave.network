@@ -47,14 +47,34 @@ export default {
       }
     },
     updateNode: async function(nodeKey) {
-      console.log("updateNode: " + nodeKey);
+      console.log("updateNode");
       try {
-        this.currentNode = await this.contract.getNode(nodeKey);
-        //this.currentNode.edgeNodeKeys = ["1", "2", "3", "0", "0", "0"]; // TODO remove
+        let node = await this.contract.getNode(nodeKey);
+        node.data = await this.fetchIpfs(node.ipfs);
+        this.currentNode = node;
       }
       catch (error) {
         console.log(error);
       }
+    },
+    getAjax: function(url) {
+      return new Promise((resolve, reject) => {
+        let xhr = new XMLHttpRequest();
+        xhr.addEventListener("load", function() {
+          resolve(xhr.responseText);
+        });
+        xhr.addEventListener("error", function(err) {
+          reject(err);
+        });
+        xhr.addEventListener("abort", function(err) {
+          reject(err);
+        });
+        xhr.open("GET", url);
+        xhr.send();
+      });
+    },
+    fetchIpfs: async function(ipfs) {
+      return this.getAjax("https://ipfs.io/ipfs/" + ipfs);
     }
   },
   created: function() {
