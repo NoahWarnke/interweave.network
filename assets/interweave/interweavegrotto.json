@@ -2,6 +2,14 @@
   "format": 1,
   "name": "Interweave Grotto",
   "shortDesc": "You are standing on some rocks by the edge of a pool of water, which is surrounded by high rocky walls. Sunlight slants through an opening high above. Behind you there is a tunnel.",
+  "edges": {
+    "0": {
+      "names": ["tunnel", "entrance", "hole", "crevice", "crack"],
+      "verbs": ["go", "go into", "enter"],
+      "leaveDesc": "You approach the crack in the rock wall, the loose rock grinding beneath your feet. The tunnel entrance is more than large enough to fit into, but at an awkward angle, so you have to lean against the rough wall to your left as you enter. The tunnel continues jaggedly at about a ten-degree slope upwards, and soon opens up enough to stand without leaning. The light fades rapidly as you cautiously proceed, and the only sounds are your footsteps on the rock fragments of the tunnel floor and your breathing, both sounding muffled and hollow.",
+      "enterDesc": "The dark tunnel slopes slightly downward before you. A faint but growing light ahead reflects dimly off the walls, which begin to slant to the right, so much so that you have to lean against the gritty rock of the right side. Soon you emerge from the jagged tunnel mouth into brightness, and can stand straight again."
+    }
+  },
   "examine": [
     {
       "names": ["", "grotto", "pool", "water"],

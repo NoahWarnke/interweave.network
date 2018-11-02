@@ -35,6 +35,10 @@ export default {
         this.contract = new InterweaveFreeHandler();
         await this.contract.initialize(this.web3Handler);
         
+        // for console access.
+        window.web3Handler = this.web3Handler;
+        window.interweave = this.contract;
+        
         // Grab starting node data.
         this.updateNode("6425788636526616286741869931615606349765969179734729515957019907323234972557");
       }
@@ -45,7 +49,7 @@ export default {
     updateNode: async function(nodeKey) {
       try {
         this.currentNode = await this.contract.getNode(nodeKey);
-        this.currentNode.edgeNodeKeys = [1, 2, 3, 0, 0, 0]; // TODO remove
+        //this.currentNode.edgeNodeKeys = ["1", "2", "3", "0", "0", "0"]; // TODO remove
       }
       catch (error) {
         console.log(error);
