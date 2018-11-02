@@ -9,7 +9,7 @@ export default {
   name: 'App',
   template: `
     <div id="app">
-      <the-navbar v-bind:node="currentNode"></the-navbar>
+      <the-navbar v-bind:node="currentNode" v-on:edgeClick="updateNode($event)"></the-navbar>
       <the-render-area v-bind:node="currentNode"></the-render-area>
       <modal-info v-if="false"></modal-info>
     </div>
@@ -47,6 +47,7 @@ export default {
       }
     },
     updateNode: async function(nodeKey) {
+      console.log("updateNode: " + nodeKey);
       try {
         this.currentNode = await this.contract.getNode(nodeKey);
         //this.currentNode.edgeNodeKeys = ["1", "2", "3", "0", "0", "0"]; // TODO remove
