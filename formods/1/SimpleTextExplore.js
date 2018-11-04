@@ -2,8 +2,11 @@
 export default {
   template: `
     <div id="simple-text-explore">
-      <h1>> {{parsedNodeData.name}} <</h1>
-      <textarea class="console" readonly="readonly">{{consoleText}}</textarea>
+      <h1>{{parsedNodeData.name}}</h1>
+      <textarea class="console noselect" readonly="readonly">{{consoleText}}</textarea>
+      <div id="console-input-area">
+        <span id="prompt">&gt;</span><input id="console-input"></input>
+      </div>
     </div>
   `,
   props: {

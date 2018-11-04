@@ -16,4 +16,45 @@
   padding: 5px;
   border: 0px;
   border-top: 1px solid white;
+  resize: none;
+}
+
+#simple-text-explore #console-input-area {
+  display: flex;
+  border-top: 1px solid white;
+}
+
+#simple-text-explore #prompt {
+  font-size: 1.7em;
+  padding: 5px;
+  animation: blinkingText 1.5s infinite;
+}
+@keyframes blinkingText {
+  0% {
+    color: #ffffff;
+  }
+  33% {
+    color: #ffffff;
+  }
+  99% {
+    color: transparent;
+  }
+}
+
+#simple-text-explore #console-input {
+  font-size: 1.7em;
+  width: 100%;
+  background-color: black;
+  color: white;
+  padding: 5px;
+  border: 0px;
+}
+
+.noSelect {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -khtml-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
 }
