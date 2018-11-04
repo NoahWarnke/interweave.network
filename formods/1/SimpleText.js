@@ -1,5 +1,5 @@
-import Explore from './Explore.js';
-import Build from './Build.js';
+import Explore from './SimpleTextExplore.js';
+import Build from './SimpleTextBuild.js';
 
 
 export default class SimpleText {

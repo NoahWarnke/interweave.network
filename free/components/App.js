@@ -7,12 +7,16 @@ import TheNavbar from './TheNavbar.js';
 import TheRenderArea from './TheRenderArea.js';
 import ModalInfo from './ModalInfo.js';
 
+// Format modules
+import SimpleText from '../../formods/1/SimpleText.js';
+
+
 export default {
   name: 'App',
   template: `
     <div id="app">
       <the-navbar v-bind:node="currentNode" v-on:edgeClick="updateNode($event)"></the-navbar>
-      <the-render-area v-bind:node="currentNode"></the-render-area>
+      <the-render-area v-bind:node="currentNode" v-bind:formats="formats"></the-render-area>
       <modal-info v-if="false"></modal-info>
     </div>
   `,
@@ -31,7 +35,10 @@ export default {
         ipfs: undefined,
         nodeEdgeKeys: [],
         data: undefined
-      }
+      },
+      formats: {
+        1: new SimpleText()
+      },
     }
   },
   methods: {

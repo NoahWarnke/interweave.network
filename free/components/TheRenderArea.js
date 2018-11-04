@@ -1,9 +1,4 @@
 
-// Format modules
-import SimpleText from '../../formods/1/SimpleText.js';
-
-
-
 export default {
   template: `
     <div id="render">
@@ -21,13 +16,11 @@ export default {
     </div>
   `,
   props: {
+    formats: Object,
     node: Object
   },
   data: function() {
     return {
-      formats: {
-        1: new SimpleText()
-      },
       parsedNodeData: undefined,
       nodeDataParsedSuccessfully: false,
       nodeDataLoadedSuccessfully: false,
