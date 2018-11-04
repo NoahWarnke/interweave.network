@@ -13,6 +13,7 @@
   background-color: black;
   color: white;
   font-size: 1.7em;
+  line-height: 2em;
   padding: 5px;
   border: 0px;
   border-top: 1px solid white;
@@ -48,13 +49,4 @@
   color: white;
   padding: 5px;
   border: 0px;
-}
-
-.noSelect {
-  -webkit-touch-callout: none;
-  -webkit-user-select: none;
-  -khtml-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-  user-select: none;
 }
