@@ -2,17 +2,16 @@
 export default {
   template: `
     <div id="render">
-      <div v-if="nodeDataError !== undefined">{{nodeDataError}}</div>
-      <div ref="formodexploreslot"></div>
-      <!--
-      <div id="norender-info" v-if="node.ipfs !== undefined">
-        <div class="node-key-and-ipfs">
-          <p>Current node key: {{node.key}}</p>
-          <p>Current node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + node.ipfs">{{node.ipfs}}</a></p>
+      <div id="norender-info" v-if="nodeRenderer === undefined">
+        <div class="error" v-if="nodeDataError !== undefined">
+          {{nodeDataError}}
         </div>
-        <textarea class="node-file-text" readonly="readonly">{{node.data || "Loading..."}}</textarea>
+        <div class="node-key-and-ipfs" v-if="node !== undefined">
+          <p>Node key: {{node.key}}</p>
+          <p>Node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + node.ipfs">{{node.ipfs}}</a></p>
+        </div>
       </div>
-      -->
+      <div id="render-component-socket" ref="formodexploreslot"></div>
     </div>
   `,
   props: {
@@ -24,6 +23,7 @@ export default {
       parsedNodeData: undefined,
       nodeDataParsedSuccessfully: false,
       nodeDataLoadedSuccessfully: false,
+      nodeDataFormatAvailable: false,
       nodeDataRenderable: false,
       nodeDataError: undefined,
       nodeRenderer: undefined
@@ -36,6 +36,7 @@ export default {
       this.parsedNodeData = undefined;
       this.nodeDataParsedSuccessfully = false;
       this.nodeDataLoadedSuccessfully = false;
+      this.nodeDataFormatAvailable = false;
       this.nodeDataRenderable = false;
       this.nodeDataError = undefined;
       this.nodeRenderer = undefined;
@@ -68,8 +69,18 @@ export default {
         this.nodeDataError = "JSON was missing a format value.";
         return;
       }
-      if (this.formats[this.parsedNodeData.format] === undefined) {
+      let formod = this.formats[this.parsedNodeData.format];
+      if (formod === undefined) {
         this.nodeDataError = "Format " + this.parsedNodeData.format + " is not supported.";
+        return;
+      }
+      
+      // Validate the data via its format module validator:
+      try {
+        formod.validateParsedData(this.parsedNodeData);
+      }
+      catch (error) {
+        this.nodeDataError = error.message;
         return;
       }
       this.nodeDataRenderable = true;
@@ -79,7 +90,7 @@ export default {
       // we need to set it up this way, rather than having all those elements in the template with a ton of v-ifs on them to pick just one.
       
       // Instantiate our renderer component and pass it some props.
-      this.nodeRenderer = new (this.formats[this.parsedNodeData.format].exploreClass())({
+      this.nodeRenderer = new (formod.exploreClass())({
         propsData: {
           node: this.node,
           parsedNodeData: this.parsedNodeData
@@ -97,6 +108,7 @@ export default {
       immediate: true,
       deep: true,
       handler(val, oldVal) {
+        // If the node's data changes and exists, parse it and update errors or the render component if parse is successful.
         if (val !== undefined && val.data !== undefined) {
           this.parseNodeData(val.data);
         }

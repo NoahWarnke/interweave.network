@@ -4,6 +4,10 @@ body {
   font-family: Verdana,sans-serif;
 }
 
+.good, .warn, .error {
+  padding: 10px;
+}
+
 .good {
   background-color: #00cc00;
 }

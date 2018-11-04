@@ -9,14 +9,13 @@
 
 #norender-info {
   flex: 1 1 auto;
-  display: flex;
-  flex-flow: column;
 }
 
-.node-file-text {
+#render-component-socket {
   flex: 1 1 auto;
-  background-color: black;
-  color: white;
-  font-size: 2em;
-  border: 0px;
+  display: flex;
+}
+
+.node-key-and-ipfs {
+  padding: 10px;
 }

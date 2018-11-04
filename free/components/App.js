@@ -84,7 +84,7 @@ export default {
         this.currentNode.data = JSON.stringify({
           failed: true,
           error: error
-        });;
+        });
       }
     },
     getAjax: function(url) {
