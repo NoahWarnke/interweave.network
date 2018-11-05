@@ -6,47 +6,45 @@
 
 #simple-text-explore h1 {
   text-align: center;
+  color: #009900;
 }
 
 #simple-text-explore .console {
   flex: 1 1 auto;
   background-color: black;
-  color: white;
+  color: #009900;
   font-size: 1.7em;
   line-height: 2em;
   padding: 5px;
   border: 0px;
-  border-top: 1px solid white;
+  border-top: 1px solid #009900;
   resize: none;
+}
+
+#simple-text-explore .console:focus {
+  outline-width: 0;
 }
 
 #simple-text-explore #console-input-area {
   display: flex;
-  border-top: 1px solid white;
+  border-top: 1px solid #00bb00;
 }
 
 #simple-text-explore #prompt {
   font-size: 1.7em;
   padding: 5px;
-  animation: blinkingText 1.5s infinite;
-}
-@keyframes blinkingText {
-  0% {
-    color: #ffffff;
-  }
-  33% {
-    color: #ffffff;
-  }
-  99% {
-    color: transparent;
-  }
+  color: #009900;
 }
 
 #simple-text-explore #console-input {
   font-size: 1.7em;
   width: 100%;
   background-color: black;
-  color: white;
+  color: #009900;
   padding: 5px;
   border: 0px;
+}
+
+#simple-text-explore #console-input:focus {
+  outline-width: 0;
 }

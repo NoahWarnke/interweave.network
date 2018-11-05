@@ -15,30 +15,39 @@ export default {
     </div>
   `,
   props: {
+    arrivedSlot: String,
     node: Object,
-    parsedNodeData: Object,
-    edgeStart: false,
-    edgeBoundary: false
+    parsedNodeData: Object
   },
   data: function() {
     return {
-      consoleText: this.parsedNodeData.shortDesc,
-      consoleInput: ""
+      consoleText:"",
+      consoleInput: "",
+      edgeStart: false,
+      edgeBoundary: false
     }
   },
   methods: {
+    init: async function() {
+      let edge = this.parsedNodeData.edges[this.arrivedSlot];
+      if (edge !== undefined) {
+        await this.addToConsole(edge.enterDesc + "\n");
+      }
+      this.addToConsole(this.parsedNodeData.shortDesc);
+    },
     consoleInputEntered: async function() {
       
       if (this.edgeStart) {
         if (!this.edgeBoundary) {
           // TODO fire edgeBoundary event.
+          this.$emit("edgeBoundary");
           this.edgeBoundary = true;
         }
         this.consoleInput = "";
         return;
       }
       
-      let entered = this.consoleInput;
+      let entered = this.consoleInput.trim();
       
       // Can't enter empty input.
       if (entered.length === 0) {
@@ -53,7 +62,7 @@ export default {
       this.parseCommand(entered);
     },
     addToConsole: async function(str) {
-      this.consoleText += "\n" + str;
+      this.consoleText += (this.consoleText.length > 0 ? "\n" : "") + str;
       
       // Scroll console to bottom (after waiting a tick for the console to populate with new lines.)
       await Vue.nextTick();
@@ -74,10 +83,14 @@ export default {
             for (var edgeNameKey in edge.names) {
               let edgeName = edge.names[edgeNameKey];
               if (cmd.indexOf(edgeName) === edgeVerb.length + 1) {
-                console.log("Edge!");
                 // Houston, we've had an edge!
-                this.addToConsole(edge.leaveDesc + " [enter anything to continue]");
-                // TODO emit edgeStart event with edgeKey included (and maybe console content?)
+                this.addToConsole(edge.leaveDesc + " [Enter anything to continue]");
+                
+                // TODO check for actual edge on node at that slot number. Otherwise, just turn the bus around lol.
+                this.$emit("edgeStart", {
+                  slot: edgeKey,
+                  consoleText: this.consoleText // For picking up in the same place later.
+                });
                 this.edgeStart = true;
                 return;
               }
@@ -118,6 +131,9 @@ export default {
       // No matches.
       this.addToConsole("You're unable to do this.");
     }
+  },
+  created() {
+    this.init();
   },
   computed: {
     /*

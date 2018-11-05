@@ -11,12 +11,16 @@ export default {
           <p>Node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + node.ipfs">{{node.ipfs}}</a></p>
         </div>
       </div>
-      <div id="render-component-socket" ref="formodexploreslot"></div>
+      <div
+        id="render-component-socket"
+        ref="formodexploreslot">
+      </div>
     </div>
   `,
   props: {
     formats: Object,
-    node: Object
+    node: Object,
+    arrivedSlot: String
   },
   data: function() {
     return {
@@ -93,14 +97,27 @@ export default {
       this.nodeRenderer = new (formod.exploreClass())({
         propsData: {
           node: this.node,
-          parsedNodeData: this.parsedNodeData
+          parsedNodeData: this.parsedNodeData,
+          arrivedSlot: this.arrivedSlot
         }
       });
       // Mount it, passing no element (makes it as an off-document element).
       this.nodeRenderer.$mount();
       
+      // Trap edge events coming from it.
+      this.nodeRenderer.$on("edgeStart", this.edgeStart);
+      this.nodeRenderer.$on("edgeBoundary", this.edgeBoundary);
+      
       // Finally, add it to the formod explore slot element.
       exploreEl.appendChild(this.nodeRenderer.$el);
+    },
+    edgeStart: function($event) {
+      console.log("render edge!");
+      this.$emit("edgeStart", $event);
+    },
+    edgeBoundary: function() {
+      console.log("edgeBoundary render!");
+      this.$emit("edgeBoundary");
     }
   },
   watch: {

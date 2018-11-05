@@ -15,8 +15,17 @@ export default {
   name: 'App',
   template: `
     <div id="app">
-      <the-navbar v-bind:node="currentNode" v-on:edgeClick="updateNode($event)"></the-navbar>
-      <the-render-area v-bind:node="currentNode" v-bind:formats="formats"></the-render-area>
+      <the-navbar
+        v-bind:node="currentNode"
+        v-on:edgeClick="updateNode($event)">
+      </the-navbar>
+      <the-render-area
+        v-bind:node="currentNode"
+        v-bind:arrivedSlot="arrivedSlot"
+        v-bind:formats="formats"
+        v-on:edgeStart="edgeStart($event)"
+        v-on:edgeBoundary="edgeBoundary()">
+      </the-render-area>
       <modal-info v-if="false"></modal-info>
     </div>
   `,
@@ -36,9 +45,11 @@ export default {
         nodeEdgeKeys: [],
         data: undefined
       },
+      arrivedSlot: "-1",
       formats: {
         1: new SimpleText()
       },
+      pendingNodeKey: undefined
     }
   },
   methods: {
@@ -63,12 +74,8 @@ export default {
     },
     updateNode: async function(nodeKey) {
       try {
-        /*
-        let node = await this.contract.getNode(nodeKey);
-        node.data = await this.fetchIpfs(node.ipfs);
-        this.currentNode = node;
-        */
         this.currentNode = await this.contract.getNode(nodeKey);
+        this.pendingEdge = undefined;
       }
       catch (error) {
         console.log("blockchain node load failed: " + error);
@@ -117,6 +124,14 @@ export default {
     },
     fetchIpfs: async function(ipfs) {
       return this.getAjax("https://ipfs.io/ipfs/" + ipfs);
+    },
+    edgeStart($event) {
+      this.arrivedSlot = $event.slot;
+      this.pendingNodeKey = this.currentNode.edgeNodeKeys[$event.slot];
+    },
+    edgeBoundary() {
+      this.updateNode(this.pendingNodeKey);
+      this.pendingNodeKey = undefined;
     }
   },
   created: function() {
