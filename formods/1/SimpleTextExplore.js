@@ -160,7 +160,7 @@ export default {
             
             targetKey = this.parsedNodeData.targetToKey[lastTWords];
             if (targetKey !== undefined) {
-              continue;
+              break;
             }
           }
         }
@@ -172,7 +172,6 @@ export default {
         if (mostSpecificVerbKey === verbKey) {
           mostSpecificVerbHadMatches = true;
         }
-        
         let bindingVerb = this.parsedNodeData.bindings[verbKey];
         if (bindingVerb === undefined) {
           continue;
