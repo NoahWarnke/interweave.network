@@ -31,10 +31,10 @@ export default {
         "6": ["go into", "enter"],
         "7": ["go onto", "climb onto"],
         "8": ["follow", "walk along", "walk down"],
-        "9": ["swim", "swim across", "swim into", "wade", "wade across", "wade into"],
+        "9": ["swim", "swim across", "swim into", "swim in", "wade", "wade across", "wade into"],
         "10": ["climb", "climb up", "climb onto", "climb over"]
       },
-      verbToId: {}, // created from verbs list.
+      verbToKey: {}, // created from verbs list.
       verbFailNoTarget: {
         "0": "You can't see anything like that here.",
         "1": "You don't hear anything like that here.",
@@ -68,14 +68,20 @@ export default {
     }
   },
   methods: {
-    init: async function() {
-      
-      // Invert our verbs array for faster lookup.
-      for (var verbSetKey in this.verbs) {
-        for (var verbKey in this.verbs[verbSetKey]) {
-          this.verbToId[this.verbs[verbSetKey][verbKey]] = verbSetKey;
+    invertLookup: function(objectWithArrays) {
+      let result = {};
+      for (var setKey in objectWithArrays) {
+        for (var key in objectWithArrays[setKey]) {
+          result[objectWithArrays[setKey][key]] = setKey;
         }
       }
+      return result;
+    },
+    init: async function() {
+      
+      // Invert our verbs and targets arrays for faster lookup.
+      this.verbToKey = this.invertLookup(this.verbs);
+      this.parsedNodeData.targetToKey = this.invertLookup(this.parsedNodeData.targets);
       
       let edge = this.parsedNodeData.edges[this.arrivedSlot];
       if (edge !== undefined) {
@@ -117,63 +123,112 @@ export default {
       this.$refs.console.scrollTop = this.$refs.console.scrollHeight;
     },
     parseCommand: function(cmd) {
-      //let words = cmd.split(" ");
       
-      // Greedily look for matches.
+      let words = cmd.split(" ");
+      let mostSpecificVerbKey = undefined;
+      let mostSpecificVerbHadMatches = false;
       
-      // Check for edges.
-      for (var edgeKey in this.parsedNodeData.edges) {
-        let edge = this.parsedNodeData.edges[edgeKey];
+      for (var v = words.length; v > 0; v--) {
+        let firstVWords = words
+          .slice(0, v)
+          .join(" ")
+          .toLowerCase()
+        ;
         
-        for (var edgeVerbKey in edge.verbs) {
-          let edgeVerb = edge.verbs[edgeVerbKey];
-          if (cmd.indexOf(edgeVerb) === 0) {
-            for (var edgeNameKey in edge.names) {
-              let edgeName = edge.names[edgeNameKey];
-              if (cmd.indexOf(edgeName) === edgeVerb.length + 1) {
-                // Houston, we've had an edge!
-                this.addToConsole(edge.leaveDesc + " [Enter anything to continue]");
-                
-                // TODO check for actual edge on node at that slot number. Otherwise, just turn the bus around lol.
-                this.$emit("edgeStart", {
-                  slot: edgeKey,
-                  consoleText: this.consoleText // For picking up in the same place later.
-                });
-                this.edgeStart = true;
-                return;
-              }
+        let verbKey = this.verbToKey[firstVWords];
+        if (verbKey === undefined) {
+          continue;
+        }
+          
+        // Save the most specific verb in case we find no matches.
+        if (mostSpecificVerbKey === undefined) {
+          mostSpecificVerbKey = verbKey;
+        }
+        
+        let targetKey = undefined;
+        if (v === words.length) {
+          // Check for single-verb command string
+          targetKey = this.parsedNodeData.targetToKey[""];
+        }
+        else {
+          for (var t = words.length - v; t > 0; t--) {
+            let lastTWords = words
+              .slice(v, v + t)
+              .join(" ")
+              .toLowerCase()
+            ;
+            
+            targetKey = this.parsedNodeData.targetToKey[lastTWords];
+            if (targetKey !== undefined) {
+              continue;
             }
           }
+        }
+        
+        if (targetKey === undefined) {
+          continue;
+        }
+        
+        if (mostSpecificVerbKey === verbKey) {
+          mostSpecificVerbHadMatches = true;
+        }
+        
+        let bindingVerb = this.parsedNodeData.bindings[verbKey];
+        if (bindingVerb === undefined) {
+          continue;
+        }
+        
+        let resultId = bindingVerb[targetKey];
+        if (resultId === undefined) {
+          continue;
+        }
+        
+        let result = this.parsedNodeData.results[resultId];
+          
+        if (result.indexOf("edge") === 0) {
+          let slot = parseInt(result.substr(4, result.length - 4));
+          let edge = this.parsedNodeData.edges[slot];
+          
+          if (edge !== undefined) {
+            
+            // Not-yet-connected edge, so turn around.
+            if (this.node.edgeNodeKeys[slot] == 0) {
+              this.addToConsole(
+                edge.leaveDesc
+                + "\n\nHowever, you cannot go any further, and turn around.\n\n"
+                + edge.enterDesc
+                + "\n\n"
+                + this.parsedNodeData.shortDesc
+              );
+              return;
+            }
+            
+            // Houston, we've had an edge!
+            this.addToConsole(edge.leaveDesc + " [Enter anything to continue]");
+            
+            this.$emit("edgeStart", {
+              slot: slot + "",
+              consoleText: this.consoleText // For picking up in the same place later.
+            });
+            this.edgeStart = true;
+            return;
+          }
+        }
+        else {
+          this.addToConsole(result);
+          return;
         }
       }
       
-      // Check for other actions.
-      let actionKeys = Object
-        .keys(this.parsedNodeData)
-        .filter((key) => {
-          return ["format", "name", "shortDesc", "edges"].indexOf(key) === -1;
-        })
-      ;
-      
-      for (var actionKeyKey in actionKeys) {
-        let actionKey = actionKeys[actionKeyKey];
-        
-        if (cmd.indexOf(actionKey) === 0) {
-          let actionTargets = this.parsedNodeData[actionKey];
-          
-          for (var actionTargetKey in actionTargets) {
-            let actionTarget = actionTargets[actionTargetKey];
-            
-            for (var actionNameKey in actionTarget.names) {
-              let actionName = actionTarget.names[actionNameKey];
-              if ((actionName === "" && cmd.trim() === actionKey) || cmd.indexOf(actionName) === actionKey.length + 1) {
-                // Houston, we've had an action!
-                this.addToConsole(actionTarget.desc);
-                return;
-              }
-            }
-          }
+      // At least one verb matched, but no target/result bindings.
+      if (mostSpecificVerbKey !== undefined) {
+        if (mostSpecificVerbHadMatches) {
+          this.addToConsole(this.verbFailTarget[mostSpecificVerbKey])
         }
+        else {
+          this.addToConsole(this.verbFailNoTarget[mostSpecificVerbKey]);
+        }
+        return;
       }
       
       // No matches.

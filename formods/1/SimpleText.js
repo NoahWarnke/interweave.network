@@ -97,6 +97,13 @@ export default class SimpleText {
       if (typeof result !== "string" || result.length === 0) {
         throw new Error("SimpleText results must be non-empty strings (result " + resultKey + ")");
       }
+      
+      if (result.indexOf("edge") === 0) {
+        let slot = parseInt(result.substr(4, result.length - 4));
+        if (data.edges[slot] === undefined) {
+          throw new Error("SimpleText result was an edge type, but did not refer to a valid edge (result " + result + ")");
+        }
+      }
     }
     
     // bindings
@@ -116,7 +123,8 @@ export default class SimpleText {
           throw new Error("SimpleText binding target keys must refer to targets the targets object (target " + targetKey + " for verb " + verbKey + ")");
         }
         let resultKey = verb[targetKey];
-        if (data.results[resultKey] === undefined) {
+        let result = data.results[resultKey];
+        if (result === undefined) {
           throw new Error("SimpleText binding result keys must refer to results in the results object (result " + resultKey + " for target " + targetKey + " for verb " + verbKey + ")")
         }
       }

@@ -126,6 +126,10 @@ export default {
       return this.getAjax("https://ipfs.io/ipfs/" + ipfs);
     },
     edgeStart($event) {
+      if (this.currentNode.edgeNodeKeys[$event.slot] == 0) {
+        console.log("Formod attempted to trigger an edge start, but the edge is not set in the blockchain.");
+        return;
+      }
       this.arrivedSlot = $event.slot;
       this.pendingNodeKey = this.currentNode.edgeNodeKeys[$event.slot];
     },
