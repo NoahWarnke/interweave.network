@@ -1,6 +1,6 @@
 import App from './components/App.js';
 
-new Vue({
+window.interweaveApp = new Vue({
   el: '#app',
   render: (createElement) => {
     return createElement(App);

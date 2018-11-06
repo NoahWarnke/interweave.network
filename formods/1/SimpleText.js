@@ -34,6 +34,11 @@ export default class SimpleText {
       throw new Error("SimpleText data must have format 1.");
     }
     
+    // version
+    if (data.formatVersion !== parseInt(data.formatVersion) || data.formatVersion < 1 || data.formatVersion > 1) {
+      throw new Error("SimpleData format version must be an integer 1 >= x >= 1.");
+    }
+    
     // name
     if (typeof data.name !== "string" || data.name.length === 0) {
       throw new Error("SimpleText data must contain a name property (the not-necessarily-unique name of the Node) that is a non-empty string.");
@@ -59,60 +64,60 @@ export default class SimpleText {
       if (typeof edge.enterDesc !== "string" || edge.enterDesc.length === 0) {
         throw new Error("SimpleText edges must each have an enterDesc property (a short description of entering the Node via this edge) that is a non-empty string (edge #" + edgeKey + ")");
       }
-      if (edge.names === undefined || edge.names.constructor !== Array || edge.names.length === 0) {
-        throw new Error("SimpleText edges must each have a name array that has more than 0 elements (edge #" + edgeKey + ")");
+    }
+    
+    // targets
+    if (data.targets === undefined || data.targets.constructor !== Object || Object.keys(data.targets).length === 0) {
+      throw new Error("SimpleText data must contain a targets object with at least 1 element.");
+    }
+    let targetMatches = {};
+    for (var targetKey in data.targets) {
+      let target = data.targets[targetKey];
+      if (target.constructor !== Array || target.length === 0) {
+        throw new Error("SimpleText targets must be arrays with at least 1 element (target " + targetKey + ")");
       }
-      for (var nameKey in edge.names) {
-        let name = edge.names[nameKey];
-        if (typeof name !== "string" || name.length === 0) {
-          throw new Error("SimpleText edge names must each be a non-empty string (name #" + nameKey + " of edge #" + edgeKey + ")");
+      for (var targetItemKey in target) {
+        let targetItem = target[targetItemKey];
+        if (typeof targetItem !== "string") {
+          throw new Error("SimpleText target items must each be a string (target item " + targetItem + " of target " + targetKey + ")");
         }
-      }
-      if (edge.verbs === undefined || edge.verbs.constructor !== Array || edge.verbs.length === 0) {
-        throw new Error("SimpleText edges must each have a verbs array that has more than 0 elements (edge #" + edgeKey + ")");
-      }
-      for (var verbKey in edge.verbs) {
-        let verb = edge.verbs[verbKey];
-        if (typeof verb !== "string" || verb.length === 0) {
-          throw new Error("SimpleText edge verbs must each be a non-empty string (verb #" + verbKey + " of edge #" + edgeKey + ")");
+        if (targetMatches[targetItem] !== undefined) {
+          throw new Error("SimpleText target items must each be a unique (target item " + targetItem + " of target " + targetKey + ")");
         }
+        targetMatches[targetItem] = true;
       }
     }
     
-    // Other actions (examine, listen, etc.)
-    let actionKeys = Object
-      .keys(data)
-      .filter((key) => {
-        return ["format", "name", "shortDesc", "edges"].indexOf(key) === -1;
-      })
-    ;
-    
-    for (var actionKeyKey in actionKeys) {
-      let actionKey = actionKeys[actionKeyKey];
-      let action = data[actionKey];
-      
-      if (action === undefined || action.constructor !== Array || action.length === 0) {
-        throw new Error("SimpleText actions must each be an array that has more than 0 elements (action " + actionKey + ")");
+    // results
+    if (data.results === undefined || data.targets.constructor !== Object || Object.keys(data.results).length === 0) {
+      throw new Error("SimpleText data must contain a results object with at least 1 element.");
+    }
+    for (var resultKey in data.results) {
+      let result = data.results[resultKey];
+      if (typeof result !== "string" || result.length === 0) {
+        throw new Error("SimpleText results must be non-empty strings (result " + resultKey + ")");
       }
-      
-      let actionMatches = {};
-      for (var actionMatchKey in action) {
-        let actionMatch = action[actionMatchKey];
-        if (actionMatch.names === undefined || actionMatch.names.constructor !== Array || actionMatch.names.length === 0) {
-          throw new Error("SimpleText action matches must each have a name array that has more than 0 elements (action match #" + actionMatchKey + " of action " + actionKey + ")");
+    }
+    
+    // bindings
+    if (data.bindings === undefined || data.bindings.constructor !== Object || Object.keys(data.bindings).length === 0) {
+      throw new Error("SimpleText data must contain a bindings object with at least 1 element.");
+    }
+    for (var verbKey in data.bindings) {
+      if (verbKey != parseInt(verbKey) || verbKey < 0 || verbKey > 10) {
+        throw new Error("SimpleText binding verb keys must refer to verbs in the pre-defined verbs object (binding for verb " + verbKey + ")");
+      }
+      let verb = data.bindings[verbKey];
+      if (verb.constructor !== Object || Object.keys(verb).length === 0) {
+        throw new Error("SimpleText binding verbs must be objects with at least 1 element (binding for verb " + verbKey + ")");
+      }
+      for (var targetKey in verb) {
+        if (data.targets[targetKey] === undefined) {
+          throw new Error("SimpleText binding target keys must refer to targets the targets object (target " + targetKey + " for verb " + verbKey + ")");
         }
-        for (var nameKey in actionMatch.names) {
-          let name = actionMatch.names[nameKey];
-          if (typeof name !== "string") { // numEmpty increasese each time there's a length === 0 name.
-            throw new Error("SimpleText action match names must each be a string (name #" + nameKey + " of action match #" + actionMatchKey + " of action " + actionKey + ")");
-          }
-          if (actionMatches[name] !== undefined) {
-            throw new Error("SimpleText action match names must each be a unique for that action (name " + name + " of action match #" + actionMatchKey + " of action " + actionKey + ")");
-          }
-        }
-        
-        if (typeof actionMatch.desc !== "string" || actionMatch.desc.length === 0) {
-          throw new Error("SimpleText actions must each contain a desc property (a short description of the what happens when the action matches) that is a non-empty string (action match " + actionMatchKey + " of action " + actionKey + ")");
+        let resultKey = verb[targetKey];
+        if (data.results[resultKey] === undefined) {
+          throw new Error("SimpleText binding result keys must refer to results in the results object (result " + resultKey + " for target " + targetKey + " for verb " + verbKey + ")")
         }
       }
     }

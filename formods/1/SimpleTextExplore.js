@@ -34,6 +34,7 @@ export default {
         "9": ["swim", "swim across", "swim into", "wade", "wade across", "wade into"],
         "10": ["climb", "climb up", "climb onto", "climb over"]
       },
+      verbToId: {}, // created from verbs list.
       verbFailNoTarget: {
         "0": "You can't see anything like that here.",
         "1": "You don't hear anything like that here.",
@@ -68,6 +69,14 @@ export default {
   },
   methods: {
     init: async function() {
+      
+      // Invert our verbs array for faster lookup.
+      for (var verbSetKey in this.verbs) {
+        for (var verbKey in this.verbs[verbSetKey]) {
+          this.verbToId[this.verbs[verbSetKey][verbKey]] = verbSetKey;
+        }
+      }
+      
       let edge = this.parsedNodeData.edges[this.arrivedSlot];
       if (edge !== undefined) {
         await this.addToConsole(edge.enterDesc + "\n");

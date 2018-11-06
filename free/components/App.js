@@ -66,7 +66,7 @@ export default {
         window.interweave = this.contract;
         
         // Grab starting node data.
-        this.updateNode("6425788636526616286741869931615606349765969179734729515957019907323234972557");
+        this.updateNode("4802423149786398712975601635277375780486398097217997509586637249159306333648");
       }
       catch (error) {
         console.log(error);
