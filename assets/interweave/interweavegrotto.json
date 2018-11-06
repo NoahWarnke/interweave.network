@@ -1,53 +1,74 @@
 {
-  "format": 1,
+  "format": "1",
+  "formatVersion": "2.0",
   "name": "Interweave Grotto",
   "shortDesc": "You are standing on some rocks by the edge of a pool of water, which is surrounded by high rocky walls. Sunlight slants through an opening high above. Behind you there is a tunnel.",
   "edges": {
     "0": {
-      "names": ["tunnel", "entrance", "hole", "crevice", "crack"],
-      "verbs": ["go", "go into", "enter"],
       "leaveDesc": "You approach the crack in the rock wall, the loose rock grinding beneath your feet. The tunnel entrance is more than large enough to fit into, but at an awkward angle, so you have to lean against the rough wall to your left as you enter. The tunnel continues jaggedly at about a ten-degree slope upwards, and soon opens up enough to stand without leaning. The light fades rapidly as you cautiously proceed, and the only sounds are your footsteps on the rock fragments of the tunnel floor and your breathing, both sounding muffled and hollow.",
       "enterDesc": "The dark tunnel slopes slightly downward before you. A faint but growing light ahead reflects dimly off the walls, which begin to slant to the right, so much so that you have to lean against the gritty rock of the right side. Soon you emerge from the jagged tunnel mouth into brightness, and can stand straight again."
     }
   },
-  "examine": [
-    {
-      "names": ["", "grotto", "pool", "water"],
-      "desc": "You are standing on a loose beach of shattered slate rocks at the edge of a deep clear pool of water, perhaps five times your height across. High walls of slate rise from the water in all directions ahead of you, covered in bright green ferns and mosses. Water drips down the walls, moistening the plant life. Far above, the walls end, and you can see blue sky and puffy clouds drifting by. Sunlight slants in from the hole above, illuminating the wall to your left and part of the pool. You see tiny fish glittering in the sunbeams shining through their aquatic world. Behind you, the walls surround your small rocky beach, but a dark crack of a tunnel entrance gapes from the cliff directly opposite the pool, jaggedly reaching perhaps twice your height and width. It is mostly silent except for the dripping of water and the crunch of gravel beneath your feet."
+  "targets": {
+    "0": ["", "grotto", "here", "area"],
+    "1": ["moss", "mosses", "fern", "ferns", "plant", "plants"],
+    "2": ["tunnel", "crevice", "crack", "hole"],
+    "3": ["fish", "school of fish", "minnows"],
+    "4": ["sky", "clouds", "opening"],
+    "5": ["rock", "rocks", "slate", "slate rocks", "shattered slate rocks", "beach"],
+    "6": ["walls", "rock walls", "cliff", "cliffs"],
+    "7": ["words", "carved words", "carving", "rock carving", "wall carving"],
+    "8": ["drop", "drip", "drops", "drips", "wind", "breeze"],
+    "9": ["pool", "water"],
+    "10": ["fossil", "fossils"]
+  },
+  "results": {
+    "0": "You are standing on a loose beach of shattered slate rocks at the edge of a deep clear pool of water, perhaps fifteen paces across. High walls of slate rise from the water in all directions ahead of you, covered in bright green ferns and mosses. Water drips down the walls, moistening the plant life. Far above, the walls end, and you can see blue sky and puffy clouds drifting by. Sunlight slants in from the hole above, illuminating the wall to your left and part of the pool. You see tiny fish glittering in the sunbeams shining through their aquatic world. Behind you, the walls surround your small rocky beach, but a dark crack of a tunnel entrance gapes from the cliff directly opposite the pool, jaggedly reaching perhaps four paces high and one wide. It is mostly silent except for the dripping of water and the crunch of gravel beneath your feet.",
+    "1": "The green plant life springs lushly from every crack and crevice of the slate walls. The occasional drop from above strikes a fern, making it bob up and down as smaller droplets tumble into the pool below. The mosses glisten in places as water soaks through them.",
+    "2": "Several layers of the sedimentary slate, which everywhere is resting at about a 60-degree angle from the horizontal, have separated, leaving a dark, angular crack in the rocky walls, about four paces high and one pace wide. You could easily fit inside.",
+    "3": "The small minnow-sized fish swim lazily together in a school, sometimes glinting in the sunbeam from above, sometimes invisible in the shadows away from it. From time to time, you see one dart to the surface and swallow a small insect that had the misfortune of landing there.",
+    "4": "High above you, the grotto walls open out into a sky of blue with puffy white clouds gently drifting by. You sometimes see the black dot of a bird soar by far above.",
+    "5": "You squat down and pick up a piece of slate from the beach near your feet. It's a fine-grained sedimentary stone, pale blue-grey, about one finger-width thick and two hands in breadth. You see the distorted fossils of tiny sea creatures scattered about one side of it.",
+    "6": "The mossy slate walls, their layers at about 60 degrees from the horizontal, rise roughly all around you, forming a sort of irregular tube that appears to continue upwards for at least ten times your height before opening to the sky. At about eye level to your right, above where the water's edge meets the wall, there seem to be some words carved into the rock.",
+    "7": "You closely inspect the words carved into the rock wall. They are neatly engraved, as by an expert stonemason with good tools, but also weathered; mosses peek out from several places on the letters. They read, in sans-serif English characters about two finger-widths high, 'WELCOME TO INTERWEAVE GROTTO. HERE IT ALL BEGAN.'",
+    "8": "It is still here, with only the steady dripping of water and an occasional gentle, deep thrumming, more felt than heard, as the breeze blowing across the opening far above drives the grotto's air column to resonate. You shift your weight and the slate cobbles beneath your feet crunch slightly.",
+    "9": "edge0",
+    "10": "You remove your clothes, neatly fold them into a pile on the beach, and wade into the water. It is actually rather warm, but the rocks are sharp underfoot. The little fish dart away from you as you approach, and your splashing echoes hollowly on the rocks. It gets deep quickly, and you turn to float on your back, staring up at the circle of sky above you, with the sun playing warm over your body and the reflection of the water dancing on the rock walls above you. You relax for a while, watching the clouds drift past and feeling the deep frequencies of nature resonate around you. There is nowhere else to go, so eventually you paddle back to shore, let yourself dry off, and pull on your garments again.",
+    "11": "They wouldn't like that, even if you could catch them.",
+    "12": "You pick up one of the beach rocks and look closely at the fossils. They would appear to be tiny segments of crinoid stems, with an occasional fragmentary bivalve shell mixed in.",
+    "13": "They are far too steep and crumbly for that."
+  },
+  "bindings": {
+    "0": {
+      "0": "0",
+      "1": "1",
+      "2": "2",
+      "3": "3",
+      "4": "4",
+      "5": "5",
+      "6": "6",
+      "7": "7",
+      "9": "0",
+      "10": "12"
     },
-    {
-      "names": ["moss", "mosses", "fern", "ferns"],
-      "desc": "The green plant life springs lushly from every crack and crevice of the slate walls. The occasional drop from above strikes a fern, making it bob up and down as smaller droplets tumble into the pool below. The mosses glisten in places as water soaks through them."
+    "1": {
+      "0": "8",
+      "8": "8"
     },
-    {
-      "names": ["tunnel", "crevice", "crack"],
-      "desc": "Several layers of the sedimentary slate, which everywhere is resting at about a 60-degree angle from the horizontal, have separated, leaving a dark, angular crack in the rocky walls, about twice your height vertically, and twice your width horizontally. You could easily fit inside."
+    "3": {
+      "3": "11"
     },
-    {
-      "names": ["fish"],
-      "desc": "The small minnow-sized fish swim lazily together in a school, sometimes glinting in the sunbeam from above, sometimes invisible in the shadows away from it. From time to time, you see one dart to the surface and swallow a small insect that had the misfortune of landing there."
+    "5": {
+      "2": "9"
     },
-    {
-      "names": ["sky", "clouds"],
-      "desc": "High above you, the grotto walls open out into a sky of blue with puffy white clouds gently drifting by. You sometimes see the black dot of a bird soar by far above."
+    "6": {
+      "2": "9"
     },
-    {
-      "names": ["rocks", "shattered slate rocks", "shattered slate", "beach"],
-      "desc": "You squat down and pick up a piece of slate from the beach near your feet. It's a fine-grained sedimentary stone, pale blue-grey, about one finger-width thick and two hands in breadth. You see the distorted fossils of tiny sea creatures scattered about one side of it."
+    "9": {
+      "9": "10"
     },
-    {
-      "names": ["walls", "rock walls", "cliff"],
-      "desc": "The mossy slate walls, their layers at about 60 degrees from the horizontal, rise roughly all around you, forming a sort of irregular tube that appears to continue upwards for at least ten times your height before opening to the sky. At about eye level to your right, above where the water's edge meets the wall, there seem to be some words carved into the rock."
-    },
-    {
-      "names": ["words", "carving", "rock carving"],
-      "desc": "You closely inspect the words carved into the rock wall. They are neatly engraved, as by an expert stonemason with good tools, but also weathered; mosses peek out from several places on the letters. They read, in sans-serif English characters about two finger-widths high, 'WELCOME TO INTERWEAVE GROTTO. HERE IT ALL BEGAN.'"
+    "10": {
+      "6": "13"
     }
-  ],
-  "listen": [
-    {
-        "names": ["", "water", "drop", "drip", "drops", "drips", "wind", "breeze"],
-        "desc": "It is still here, with only the steady dripping of water and an occasional gentle, deep thrumming, more felt than heard, as the breeze blowing across the opening far above drives the grotto's air column to resonate. You shift your weight and the slate cobbles beneath your feet crunch slightly."
-    }
-  ]
+  }
 }
