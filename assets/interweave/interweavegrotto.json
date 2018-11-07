@@ -33,7 +33,7 @@
     "7": "You closely inspect the words carved into the rock wall. They are neatly engraved, as by an expert stonemason with good tools, but also weathered; mosses peek out from several places on the letters. They read, in sans-serif English characters about two finger-widths high, 'WELCOME TO INTERWEAVE GROTTO. HERE IT ALL BEGAN.'",
     "8": "It is still here, with only the steady dripping of water and an occasional gentle, deep thrumming, more felt than heard, as the breeze blowing across the opening far above drives the grotto's air column to resonate. You shift your weight and the slate cobbles beneath your feet crunch slightly.",
     "9": "edge0",
-    "10": "You remove your clothes, neatly fold them into a pile on the beach, and wade into the water. It is actually rather warm, and the rocks are sharp underfoot. The little fish dart away from you as you approach, your splashing echoing hollowly off the rocks. It gets deep quickly, and you turn to float on your back, staring up at the circle of sky above you, with the sun playing warm over your bare skin and the reflection of the water dancing on the rock walls above you. You relax for a time, watching the clouds drift past and feeling the deep frequencies of nature resonate around you. There is nowhere else to go, so eventually you paddle back to shore, let yourself dry off, and pull on your garments again.",
+    "10": "You remove your clothes, neatly fold them into a pile on the beach, and wade into the water. It is actually rather warm, and the rocks are sharp underfoot. The little fish dart away from you as you approach, your splashing echoing hollowly off the rocks. It gets deep quickly, and you turn to float on your back, staring up at the circle of sky above you, with the sun playing warm over your bare skin and the reflection of the water dancing on the vegetation-draped rock walls above you. You relax for a time, watching the clouds drift past and feeling the deep frequencies of nature resonate around you. There is nowhere else to go, so eventually you paddle back to shore, let yourself dry off, and pull on your garments again.",
     "11": "They wouldn't like that, even if you could catch them.",
     "12": "You pick up one of the beach rocks and look closely at the fossils. They would appear to be tiny segments of crinoid stems, with an occasional fragmentary bivalve shell mixed in.",
     "13": "They are far too steep and crumbly for that."
@@ -59,7 +59,8 @@
       "3": "11"
     },
     "5": {
-      "2": "9"
+      "2": "9",
+      "9": "10"
     },
     "6": {
       "2": "9"

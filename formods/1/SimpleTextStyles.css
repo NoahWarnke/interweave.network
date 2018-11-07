@@ -2,6 +2,7 @@
   flex: 1 1 auto;
   display: flex;
   flex-flow: column;
+  font-family: monospace;
 }
 
 #simple-text-explore h1 {
@@ -43,6 +44,7 @@
   color: #009900;
   padding: 5px;
   border: 0px;
+  font-family: monospace;
 }
 
 #simple-text-explore #console-input:focus {

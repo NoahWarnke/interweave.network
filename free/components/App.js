@@ -56,9 +56,11 @@ export default {
     init: async function() {
       try {
         this.web3Handler = new Web3Handler();
+        window.web3Handler = this.web3Handler; // For console access.
         await this.web3Handler.initialize();
         
         this.contract = new InterweaveFreeHandler();
+        window.contract = this.contract; // For console access.
         await this.contract.initialize(this.web3Handler);
         
         // for console access.
