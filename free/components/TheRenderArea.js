@@ -20,7 +20,7 @@ export default {
   props: {
     formats: Object,
     node: Object,
-    arrivedSlot: String
+    arrivedSlot: Number
   },
   data: function() {
     return {
@@ -112,11 +112,9 @@ export default {
       exploreEl.appendChild(this.nodeRenderer.$el);
     },
     edgeStart: function($event) {
-      console.log("render edge!");
       this.$emit("edgeStart", $event);
     },
     edgeBoundary: function() {
-      console.log("edgeBoundary render!");
       this.$emit("edgeBoundary");
     }
   },

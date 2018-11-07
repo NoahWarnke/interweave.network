@@ -7,7 +7,7 @@ export default {
     <div id="navbar">
       <button-home></button-home>
       <button-edge
-        v-for="edge in availableEdges" :key="edge"
+        v-for="edge in availableEdges" :key="edge.nodeKey"
         v-bind:edge="edge"
         v-on:edgeClick="edgeClick">
       </button-edge>
@@ -24,10 +24,18 @@ export default {
   },
   computed: {
     availableEdges: function() {
+      let result = {};
       if (this.node !== undefined && this.node.edgeNodeKeys !== undefined) {
-        return this.node.edgeNodeKeys.filter((key) => {
-          return key != 0
-        });
+        
+        return this.node.edgeNodeKeys
+          .map((value, index) => {
+            return {
+              slot: index,
+              nodeKey: value
+            };
+          })
+          .filter((value) => {return value.nodeKey != 0;})
+        ;
       }
       return [];
     }

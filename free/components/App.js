@@ -17,7 +17,7 @@ export default {
     <div id="app">
       <the-navbar
         v-bind:node="currentNode"
-        v-on:edgeClick="updateNode($event)">
+        v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
       <the-render-area
         v-bind:node="currentNode"
@@ -45,7 +45,7 @@ export default {
         nodeEdgeKeys: [],
         data: undefined
       },
-      arrivedSlot: "-1",
+      arrivedSlot: -1,
       formats: {
         1: new SimpleText()
       },
@@ -131,7 +131,7 @@ export default {
         return;
       }
       this.arrivedSlot = $event.slot;
-      this.pendingNodeKey = this.currentNode.edgeNodeKeys[$event.slot];
+      this.pendingNodeKey = this.currentNode.edgeNodeKeys[$event.slot]; // $event.nodeKey would work too.
     },
     edgeBoundary() {
       this.updateNode(this.pendingNodeKey);

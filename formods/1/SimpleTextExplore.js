@@ -16,7 +16,7 @@ export default {
     </div>
   `,
   props: {
-    arrivedSlot: String,
+    arrivedSlot: Number,
     node: Object,
     parsedNodeData: Object
   },
@@ -47,7 +47,7 @@ export default {
       this.verbToKey = this.invertLookup(SimpleTextUtils.verbs);
       this.parsedNodeData.targetToKey = this.invertLookup(this.parsedNodeData.targets);
       
-      let edge = this.parsedNodeData.edges[this.arrivedSlot];
+      let edge = this.parsedNodeData.edges[this.arrivedSlot + ""];
       if (edge !== undefined) {
         await this.addToConsole(edge.enterDesc + "\n");
       }
@@ -154,8 +154,9 @@ export default {
           
           if (edge !== undefined) {
             
+            let nodeKey = this.node.edgeNodeKeys[slot];
             // Not-yet-connected edge, so turn around.
-            if (this.node.edgeNodeKeys[slot] == 0) {
+            if (nodeKey == 0) {
               this.addToConsole(
                 edge.leaveDesc
                 + "\n\nHowever, you cannot go any further, and turn around.\n\n"
@@ -170,7 +171,8 @@ export default {
             this.addToConsole(edge.leaveDesc + " [Enter anything to continue]");
             
             this.$emit("edgeStart", {
-              slot: slot + "",
+              slot: slot,
+              nodeKey: nodeKey,
               consoleText: this.consoleText // For picking up in the same place later.
             });
             this.edgeStart = true;
