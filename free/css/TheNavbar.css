@@ -13,3 +13,7 @@
   border-radius: 15px;
   background-color: white;
 }
+
+#navbar #button-build, #button-my-nodes {
+  float: right;
+}

@@ -45,8 +45,15 @@ export default {
       this.nodeDataError = undefined;
       this.nodeRenderer = undefined;
       
-      // Clear the formod explore slot component, if any exist.
+      // Get the formod explore slot component
       let exploreEl = this.$refs.formodexploreslot;
+      
+      // If this happened to get called before the component is done loading, just return. Will catch on mounted().
+      if (exploreEl === undefined) {
+        return;
+      }
+      
+      // Clear the formod explore slot, if anything's there.
       while (exploreEl.firstChild) {
         exploreEl.removeChild(exploreEl.firstChild);
       }
@@ -128,6 +135,11 @@ export default {
           this.parseNodeData(val.data);
         }
       }
+    }
+  },
+  mounted: function() {
+    if (this.node!== undefined && this.node.data !== undefined) {
+      this.parseNodeData(this.node.data);
     }
   }
 }

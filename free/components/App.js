@@ -5,6 +5,7 @@ import InterweaveFreeHandler from '../js/InterweaveFreeHandler.js';
 // Viewer modules
 import TheNavbar from './TheNavbar.js';
 import TheRenderArea from './TheRenderArea.js';
+import ListNodes from './ListNodes.js';
 import ModalInfo from './ModalInfo.js';
 
 // Format modules
@@ -17,6 +18,10 @@ export default {
     <div id="app">
       <the-navbar
         v-bind:node="currentNode"
+        v-bind:buildMode="buildMode"
+        v-bind:myNodesMode="myNodesMode"
+        v-on:buildClick="buildModeToggle()"
+        v-on:myNodesClick="myNodesToggle()"
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
       <the-render-area
@@ -24,14 +29,17 @@ export default {
         v-bind:arrivedSlot="arrivedSlot"
         v-bind:formats="formats"
         v-on:edgeStart="edgeStart($event)"
-        v-on:edgeBoundary="edgeBoundary()">
+        v-on:edgeBoundary="edgeBoundary()"
+        v-if="!myNodesMode">
       </the-render-area>
+      <list-nodes v-if="myNodesMode" v-bind:myNodes="myNodes"></list-nodes>
       <modal-info v-if="false"></modal-info>
     </div>
   `,
   components: {
     TheNavbar,
     TheRenderArea,
+    ListNodes,
     ModalInfo
   },
   data: function() {
@@ -49,7 +57,10 @@ export default {
       formats: {
         1: new SimpleText()
       },
-      pendingNodeKey: undefined
+      pendingNodeKey: undefined,
+      myNodes: [],
+      buildMode: false,
+      myNodesMode: false
     }
   },
   methods: {
@@ -69,6 +80,7 @@ export default {
         
         // Grab starting node data.
         this.updateNode("4802423149786398712975601635277375780486398097217997509586637249159306333648");
+        this.updateMyNodes();
       }
       catch (error) {
         console.log(error);
@@ -94,6 +106,14 @@ export default {
           failed: true,
           error: error
         });
+      }
+    },
+    updateMyNodes: async function() {
+      try {
+        this.myNodes = await this.contract.getNodesBelongingTo(this.web3Handler.account);
+      }
+      catch (error) {
+        console.log(error);
       }
     },
     getAjax: function(url) {
@@ -138,6 +158,24 @@ export default {
     edgeBoundary() {
       this.updateNode(this.pendingNodeKey);
       this.pendingNodeKey = undefined;
+    },
+    buildModeToggle() {
+      if (this.web3Handler.loggedIn) {
+        this.buildMode = !this.buildMode;
+      }
+      if (!this.buildMode) {
+        this.myNodesMode = false;
+      }
+      // TODO watch web3Handler for log-out events and turn off build mode
+    },
+    async myNodesToggle() {
+      if (this.web3Handler.loggedIn) {
+        if (!this.myNodesMode) {
+          await this.updateMyNodes();
+        }
+        this.myNodesMode = !this.myNodesMode;
+      }
+
     }
   },
   created: function() {
