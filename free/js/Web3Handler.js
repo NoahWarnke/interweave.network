@@ -24,8 +24,8 @@ export default class Web3Handler {
    * Initialize this web3Handler. Gets all the current dapp-browser state, and then starts polling to update that regularly. */
   async initialize() {
     await this.update();
-    setInterval(() => {this.update();}, 1000);
-    //setTimeout(() => {this.update();}, 2000);
+    //setInterval(() => {this.update();}, 1000);
+    setTimeout(() => {this.update();}, 2000);
   }
   
   registerListener(eventName, callback) {
