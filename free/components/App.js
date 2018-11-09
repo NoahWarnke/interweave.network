@@ -32,7 +32,11 @@ export default {
         v-on:edgeBoundary="edgeBoundary()"
         v-if="!myNodesMode">
       </the-render-area>
-      <list-nodes v-if="myNodesMode" v-bind:myNodes="myNodes"></list-nodes>
+      <list-nodes
+        v-if="myNodesMode"
+        v-bind:myNodes="myNodes"
+        v-on:pagedToTheseNodeKeys="pagedToTheseNodeKeys">
+      </list-nodes>
       <modal-info v-if="false"></modal-info>
     </div>
   `,
@@ -58,7 +62,7 @@ export default {
         1: new SimpleText()
       },
       pendingNodeKey: undefined,
-      myNodes: [],
+      myNodes: {},
       buildMode: false,
       myNodesMode: false
     }
@@ -108,14 +112,6 @@ export default {
         });
       }
     },
-    updateMyNodes: async function() {
-      try {
-        this.myNodes = await this.contract.getNodesBelongingTo(this.web3Handler.account);
-      }
-      catch (error) {
-        console.log(error);
-      }
-    },
     getAjax: function(url) {
       return new Promise((resolve, reject) => {
         
@@ -147,7 +143,7 @@ export default {
     fetchIpfs: async function(ipfs) {
       return this.getAjax("https://ipfs.io/ipfs/" + ipfs);
     },
-    edgeStart($event) {
+    edgeStart: function($event) {
       if (this.currentNode.edgeNodeKeys[$event.slot] == 0) {
         console.log("Formod attempted to trigger an edge start, but the edge is not set in the blockchain.");
         return;
@@ -155,11 +151,11 @@ export default {
       this.arrivedSlot = $event.slot;
       this.pendingNodeKey = this.currentNode.edgeNodeKeys[$event.slot]; // $event.nodeKey would work too.
     },
-    edgeBoundary() {
+    edgeBoundary: function() {
       this.updateNode(this.pendingNodeKey);
       this.pendingNodeKey = undefined;
     },
-    buildModeToggle() {
+    buildModeToggle: function() {
       if (this.web3Handler.loggedIn) {
         this.buildMode = !this.buildMode;
       }
@@ -168,14 +164,51 @@ export default {
       }
       // TODO watch web3Handler for log-out events and turn off build mode
     },
-    async myNodesToggle() {
+    myNodesToggle: async function() {
       if (this.web3Handler.loggedIn) {
         if (!this.myNodesMode) {
           await this.updateMyNodes();
         }
         this.myNodesMode = !this.myNodesMode;
       }
-
+    },
+    updateMyNodes: async function() {
+      try {
+        let nodeKeys = await this.contract.getNodesBelongingTo(this.web3Handler.account);
+        this.myNodes = {};
+        for (var keyKey in nodeKeys) {
+          this.myNodes[nodeKeys[keyKey]] = {
+            key: nodeKeys[keyKey]
+          };
+        }
+      }
+      catch (error) {
+        console.log(error);
+      }
+    },
+    pagedToTheseNodeKeys: function(nodeKeys) {
+      console.log("app pagedToTheseNodeKeys");
+      
+      // Request node data asynchronously and in parallel for all paged-to nodeKeys in myNodes.
+      for (var keyKey in nodeKeys) {
+        this.updateMyNodeData(nodeKeys[keyKey]);
+      }
+    },
+    updateMyNodeData: async function(nodeKey) {
+      try {
+        let node = await this.contract.getNode(nodeKey);
+        this.myNodes[nodeKey] = node;
+        this.myNodes[nodeKey].data = JSON.parse(await this.fetchIpfs(node.ipfs));
+        this.$forceUpdate();
+        console.log("Data loaded for " + nodeKey);
+      }
+      catch (error) {
+        console.log(error);
+        this.myNodes[nodeKey].data = JSON.stringify({
+          failed: true,
+          error: error
+        });
+      }
     }
   },
   created: function() {
