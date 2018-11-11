@@ -1,0 +1,128 @@
+# Interweaver's to-do items, 2018-10-24:
+
+- Thoughts on figuring out the second slot when traveling from the first...
+  - So your Node has edgeNodeKeys 0..5
+  - So you have the keys in each when you do getNode
+  - How do you figure out which edgeNodeKeys index in the other Node *your* node is in?
+  - Old HalfEdges pointed straight to another HalfEdge, but edgeNodeKeys point to the Node's key.
+  - Answer: gonna have to iterate, up to 6 times lol. But, totally just do it in the Viewer. No need for smart contract code.
+  - You only really care about the answer when you want to figure out which *incoming* halfedge data you want to render. Whenever traversing edges, that is.
+  - So not really a problem at all. It's a contract invariant that you *will* be one of those edgeNodeKeys in the other Node if it's in one of your Node's edgeNodeKeys.
+  
+- Thoughts on transferring Nodes (eventually) with regard to the Owner constructs containing Nodes and EdgeProposals...
+  - Okay, so it should be easy enough to remove the Node's key from their nodeKeys array, since we have the index saved on the Node.
+  - It's easy to delete EdgeProposal keys from their edgeProposalKeys array when deleting the EdgeProposal, since we have the index saved on the EdgeProposal.
+  - But what about when the Node is no longer theirs?
+  - There's an unbounded number of EdgeProposals belonging to them that are targeting that Node.
+  - So it's potentially impossible to delete them all and put them onto the new Owner's list in the single transaction.
+  - Basically, I think we need to have the edgeProposalKeys lists attached to *Nodes* rather than Owners.
+  - Then the potentially infinite list would not need to change when the Node ownership changes.
+  - Owner would also be a silly struct with just one entry - ownerLookup could simply return the nodeKeys list, without an intermediate struct.
+  - So how do Node owners iterate over their outstanding proposals then?
+  - Well, easy: for each Node in their nodeKeys list, call getNodeEdgeProposalCount and getNodeEdgeProposalKeyByIndex (if needed), repurposed from the Owner-based ones.
+  - Not so easy to get their total proposals count, but that's acceptable.
+  - So, deleting Nodes: does this mess it up?
+  - Um, I don't think so? I think dynamic arrays get recursively deleted when you delete their struct (from nodeLookup)?
+  - But, I think the gas cost of (automatically) calling 'delete' on an unbounded number of dynamic array entries could be unbounded and thus borkable.
+  - Hmmm.
+
+- What if we did away with edgeProposalKeys entirely?
+  - How do you get your EdgeProposals?
+  - Answer: from the logs ('you' being someone in a viewer with a web3 instance)
+  - Index the edgeProposal creations and deletions by nodeKey rather than ownerAddr.
+  - Then when you want to get your EdgeProposal keys, you look up proposal creations by each Node's nodeKey.
+  - You also have to look up proposal rejections and accepts, so you can tell which ones got deleted.
+  - Is this efficient? Well, event scans are outside the gas system, so it's cheap, at least.
+  - I think it might work.
+  - The default Viewer behavior would be to just scan Nodes you're visiting while in build mode, to give you a sense of if any proposals happened.
+  - But you could also have it scanning each Node on your 'my Nodes' paginated list and giving you a count of existing edgeProposals.
+  - Would never have a grand total of 'you have 213525 open EdgeProposals', but you'd not really want that, anyway, since N of them would be invalid.
+  - Okay, this seems like it makes sense.
+  
+- Thoughts on the value of owner nodeKeys, in light of this:
+  - Well, if we accept using logs as a valid mechanism for key lookup, then why not do the same for owner nodeKeys?
+  - You'd just look for all NodeCreated, NodeDeleted, and (eventually) NodeTransferred events with your address in them, and subtract the transfers/deletions from the creates.
+  - This seems like an extreme position to take, but it sure would save gas for node creations and deletions and transfers, and complexity too.
+  - Lol, I keep implementing things and then realizing they're unnecessary.
+  - Kay. I should clearly do more research on how Event logging works - would it support tons of indexed lookups from users efficiently?
+  - If so, this would really simplify things further.
+  - InterweaveGraph would literally just be nodeKeyFromIpfs, createNode, deleteNode, and getNode (and event/struct/lookup defs)
+  - InterweaveProposals would literally just be edgeProposalKeyFromNodesAndSlots, createEdgeProposal, acceptEdgeProposal, deleteEdgeProposal, and getEdgeProposal (and event/struct/lookup defs)
+  - This puts work on the Viewer to scan logs looking for the all-important keys, which allow you to look up data and actually call to make changes.
+  - I think that's where the work belongs, anyway. The Solidity code needs to be as dead simple as possible, to be cheap/efficient and robust.
+  - Um okay, one thing: ERC721 requires a balanceOf function. This would require, at a minimum, keeping track on-chain of + and - the node counts for owners.
+  - So probably have an ownerNodeCount mapping from address to number of nodes, and increase when creating a node and transferring in, decrease when deleting and transferring away
+  - This would be like having the nodeKeys list, but without saving the actual keys (which has a 20000 storage gas cost per key addition), just updating the count (a 5000 gas storage update cost).
+  - So basically saving 15k gas per node creation, and some amount per deletion as well.
+  - Sounds like a good deal, provided event log lookups work well. I think Bloom filters make this possible?
+  
+- [ ] Research solidity events and logging, especially as relates to indexing.
+  
+- [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
+  - [ ] Smart contracts
+    - [X] Write a getEdgeProposal function.
+      - Should include a connect/disconnect check and a validity check in there.
+    - [ ] Write unit tests for InterweaveProposals (at least, an attempt at them, given none of them will pass yet)
+      - [ ] test_proposals.js:
+        - [ ] createEdgeProposal
+          - Should error if slot0 > 5
+          - Should error if slot1 > 5
+          - Should error if nodeKey0 not owned by msg.sender
+          - Should error if nodeKey1 doesn't exist
+          - Should error if node0[slot0] is a third node
+          - Should error if node1[slot1] is a third node
+          - Should error if the same EdgeProposal already exists.
+          - Should error if the reverse EdgeProposal already exists.
+          - Should result in connected Nodes if they're both msg.sender's and they were both 0 before
+          - Should result in disconnected Nodes if they're both msg.sender's and they were both each other before
+          - Should result in the correct getOwnerEdgeProposalCount for both Owners after 0th, 1st, 2nd creations
+          - Should result in the correct getOwnerEdgeProposalKeyByIndex result in both Owner lists (for the 0th, 1st, 2nd creations - doesn't matter where in the lists.)
+          - Should result in the correct getEdgeProposal values.
+          - Should not error if the same person makes another EdgeProposal pointing from the same Node slot to a different slot.
+          - Should not error if the same person makes another EdgeProposal pointing to the same Node slot from a different slot.
+        - [ ] acceptEdgeProposal
+          - Should error if EdgeProposal doesn't exist
+          - Should error if ep.n1.ownerAddr != msg.sender
+          - Should error if EdgeProposal is invalid
+          - Should disconnect if Nodes are currently connected
+          - Should connect if Nodes are currently disconnected
+          - Should delete the EdgeProposal from the lookup and from both owner ep lists.
+          
+        - [ ] rejectEdgeProposal
+          -
+        - [ ] deleteNode if that Node has EdgeProposals
+          - Should not error
+          - edgeEdgeProposal should show an invalid EdgeProposal afterward.
+    - [ ] Finish InterweaveProposals
+    - [ ] Run tests as we go, and fix bugs with the contract and with the tests
+    - [ ] With tested InterweaveGraph and InterweaveProposals contracts, compile and deploy to testnet!
+    - [ ] Share somewhere, and fix bugs that people find, haha. This being the "free version", less (but not nothing) is at stake.
+    - [ ] When DApp is tested and ready to go, deploy to mainnet!
+  - [ ] DApp
+    - [ ] Clone Set Hash code to start with
+    - [ ] Rewrite the ContractHandler to interface with all of the smart contract functions
+    - [ ] Spend a little time designing how the UI should look/be structured
+    - [ ] Rewrite the Vue app to use the ContractHandler functions to implement this UI
+    - [ ] Extensively test! Probably can point the ContractHandler at my Ganache testnet for cheaper tests before hitting up testnet.
+    
+- [ ] Build Version 2 (the "payable version", i.e. with the ability to pay/be paid for EdgeProposals, and Nodes are ERC-721s)
+
+- [ ] Write whitepaper:
+    - [ ] Fill in sections. Note: leave out implementation details (anything as specific as which smart contracts or fields need to be created.) That goes in yellow paper.
+      - [ ] Rationale for Interweave Network
+      - [ ] Philosophy
+      - [ ] Architecture
+      - [ ] Applications
+      - [ ] Challenges
+      - [ ] Summary
+      - [ ] Further Reading
+    - [ ] Let sit for a few days while doing other things.
+    - [ ] Revisions, round 1.
+    - [ ] Let sit for another few days while doing other things.
+    - [ ] Revisions, round 2.
+    - [ ] Publish (reddit? medium? Lol, I've seen enough whitepapers to know where this is going. Not that I have any reach...)
+ 
+
+
+
+ 

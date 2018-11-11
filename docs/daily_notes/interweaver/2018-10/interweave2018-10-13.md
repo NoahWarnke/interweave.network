@@ -1,0 +1,79 @@
+# Interweaver's to-do items, 2018-10-13:
+
+
+- [ ] Design the Interweave Network.
+  - [ ] Rewrite interweave design documents into whitepaper-style document with more carefully-thought-out ideas.
+    - [ ] Fill in sections. Note: leave out implementation details (anything as specific as which smart contracts or fields need to be created.) That goes in yellow paper.
+      - [X] Existing work
+        - [X] Research similar concepts beyond games I'm already familiar with:
+          - sandbox games with user ownership of land
+            - Minecraft: Users own the servers, rather than specific land.
+              - Some modded versions had ways to go between different servers in-game (Bukkit?)
+            - Wurm Online
+            - Second Life
+          - "open world" concept: players explore and approach objectives freely, no invisible walls/loading screens
+            - GTA, etc.
+          - interconnected games frameworks
+            - My Google-fu is not strong enough.
+          - portals between worlds games
+            - OpenCroquet/Colbalt (http://wiki.c2.com/?OpenCroquet, http://www.opencobalt.net/) was the thing I remember from 10 years ago with the portals between worlds...
+              - The idea was users built their own 3D spaces, and then hyperlink to them (via portals).
+              - It was intended to be a new type of web browser.
+              - "It's a framework for building cooperative, 3D spaces. Theoretically, you could reimplement Second Life on top of Croquet, or rather, multiple SecondLifes that could talk to each other."
+          - user-created text-based adventures (sandbox?)
+            - First: Colossal Cave Adventure. Graph of locations.
+            - Lots of Interactive Fiction building tools nowadays, but I couldn't find any connected-world ones...
+              - http://twinery.org/, etc.
+          - networks on ethereum
+            - Nothing for "network graphs within ethereum" in the first 10 Google pages...
+          - graphs on ethereum
+          
+          - Okay conclusion: if similar things on the blockchain exist (other than Decentraland) they are horribly bad at SEO.
+          - And if similar things not on blockchain exist (the open user-created text based world), I'm too bad at Googling to find it too. Lol...
+        - [X] Write
+      - [ ] Rationale for Interweave Network
+      - [ ] Philosophy
+      - [ ] Architecture
+      - [ ] Applications
+      - [ ] Challenges
+      - [ ] Summary
+      - [ ] Further Reading
+    - [ ] Let sit for a few days while doing other things.
+    - [ ] Revisions, round 1.
+    - [ ] Let sit for another few days while doing other things.
+    - [ ] Revisions, round 2.
+    - [ ] Publish (reddit? medium? Lol, I've seen enough whitepapers to know where this is going. Not that I have any reach...)
+
+- [ ] Try setting up an IPFS node of my own (just for practice)
+
+- [X] Try setting up a geth node of my own (just for practice)
+  - Download geth
+  - cd to extracted directory
+  - ./geth --testnet --syncmode=fast --mine --datadir /media/noah/55aff53c-1218-4a37-bb18-c3a119f3a96b1/.ethereum/testnet --etherbase '0x002e67f620dda8a9141e262e125938bb28048cd1'
+  - Wait for several hours for sync
+  - Mining is slow!
+ 
+- [ ] Build the network!
+  - [ ] Stage 1a
+    - [ ] Non-transferrable nodes (not yet ERC721)
+    - [ ] Non-deletable edges that you can create between any of your own nodes (that don't already have an edge)
+    - [ ] Uses normal URLs for the link value (up to 100 chars)
+    - [ ] Node format 1 (simple text) node and edge 1 format (edge-edge, edge-else, else-edge)
+    - [ ] Simple front-end viewer that supports exploring a network built of nodetype1 and edgetype1
+    - [ ] Network built via direct function calls, not through the viewer.
+  - [ ] Stage 1b
+    - [ ] Viewer supports a way to add nodes and edges and keep track of your account's nodes.
+  - [ ] Stage 1c
+    - [ ] Node format 2 (images) and edges 2 format (image-image, image-else, else-image)
+  - [ ] Stage 2a
+    - [ ] Nodes ERC721 and thus transferrable
+    - [ ] Edges proposable according to proposition rules.
+    - [ ] Edges deletable according to edge deletion rules.
+  - [ ] Stage 2b
+    - [ ] Edge proposals/deletions (and node transfers?) in viewer.
+  - [ ] Stage 3a
+    - [ ] Nodes switch to only supporting IPFS URLs.
+  - [ ] Stage 3b
+    - [ ] IPFS uploads through the viewer.
+  - [ ] Stage 4
+    - [ ] Additional formats, like 3d, etc.

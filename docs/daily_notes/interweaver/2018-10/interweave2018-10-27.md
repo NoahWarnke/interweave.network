@@ -1,0 +1,158 @@
+# Interweaver's to-do items, 2018-10-27:
+  
+- [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
+  - [ ] Smart contracts
+    - [X] Finish InterweaveProposals (initial implementation)
+    - [X] Write unit tests for InterweaveProposals (at least, an attempt at them, given none of them will pass yet)
+      - [X] test_proposals.js:
+        - [X] Stub them out
+        - [X] Struggle with before/beforeAll/how we clean up after ourselves...
+          - Every test needs an instance of the contract.
+          - Putting it in "beforeEach" made sense to me for the Nodes testing - new instance per test.
+          - I was able to do "Before" for some of the Nodes tests though, calling the instance in it, and it didn't mess up?
+          - Now doing instance calls in Before seems to mess up if the instance is generated in BeforeEach - Before comes before BeforeEach?
+          - Hmm
+          - Aha! I wanted Contract.new(), not Contract.deployed().
+        - [X] Implement unit tests
+    - [X] Run tests as we go, and fix bugs with the contract and with the tests
+      - Did actually uncover a couple of bugs with the implementation, awesome!
+    - [X] Go through each of the Solidity vulnerabilities I know about, and assess the contracts for whether they're vulnerable to it or not.
+      - [X] Re-entrancy
+        - This occurs when you use msg.sender.call.value to transfer money.
+        - Interweave Free contracts don't use .call anywhere, or transfer money at all, currently.
+        - Still, do I follow "checks effects interactions"? I guess the only interactions are events, right? So do I always do those last?
+        - Okay, acceptEdgeProposal had one case where EdgeCreated or EdgeDeleted events are emitted before the edgeProposalLookup was deleted. Fixed that.
+      - [X] Over/underflow
+        - Cases where integers are added to or subtracted from, with the range controlled by state, not set numbers.
+        - I've definitely got a few 'for' loops...
+        - Okay, one single 'for' loop in deleteNode for checking the six edgeNodeKeys.
+        - for (uint8 i = 0; i < 6; i++)
+        - No other + - * / math operations anywhere, amazingly! These contracts are all about structure, not calculations.
+        - I think this is pretty clearly constrained to not going anywhere!
+        - So yes, don't need to import SafeMath here.
+      - [X] Unexpected ether
+        - Contracts can have eth other than what flows through their 'payable' functions.
+        - I'm not doing anything with money, so this is irrelevant.
+      - [X] Randomness/entropy illusion
+        - Blockchain is deterministic, so any internal 'randomness' is fake.
+        - I'm not doing anything with randomness.
+        - I *am* using keccak for hashing, but in an intentionally predictable way - you can tell what your Node or EdgeProposal key will be before you create it.
+        - So this doesn't apply.
+      - [X] Delegatecall
+        - When you call an external contract's code with delegatecall, to make it run in the context of the calling function.
+        - I'm not doing this anywhere (no external calls at all!) so not relevant.
+      - [X] Default visibility
+        - Functions default to public, so you could expose unintended things if you don't set visibility.
+        - All of my functions have visibility set, so this is not relevant.
+      - [X] External contract referencing
+        - If referencing an external contract, there's no guarantee that a given address is the correct contract type or contract, even if you cast to it...
+        - I'm not referencing any external contracts at all, so this is not relevant.
+      - [X] Short address/parameter
+        - Passing in params that are not the right size, EVM will pad the call string with 0s *at the end* to get expected length.
+        - This will change other parameters than the shortened one, e.g. whatever's last.
+        - Hmm, seems like this one's a definite consideration, given that we're passing in addresses and byte32s and uint256s from the user all the time.
+        - The proposed solutions are:
+          - a) check user input in the frontend (useless for security lol, just preventing accidents),
+          - b) parameter ordering to make exploiting harder, and
+          - c) checking len(msg.data) right size.
+        - Okay, that last one seems doable.
+        - Done. Added assert(msg.data.len >= numBytesInParams + 4) to the top of the 5 non-view functions. Unit tests still pass, but fail if I make the numbers one larger.
+      - [X] Unchecked CALL return values
+        - call() and send() can revert, but *return false*, not stop the entire transaction, so assuming they will stop the tx is dangerous.
+        - I'm not using either of these, so not relevant.
+      - [X] Race conditions
+        - Miners can re-order the tx pool or reject txes, insert their own, etc. And others can watch the pool and put in their own txes with higher gas if they want to front-run.
+        - Yes, this technically applies to situations here:
+          - Let's say someone creates an EdgeProposal, and then watches for the other party to call acceptEdgeProposal in the tx pool.
+          - When they see that happen, they throw in a rejectEdgeProposal call with high gas, yoinking the proposal and making the other's acceptEdgeProposal fail.
+          - Okay, the outcome of this attack is... the attacker spent a bunch of gas to create and delete an edgeProposal, and the victim spent a little bit before getting reverted.
+          - Not really a major problem. Kind of trolling, yes, but didn't result in any unfair stuff happening, and the attacker pays more than the victim.
+          - Victim can just ignore if this happens a few times from the same account...
+          - To be honest, it would be more annoying to get spammed by tons of EdgeProposals that *didn't* get reverted by the attacker... But again, expensive.
+        - I'd say this isn't a risk here.
+      - [X] DOS attacks
+        - Breaking a contract by entering enough data to make places in the contract that iterate over that data take more gas than the block can contain.
+        - Or by there being an owner on the contract, and they lose their keys...
+        - Neither of these apply. We have one 'for' loop, which loops up to 6 times, over user-submitted data that is at most 6 uint256s long. No 'contract owner' either.
+        - I actually spent a lot of time thinking about this already, and there's nowhere left for this problem to crop up.
+        - So we're safe here.
+      - [X] Block timestamp manipulation
+        - If contract depends on block.timestamp, it can be changed a tad by miners.
+        - We don't, so not relevant.
+      - [X] Constructors with care
+        - If your constructor has a name that is supposed to match the contract's (per old Solidity syntax) but doesn't, anyone can call it...
+        - I don't have any constructors, much less one with the old matching-name syntax. Not relevant.
+      - [X] Uninitialized Storage Pointers
+        - Uninitialized storage variables point to the contract's storage slot 0 (whatever is in it! Gah, what a gaping hole.)
+        - Thus if you change such an uninitialized pointer, you're messing with real contract storage values.
+        - Need to always put 'memory' or 'storage' when creating local variables, and don't create uninitialized ones.
+        - I'm pretty sure I put 'storage'/'memory' for all complex types (the compiler doesn't let me put 'memory' for non-complex ones?), and don't create uninitialized storage...
+        - But let me check haha.
+        - Right, can only set 'memory/storage' for array or struct types, according to the compiler.
+        - InterweaveGraph: 3 'memory' variables of type Node, no storage. Not modifying storage, just setting and deleting it!
+        - InterweaveProposals: 4 'storage' Nodes (all initialized to something from nodeLookup), 3 'memory' EdgeProposals, 1 'memory' address[2].
+        - Okay, so looks like I've always explicitly put memory/storage for all array or struct variables, and have never left any storage uninitialized.
+        - So: going to declare safe from this one.
+      - [X] Floating points and precision
+        - All math is integer division, so if you try to simulate floating point math, beware: do multiplications before divisions, keep in >1 forms, use high precisions, etc.
+        - I'm not doing any floating point math (or integer math, except for that one deleteNode for loop!) So not relevant.
+      - [x] Tx.origin authentication
+        - If you use tx.origin to check for the account that originally sent a transaction, that makes your contract vulnerable to phishing via other smart contracts.
+        - I do not use tx.origin to check for the account that originally sent a transaction. So not relevant.
+        - I actually considered using it in the approved manner: require(tx.origin == msg.sender) to keep out smart contracts. But why restrict usage like that?
+      - Okay, 'internal mini-audit' complete! Conclusions:
+        - I had one small violation of "checks effects interactions" where an event fired before an effect. Re-ordered the effect to be before the event emission.
+        - I was potentially vulnerable to the short address/parameter bug - I didn't attempt to actually create an attack, but added msg.data.length checks to the 5 non-view functions.
+        - Otherwise, seems good to go!
+        - Haha, I am so naive about everything, so who knows if it really is. But this is a very simple contract pair, with no money involved, so it could very well be fine.
+        - Sweet, let's move on!
+      
+    - [X] Learn how to deploy to Ganache manually, and hook MetaMask up to it.
+      - Set Ganache up to not automine, but 15-second block times (better simulate real network).
+      - Set Metamask to 'Custom RPC' network in the dropdown menu - it takes you to settings, where you can add, e.g., Ganache's http://127.0.0.1:7545 RPC port.
+      - Note that our Ganache Network ID is 5777 - will need to add handling code for that in the contractHandler code.
+      - Deploy contract via that!
+      - Can I do this with Truffle?
+      - 'truffle migrate --reset' (--reset to prevent 'Error: Attempting to run transaction which calls a contract function, but recipient address is not a contract address')
+      - This is pretty slow, with my 15-second block time, lolz.
+      - But okay, seems to have worked!
+      - Let's try connect Set Hash.
+      - Add in the contract deploy address and block number of deploy to contractHandler.js
+      - And sweet, we're in business! Connected successfully.
+      - Okay lol, 15 second block times are kind of a joke for fast development.
+      - Automine would almost certainly be much better, until testing delay-type stuff.
+      - So let's re-migrate to Ganache with automine enabled (should be a lot faster), and then get going!
+      - Okay, after re-migrating, I was getting super-annoying "wrong nonce" errors, because MetaMask was saving my Ganache account's nonce from the previous Ganache startup.
+      - MetaMask -> Settings -> Reset Account fixed that.
+      
+    - [ ] When DApp is ready to share, compile and deploy to testnet!
+    - [ ] When DApp is tested and ready to go, deploy to mainnet!
+  - [ ] DApp
+    - [ ] Clone Set Hash code to Interweave Free to start with
+    - [ ] Rewrite the ContractHandler to interface with all of the smart contract functions
+    - [ ] Design how the UI should look/be structured
+    - [ ] Rewrite the Vue app to use the ContractHandler functions to implement this UI
+    - [ ] Extensively test! Probably can point the ContractHandler at my Ganache testnet for cheaper tests before hitting up testnet.
+    - [ ] Share somewhere, and fix bugs that people find, haha. This being the "free version", less (but not nothing) is at stake.
+    
+- [ ] Build Version 2 (the "payable version", i.e. with the ability to pay/be paid for EdgeProposals, and Nodes are ERC-721s)
+
+- [ ] Write whitepaper:
+    - [ ] Fill in sections. Note: leave out implementation details (anything as specific as which smart contracts or fields need to be created.) That goes in yellow paper.
+      - [ ] Rationale for Interweave Network
+      - [ ] Philosophy
+      - [ ] Architecture
+      - [ ] Applications
+      - [ ] Challenges
+      - [ ] Summary
+      - [ ] Further Reading
+    - [ ] Let sit for a few days while doing other things.
+    - [ ] Revisions, round 1.
+    - [ ] Let sit for another few days while doing other things.
+    - [ ] Revisions, round 2.
+    - [ ] Publish (reddit? medium? Lol, I've seen enough whitepapers to know where this is going. Not that I have any reach...)
+ 
+
+
+
+ 

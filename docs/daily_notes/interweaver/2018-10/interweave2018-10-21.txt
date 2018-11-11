@@ -1,0 +1,156 @@
+# Interweaver's to-do items, 2018-10-21:
+   
+- further thoughts on having deleted node.owner
+  - This will work fine for interweave-free, where nodes never *change* owners lol.
+  - But for full interweave, changing owners would require changing the node address, which shouldn't be allowed.
+  - So yeah, gonna have to bring back node.owner for that.
+  
+- Further thoughts on what actually exploring and editing the graph in Interweave Free will look like:
+  - You go to a Viewer website somewhere (maybe IPFS-hosted someday :D)
+  - It has a hard-coded starting Node address, or a set of randomly-picked Node addresses (someday perhaps that special Viewer node with infinite half-edges).
+  - In any case, the user starts with the viewer pointed at a nodeAddr.
+  - One call to getNode later, they have the owner, IPFS, format, and a list of halfEdgeAddrs.
+  - At that point, the whole Node can render, but not any Edges yet, just how many of them there will be (and perhaps their addresses, if anyone cares.)
+  - 0-6 calls to getEdge later, they have the IPFS of the one/two halfEdges of each edge, their formats, and the nodeAddr of the Nodes at the other end (if any) of each.
+  - At that point, the Node's outgoing connected HalfEdges can render to whatever extent they will when you're in the Node (perhaps just the names, or nothing even?)
+  - Then if a user selects a HalfEdge to follow, while the Viewer is rendering the two HalfEdges with a smooth transition between them, it will call getNode in the background.
+  - Hopefully by the time the Edge finishes rendering, the next Node will have loaded, letting it render immediately.
+  - Process repeats at this point. Explore! Only two functions are needed to be called (getNode and getEdge), albeit together up to 7 times per Node.
+  
+  - If you're signed in to MetaMask or equivalent:
+    - When you're at a Node, you can see some indication if you own it or not, since node.owner is returned with the Node data.
+    - Globally, the Viewer will fetch your list of Nodes addresses by calling getSenderNodeCount and getSenderNodeAddrByIndex.
+    - Globally, the Viewer will fetch your list of EdgeProposal addresses by calling getSenderEdgeProposalCount and getSenderEdgeProposalAddrByIndex.
+    - Potentially, these requests will be paginated, perhaps to 8 per page, so if you have a lot it's not grinding through requests.
+    - Potentially, there will be a get8SenderNodeAddrsByIndex and get8SenderEdgeProposalAddrsByIndex. This would speed up loading by grouping requests.
+    - These addresses would not render until you clicked on them.
+    - Then a call to getNode, or getEdgeProposal, would return all the relevant data for that object.
+    - You could accept or reject EdgeProposals from the window giving EdgeProposal information after you clicked it.
+    
+    - Could you teleport to one of your Nodes after viewing that window? Hmm, I don't know.
+    - Could you add/remove HalfEdges or delete the Node while viewing that window? Hmm, also don't know.
+    - It would be appealing (to me) to only be able to edit a Node while you were standing at it.
+    - This would make navigating the graph a crucial aspect of managing your personal network of Nodes.
+    - Teleporting, in general, is an example of an evil "seam" between unconnected places.
+    - Tele-managing seems like it would be almost as bad.
+    - Potentially you could be a long ways away from one of your Nodes that you wanted to edit...
+    - Okay, hmm. I think this is one of those things that Viewers will decide for themselves.
+    - The vanilla Interweave Network Viewer will not allow teleporting (especially) or tele-managing. You must always get back to your Node to manage it.
+    - So what's the value of seeing your list of Nodes?
+    - Probably just a reminder of which ones you own?
+    - What if you totally lost one of your Nodes?
+    - Well, getting lost is part of the fun of exploring :P
+    - Keep maps!
+    - Automatic graph traversal to give you the route back to your Node? Hmm.
+    - Lol, probably will need to consider this more. Might impact others' fun if they misplace their Nodes.
+    - To start with, no tele-anything.
+    
+- Thoughts on my large use of 'address' as keys for objects:
+  - Whoops, didn't realize that was restricted to 20 bytes (Eth address size)!
+  - Had meant that to always be the full uint256 size range.
+  - Uhm, should go through and rename all 'Addr' to 'Key' (or even 'Id'), and change all 'address' (except the ones that are legit Owner addresses) to 'uint256'.
+  - Should do that before I go through and write my test_halfedges unit tests, since those will refer to 'addr' in a ton of spots too.
+  - Hmm, I do like the ability to see the address as bytes though...
+  - How about instead of uint256, it's bytes32?
+  - And I do like "key" better than "id", for some reason (probs because it's a literal key for key/value lookup in the node/halfedge/edgeproposal lookup mappings)
+  - Oops, looks like bytes32 is actually more expensive than uint256.
+  - So "key" + uint256 it is.
+  
+- Thoughts on eventual ERC-721:
+  - Looks like I could just make an InterweaveNFT contract that inherits from InterweaveProposals, and simply bolts in the required functions.
+  - With Node keys as uint256, that works perfectly with NFT ids as uint256.
+  - The one mechanism beyond ownership (already accounted for) is 'approval', where you can set someone to have permissions over 1, or all, of your assets.
+  - I can probably just steal a default ERC-721 implementation (and hopefully unit tests?) and change the couple of functions which deal with ownership to hook into my existing code.
+  - Shouldn't be too hard, actually!
+  - And bolting in the 'payable' stuff to EdgeProposals, too, should be pretty easy, per my thoughts on that a while ago.
+  - Sweet, hope there's not too long a gap between Interweave Free and the full Interweave Network.
+  
+   
+- [ ] Register social accounts for interweavenetwork/interweaver, just in case...
+  - Twitter
+  - Medium
+  - gmail?
+  - github
+   
+- [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
+  - [ ] Smart contracts
+    - [X] Convert ipfs from string to byte32[2] for Nodes and HalfEdges.
+      - [X] How do you do that conversion?
+        - Looks like Web3.utils.toAscii(theBytes32) and Web3.utils.fromAscii(someString) will do the job.
+        - Not sure how it applies to multiple bytes32 - do you have to split it yourself? Probably:
+          - Make an empty array to hold the bytes32
+          - Get length of fromAscii call
+          - If <= 66 chars, pad the end with 0s, push onto array
+          - If > 66 (0x must not count), split off the first 66 chars and push onto array, add 0x to second chunk, and repeat with it (should only need 1 repeat for IPFS hashes)
+        - Conversely, when converting back out of bytes32[2], will have to join them together, and cut away any "00" bytes at the end, since those are empty.
+      - [X] So just convert to bytes32[2] in the code, and assume the DApp can handle converting into/out.
+        - Conveniently, this eliminates tests for string length, since it literally can only occupy those two slots. If it's too small, that's on the dapp to catch.
+        - There was never a way to validate the IPFS hash in solidity anyway, so this doesn't make our situation any worse. User's just wasting money if they put in bad hashes.
+    - [X] Convert getNode and getEdge into full-details-returning functions.
+      - [X] getNode should return the node's ipfs, format, and whether msg.sender is the owner (bool) in addition to the (up-to-6) HalfEdge addresses.
+      - [X] getEdge should return the HalfEdge's nodeAddr, ipfs, format, a bool if it's connected or not, and the nodeAddr, ipfs, and format of the other HalfEdge if so.
+    - [X] Get rid of node.owner, per yesterday's thoughts. Replace owner checks with keccak of msg.sender + the ipfs hash.
+    - [X] Get rid of owner in the various events.
+    - [X] Get rid of the owner input to getNodeCount and getNodeAddrByIndex, since msg.sender is already implicitly sent.
+    - [X] Put node.owner back again lol, since we'll need it for full interweave, if we ever want to have the owner be changeable for a node but the address constant!
+    - [X] Convert all the 'Addr' and 'address' types to 'Key' and 'uint256'
+      - Tons of find-and-replace and careful editing later...
+      - Looks like comparing BigNumbers inside assert.equal isn't gonna fly in unit tests.
+      - isEqualTo doesn't seem to want to work either?
+      - Conclusion: They're not real BigNumber instances.
+      - They can, however, have .toString() called on them, and those can be compared directly.
+      - Sweet, tests are passing again!
+    - [ ] Write unit tests for InterweaveGraph:
+      - [X] test_nodes.js:
+        - [X] createNode
+        - [X] deleteNode
+        - [X] getNodeCount
+        - [X] getNodeAddrByIndex
+        - [X] getNode if that Node doesn't have HalfEdges
+      - [ ] test_halfedges.js:
+        - [ ] createHalfEdge
+        - [ ] deleteHalfEdge
+        - [ ] getNode if that Node has HalfEdges
+        - [ ] getEdge
+        - [ ] deleteNode if that Node has HalfEdges
+    - [ ] Fix any bugs with InterweaveGraph this turns up
+    - [ ] Write unit tests for InterweaveProposals (at least, an attempt at them, given none of them will pass yet)
+      - [ ] test_proposals.js:
+        - [ ] createEdgeProposal
+        - [ ] acceptEdgeProposal
+        - [ ] rejectEdgeProposal
+        - [ ] deleteNode if that Node's HalfEdges have EdgeProposals
+        - [ ] deleteHalfEdge if that HalfEdge has EdgeProposals
+    - [ ] Finish InterweaveProposals
+    - [ ] Run tests as we go, and fix bugs with the contract and with the tests
+    - [ ] With tested InterweaveGraph and InterweaveProposals contracts, compile and deploy to testnet!
+    - [ ] Share somewhere, and fix bugs that people find, haha. This being the "free version", less (but not nothing) is at stake.
+    - [ ] When DApp is tested and ready to go, deploy to mainnet!
+  - [ ] DApp
+    - [ ] Clone Set Hash code to start with
+    - [ ] Rewrite the ContractHandler to interface with all of the smart contract functions
+    - [ ] Spend a little time designing how the UI should look/be structured
+    - [ ] Rewrite the Vue app to use the ContractHandler functions to implement this UI
+    - [ ] Extensively test! Probably can point the ContractHandler at my Ganache testnet for cheaper tests before hitting up testnet.
+    
+- [ ] Build Version 2 (the "payable version", i.e. with the ability to pay/be paid for EdgeProposals, and Nodes are ERC-721s)
+
+- [ ] Write whitepaper:
+    - [ ] Fill in sections. Note: leave out implementation details (anything as specific as which smart contracts or fields need to be created.) That goes in yellow paper.
+      - [ ] Rationale for Interweave Network
+      - [ ] Philosophy
+      - [ ] Architecture
+      - [ ] Applications
+      - [ ] Challenges
+      - [ ] Summary
+      - [ ] Further Reading
+    - [ ] Let sit for a few days while doing other things.
+    - [ ] Revisions, round 1.
+    - [ ] Let sit for another few days while doing other things.
+    - [ ] Revisions, round 2.
+    - [ ] Publish (reddit? medium? Lol, I've seen enough whitepapers to know where this is going. Not that I have any reach...)
+ 
+
+
+
+ 

@@ -1,0 +1,81 @@
+# Interweaver's to-do items, 2018-10-14:
+
+
+- [ ] Design the Interweave Network.
+  - [ ] Rewrite interweave design documents into whitepaper-style document with more carefully-thought-out ideas.
+    - [ ] Fill in sections. Note: leave out implementation details (anything as specific as which smart contracts or fields need to be created.) That goes in yellow paper.
+      - [ ] Rationale for Interweave Network
+      - [ ] Philosophy
+      - [ ] Architecture
+      - [ ] Applications
+      - [ ] Challenges
+      - [ ] Summary
+      - [ ] Further Reading
+    - [ ] Let sit for a few days while doing other things.
+    - [ ] Revisions, round 1.
+    - [ ] Let sit for another few days while doing other things.
+    - [ ] Revisions, round 2.
+    - [ ] Publish (reddit? medium? Lol, I've seen enough whitepapers to know where this is going. Not that I have any reach...)
+
+- [X] Try setting up an IPFS node of my own (just for practice)
+  - Download go-ipfs: https://dist.ipfs.io/#go-ipfs
+  - Extract to a folder
+  - cd to that folder
+  - sudo ./install.sh
+  - ipfs help (works!)
+  - ipfs init
+  - verify stuff is in /home/username/.ipfs
+  - ipfs daemon
+  - ipfs swarm peers (should list a bunch of peers)
+  - Open new terminal
+  - ipfs cat /ipfs/QmYwAPJzv5CZsnA625s3Xf2nemtYgPpHdWEz79ojWnPbdG/readme (should show a file.)
+  - ipfs add -q myfilename.txt (should create a file on your local node and return a hash: 46 characters long)
+  - QmaMZq3WqS7VGLF8Aie47pXm7pjDxCn8QSBn1HZyvg5yFJ
+  - curl "http://127.0.0.1:8080/ipfs/hash" (should find your file on the local ipfs node)
+  - curl "htts://ipfs.io/ipfs/hash" (should find your file on the IPFS gateway node! Cool!)
+  - ipfs pin ls | egrep recursive (to see roots of recursive pins on your local node)
+  
+- [X] Update StoreLink contract to SetHash contract
+  - [X] Change string length to 46 from 32
+  - [X] Add a require error message.
+  - [X] Test in remix
+  - [X] Make local .sol file
+  - [X] Compile with solcjs:
+    - [X] Navigate to location of file
+    - [X] solcjs --bin sethash.sol
+    - [X] solcjs --abi sethash.sol
+  - [X] Deploy on Ropsten with MetaMask and MyCrypto
+    - tx hash: 0xad0176a3875beef1ad5ca1bf7ed97abd3075e10db2cbd1225d777d5637bedfc4
+    - Okay, Ropsten is down due to Constantinople hijinks...
+    - Get Rinkeby test eth from http://rinkeby-faucet.com/ (0.001, lol)
+    - Deploy with cheap gas: 0xB3AC9B8eF39B5feF2E68d16444e72C5878E48514
+    - Sweet, went through!
+  - [X] Change dapp to reference new contract on Rinkeby
+  - [X] Change dapp to use 46-char message instead of 32-char message
+  - [X] Change dapp to link to ipfs if message is present.
+  
+ 
+- [ ] Build the network!
+  - [ ] Stage 1a
+    - [ ] Non-transferrable nodes (not yet ERC721)
+    - [ ] Non-deletable edges that you can create between any of your own nodes (that don't already have an edge)
+    - [ ] Uses normal URLs for the link value (up to 100 chars)
+    - [ ] Node format 1 (simple text) node and edge 1 format (edge-edge, edge-else, else-edge)
+    - [ ] Simple front-end viewer that supports exploring a network built of nodetype1 and edgetype1
+    - [ ] Network built via direct function calls, not through the viewer.
+  - [ ] Stage 1b
+    - [ ] Viewer supports a way to add nodes and edges and keep track of your account's nodes.
+  - [ ] Stage 1c
+    - [ ] Node format 2 (images) and edges 2 format (image-image, image-else, else-image)
+  - [ ] Stage 2a
+    - [ ] Nodes ERC721 and thus transferrable
+    - [ ] Edges proposable according to proposition rules.
+    - [ ] Edges deletable according to edge deletion rules.
+  - [ ] Stage 2b
+    - [ ] Edge proposals/deletions (and node transfers?) in viewer.
+  - [ ] Stage 3a
+    - [ ] Nodes switch to only supporting IPFS URLs.
+  - [ ] Stage 3b
+    - [ ] IPFS uploads through the viewer.
+  - [ ] Stage 4
+    - [ ] Additional formats, like 3d, etc.

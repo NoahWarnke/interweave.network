@@ -1,0 +1,164 @@
+# Interweaver's to-do items, 2018-10-29:
+
+- How to structure the UI?
+  - So this is the main viewer UI, leaving out the format module
+  - Just "render" ipfs as a text box with the ipfs file contents in it, the default "I can't parse this" format.
+  - This UI is for allowing basic exploring and building.
+    - So at any given time, you need to be at a specific Node, from the moment you start and the Viewer picks a Node to put you at.
+    - To travel along Edges: is that a base viewer ability, or a formod ability?
+    - Well, it's kind of a weird combo of both: edges exist in the graph, but shouldn't be rendered unless the ipfs includes them.
+    - Let's say that there's a Viewer fallback (just buttons to the up-to-six other Nodes, labeled by Node keys)
+    - But normally, if a Node renders successfully, you use the formod's edge rendering (in the case of text, expecting you to figure out the name of the edge and 'go' it.)
+    - So we should indeed build in default edge buttons for the Viewer.
+    - Okay, what about the main site?
+    - You start out on the home page with the usual graphs and links to whitepaper, blog, etc., but with a big prominent 'Start Exploring!' button.
+    - This takes you to 'explore node view': just a box for the content to render, and if it doesn't, the edge buttons.
+    - Default edge buttons have a '(back)' label after the Node key (first four digits) that they point to.
+    - When you click the edge button, it calls getNode for that nodeKey
+    - or perhaps it does that pre-emptively when you first come to the Node, and only shows the edge buttons once their Nodes have loaded? That would speed stuff up.
+    - So in any case, once the other Node is loaded and its file is loaded, render the edge transition.
+      - This is, again, per the formats of the two Nodes.
+    - Pretty dead simple.
+    - Hmm, about that 'default view' with the link... That's pretty immersion-breaking.
+    - A better solution would be to look at the formats of the surrounding Nodes (especially the one you came from), and pick a 'default render'...
+    - That would have generic edge descriptions and a Node description: "you find yourself in blackness, with a sense that the world is out of sync..."
+    - But okay, that describes the 'explore' section reasonably well.
+  - For 'build'...
+    - If you're logged in to MetaMask, there's a 'Build' button at, say, upper right (otherwise it's greyed out, and clicking/hovering prompts to install/log in to Meta)
+    - Clicking it changes everything into 'build' mode. This is somewhat immersion-breaking, necessarily.
+    - Can we make it non-immersion-breaking?
+    - Well, let's think of the simplest breaking version and then see if it can be improved.
+    - So, this interface needs ways to create and delete Nodes, and to create, accept, and reject EdgeProposals.
+    - It should also show you if you own the Node you're currently at.
+    - So this suggests it's the Explore mode, but with additional info.
+    - So perhaps across the top, there's a bar (green if it's yours, grey otherwise) listing node Key, ipfs link, and owner (if not yours), or maybe buttons...
+    - There also need to be two buttons: My Nodes and My Edge Proposals
+    - Clicking My Nodes:
+      - brings you to a different view, where it's a paginated list of your Nodes, maybe 8 or so to a page.
+      - They are each a <li> with just the abbreviated node Key (and perhaps the date they were created on, since that's available from the events in the form of block numbers?)
+      - When you click on one, it takes you to that Node, leaving the Node list (but saving the pagination if you come back).
+      - My Nodes also has a 'Create Node' button somewhere.
+      - Clicking this takes you to a page where you first choose the format (default: 'just enter an ipfs link'), and then a formod-specific Node creator pops up.
+      - The Node creator's job is to organize input from you into the correct json format, and give that to you to save to ipfs (eventually, do that automatically!)
+      - Then when you have an IPFS link, it creates the Node for you, and takes you to it.
+    - There should also be a 'delete Node' button when you're at any of your Nodes that aren't connected to other Nodes.
+    - Okay, so the tricky bit is EdgeProposals.
+      - Clicking My Edge Proposals takes you to to a different view with a paginated list of your EdgeProposals.
+      - Would be easiest to just have the edgeProposalKey and date like before... But that's hard to at-a-glance.
+      - Okay, so let's load those EdgeProposals fully, and show the epmess along with the date.
+      - Clicking one takes you to yet another view where it shows the full EdgeProposal, with the two Nodes (clickable links), slots, other owner, and epmess.
+      - This should be color-coded by whether you created the EP or not, by whether it's still valid, and by whether it would connect or disconnect Nodes.
+      - There should be an 'accept' button, and a 'reject' button. No 'accept' if not valid.
+      - Clicking 'accept' does the expected thing, as does 'reject'.
+      - Shows pending tx until it clears.
+      - Summarize what happened: proposal rejected or accepted, and edge connected or disconnected.
+      - When it does, move the EP to a separate list ('my accepted EPs', or 'my rejected EPs')
+        - So really, there's three lists: 'my open EPs', 'my accepted EPs', and 'my rejected EPs'
+        - Or maybe more of a filter for your EP list. So let's assume there's a filter toggle.
+        - This would be really nice, since then you could see old EPs that are done, just for reference.
+      - It needs to be listening for new EP events, too, and show a message when someone creates, accepts, or rejects one of yours.
+      - The hard one is the 'create Edge Proposal' button available on this view.
+      - How do you pick the two Nodes to connect?
+        - Well, obviously the first one needs to be one of yours...
+        - So there's a 'pick my first node' button, which lets you go to your Nodes view, and the first one you click is chosen.
+        - But what about the other Node?
+        - I can see two options:
+          - First, you simply go back to Explore mode and have to navigate to that Node.
+          - Second, you could have a 'bookmark this Node for later' button available on other people's Nodes, which would add them to a list...
+          - Then when you went to create an EP, you could browse that list.
+          - I guess that makes sense, but it kind of violates the 'most state is on the blockchain' principle, having this list just in your cookies.
+          - Hmm, what if it was a 'create Edge Proposal To Current Node' button?
+          - Then you'd be forced to navigate to a desired second Node *first*.
+          - Then you'd only need to pick the first Node out of your list.
+          - You could easily be at one of your own Nodes to do an instaconnect.
+          - Yeah, I like that a lot better than some weird ephemeral 'favorites list'.
+        
+- [X] Deploy a Rinkeby version of our dapp! Just because testing with Ganache x MetaMask is getting obnoxious...
+  - 0xaC22849453aA5eDc684c4Fc35EfE6250d1DC2F11
+  
+- [X] Put a version of the first Node with at least one edge described up on ipfs:
+  - QmPuobuyCEHamnom6SiiReqUnr581E7T5eAuf6QFoKfmH3
+  
+- [X] Create a Node using that IPFS hash (calling my createNode handler)
+  - 6425788636526616286741869931615606349765969179734729515957019907323234972557
+  
+- [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
+  - [ ] DApp
+    - [X] Design how the dApp UI should look/be structured
+      - Explore mode:
+        - Navbar at top:
+          - Home button, upper left
+          - Build mode button, upper right
+            - This doubles as the dApp status (always click for info, except for hammer):
+              - Red X: zero connection (on Meta but wrong network so no contract)
+              - Orange Check: No account (b/c on Infura because no MetaMask, b/c not logged in to MetaMask)
+              - Green Hammer: Account logged in (so now can go to build mode.)
+          - 0..6 edge buttons, top center
+        - Render window, rest of the window.
+      - Build mode:
+        - Green explore button instead of build mode button.
+        - Navbar also contains buttons to:
+          - See Node key
+          - See IPFS
+          - See Owner address
+          - Open My Nodes
+          - Open My EdgeProposals
+          - Delete current node (if owned by me)
+        - On smaller screens, navbar splits so half the buttons (the build-specific 6) are on the bottom.
+      - My Nodes
+        - Simple version: paginated list of nodes (current highlighted)
+        - Less simple version: scroll/zoom-able D3 graph of all my nodes with connections (current highlighted)
+        - Clicking a Node takes you to that Node.
+        - 'Add Node' button
+      - New Node screen
+        - Box for IPFS hash
+        - Or: dropdown to select formod to use wizard for creating new Node.
+      - My Edge Proposals
+        - Simple version: paginated list of current EPs
+        - Less simple version: filter buttons for By me / By Other, Valid / Invalid, Connect / Disconnect
+        - Clicking an Edge Proposal opens a modal with:
+        
+      - Edge Proposal
+        - Buttons to go to My Node, Other Node, see which slots, test the connection, and accept/reject the proposal.
+    - [ ] Rewrite the Vue app to use the InterweaveFreeContract handler functions to implement this UI
+      - [ ] Explore mode
+        - [ ] Navbar
+          - [ ] Home button
+          - [ ] Status/Build Mode button
+          - [ ] 0-5 edge buttons
+        - [ ] Render window
+          - [ ] Text box showing ipfs file
+      - [ ] Build mode
+      - [ ] My Nodes
+      - [ ] My Edge Proposals
+      - [ ] Edge Proposal
+    - [ ] Design how formods should interface with the dApp on a technical level, enabling both exploration and file-generation for that format.
+    - [ ] Design how the first formod (exploration:text) should look
+    - [ ] Implement the formod!
+    - [ ] Extensively test!
+    - [ ] Share somewhere, and fix bugs that people find, haha. This being the "free version", less (but not nothing) is at stake.
+  - [ ] Smart contracts
+    - [ ] When DApp is ready to share, compile and deploy to testnet!
+    - [ ] When DApp is tested and ready to go, deploy to mainnet!
+    
+- [ ] Build Version 2 (the "payable version", i.e. with the ability to pay/be paid for EdgeProposals, and Nodes are ERC-721s)
+
+- [ ] Write whitepaper:
+    - [ ] Fill in sections. Note: leave out implementation details (anything as specific as which smart contracts or fields need to be created.) That goes in yellow paper.
+      - [ ] Rationale for Interweave Network
+      - [ ] Philosophy
+      - [ ] Architecture
+      - [ ] Applications
+      - [ ] Challenges
+      - [ ] Summary
+      - [ ] Further Reading
+    - [ ] Let sit for a few days while doing other things.
+    - [ ] Revisions, round 1.
+    - [ ] Let sit for another few days while doing other things.
+    - [ ] Revisions, round 2.
+    - [ ] Publish (reddit? medium? Lol, I've seen enough whitepapers to know where this is going. Not that I have any reach...)
+ 
+
+
+
+ 

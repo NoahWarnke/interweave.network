@@ -1,0 +1,91 @@
+# Interweaver's to-do items, 2018-10-15:
+
+- Some thoughts on selling nodes:
+  - When selling a node (presumably when you give someone else perms over it via the 721 mechanism), disable the owner from deleting edges themselves or modifying the content.
+  - This makes sure they don't delete valuable connections or content right before the node is sold, fooling someone...
+
+- Some thoughts on the initial text node format:
+  - Depends heavily on the interaction methods supported.
+  - If we have the standard text-based adventure method of typing in commands, that suggests nodes should specify lots of different ways of referring to things in the node...
+  - Like, if you have an 'examine X' command, you need a list of ways to say X in order to give the examine text.
+  - An alternative would be to make the whole thing button-based, with just single names for things, and you could click the proper buttons.
+  - This second way seems simpler, but also less fun... Like, you're not trying to guess things to examine anymore.
+  - I guess the first way needs to have a specific grammar worked out though. Then node format can follow.
+  - Is guessing bad, for the second way? Might be frustrating or lead to spending too much time on a node...
+  - But, it's in the best tradition of interactive fiction. Probably a good idea to keep it, since it's obviously popular.
+  - Okay, so a grammar:
+    - "go X": if X is the name of an edge, follow it. Edges can have several names.
+    - "go through x": if X is a concave temporary edge, like a doorway, follow it.
+    - "go into x": if X is a concave deep edge, like a tunnel or house (behind a doorway), follow it.
+    - "go out of x": if X is a concave deep edge that you're starting inside, follow it.
+    - "go south/s/up/north/west": if the edge is in that direction, follow it.
+      - So this all suggests that edges have 'properties' which determine which types of 'go' apply: "boundary" means "through" works, "enterable" means "go into", "exitable" means "go out of", "north"/"south"/etc. means it's in that direction.
+      - So edges have a "tag cloud" of properties like that. Maybe the tag cloud is just the applicable modifiers...
+        - "through"
+        - "under"
+        - "over"
+        - "into"
+        - "out of"
+      - Or even first-order modifiers:
+        - "exit"
+        - "climb"
+      - Or directions:
+        - "north"/"south"/"east"/"west"/"up"/"down" -> go that direction (or abbreviated) works
+      - Edges also have a set of valid names that get combined with the action verb.
+        - ["doorway", "door", "oak door"]
+      - so if that was "through" or "into", you'd have "enter through oak door", "go into doorway", etc. as triggering the edge.
+    - "examine x": nodes have a set of things inside them, apart from the description.
+      - Each thing has a set of possible names, plus the description.
+      - Should include generic terms for the space you're in: "examine room", etc., which map to the default description.
+    - "examine": re-give the generic description.
+  - So, an example node: saved somewhere.
+  - Upload to IPFS: QmQvJM1kqYns8rr6YC1aFJkHQPD2iGP3t5c74JAnMFrirf
+  - So generic idea is: along with "name" and "shortDesc", you specify valid exploration verbs that are arrays, containing object with names (an array of valid names) and a desc (a string describing that object). The explorer would then type "verb validname" and get the description.
+  - The interpreter will be responsible for things like "listen *to*" versus "listen" - you can only use some set of verbs, not anything you want.
+  - What if there was 'typing' and 'button' mode?
+  - Button mode is for phones and people who want it: it offers the available top-level verbs, as buttons.
+  - Then when you click one, it offers the available objects under that verb, with the shortest name for each chosen.
+  - Then it prints out the description as if you'd entered the command.
+  - Edges: still need to be specified.
+
+
+- [ ] Design the Interweave Network.
+  - [ ] Rewrite interweave design documents into whitepaper-style document with more carefully-thought-out ideas.
+    - [ ] Fill in sections. Note: leave out implementation details (anything as specific as which smart contracts or fields need to be created.) That goes in yellow paper.
+      - [ ] Rationale for Interweave Network
+      - [ ] Philosophy
+      - [ ] Architecture
+      - [ ] Applications
+      - [ ] Challenges
+      - [ ] Summary
+      - [ ] Further Reading
+    - [ ] Let sit for a few days while doing other things.
+    - [ ] Revisions, round 1.
+    - [ ] Let sit for another few days while doing other things.
+    - [ ] Revisions, round 2.
+    - [ ] Publish (reddit? medium? Lol, I've seen enough whitepapers to know where this is going. Not that I have any reach...)
+ 
+- [ ] Build the network!
+  - [ ] Stage 1a
+    - [ ] Non-transferrable nodes (not yet ERC721)
+    - [ ] Non-deletable edges that you can create between any of your own nodes (that don't already have an edge)
+    - [ ] Uses normal URLs for the link value (up to 100 chars)
+    - [ ] Node format 1 (simple text) node and edge 1 format (edge-edge, edge-else, else-edge)
+    - [ ] Simple front-end viewer that supports exploring a network built of nodetype1 and edgetype1
+    - [ ] Network built via direct function calls, not through the viewer.
+  - [ ] Stage 1b
+    - [ ] Viewer supports a way to add nodes and edges and keep track of your account's nodes.
+  - [ ] Stage 1c
+    - [ ] Node format 2 (images) and edges 2 format (image-image, image-else, else-image)
+  - [ ] Stage 2a
+    - [ ] Nodes ERC721 and thus transferrable
+    - [ ] Edges proposable according to proposition rules.
+    - [ ] Edges deletable according to edge deletion rules.
+  - [ ] Stage 2b
+    - [ ] Edge proposals/deletions (and node transfers?) in viewer.
+  - [ ] Stage 3a
+    - [ ] Nodes switch to only supporting IPFS URLs.
+  - [ ] Stage 3b
+    - [ ] IPFS uploads through the viewer.
+  - [ ] Stage 4
+    - [ ] Additional formats, like 3d, etc.
