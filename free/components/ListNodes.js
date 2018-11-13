@@ -60,7 +60,7 @@ export default {
     myNodes: {
       immediate: true,
       deep: true,
-      handler(val, oldVal) {
+      handler: function(val, oldVal) {
         console.log("myNodes update?");
         this.$forceUpdate();
       }

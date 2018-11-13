@@ -33,6 +33,7 @@ export default {
         v-if="!myNodesMode">
       </the-render-area>
       <list-nodes
+        ref="mynodes"
         v-if="myNodesMode"
         v-bind:myNodes="myNodes"
         v-on:pagedToTheseNodeKeys="pagedToTheseNodeKeys">
@@ -199,7 +200,8 @@ export default {
         let node = await this.contract.getNode(nodeKey);
         this.myNodes[nodeKey] = node;
         this.myNodes[nodeKey].data = JSON.parse(await this.fetchIpfs(node.ipfs));
-        this.$forceUpdate();
+        console.log(this.$refs.mynodes);
+        this.$refs.mynodes.$forceUpdate();
         console.log("Data loaded for " + nodeKey);
       }
       catch (error) {

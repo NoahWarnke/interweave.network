@@ -1,12 +1,12 @@
 
 export default {
   verbs: {
-    "0": ["examine", "look", "look at", "inspect"],
+    "0": ["examine", "look", "look at", "inspect", "investigate", "check out"],
     "1": ["listen", "listen to"],
     "2": ["smell", "sniff", "sniff at"],
     "3": ["taste", "lick"],
     "4": ["touch", "feel"],
-    "5": ["go", "go to", "travel", "travel to"],
+    "5": ["go", "go to", "travel", "travel to", "explore"],
     "6": ["go into", "enter"],
     "7": ["go onto", "climb onto"],
     "8": ["follow", "walk along", "walk down"],
