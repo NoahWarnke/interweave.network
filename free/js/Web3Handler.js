@@ -10,6 +10,7 @@ export default class Web3Handler {
     this.provider = undefined;
     this.Web3Instance = undefined;
     this.browser = undefined;
+    this.accountRequested = false;
     this.loggedIn = undefined;
     this.accountAccessEnabled = false;
     this.accountAccessRejected = false;
@@ -96,6 +97,12 @@ export default class Web3Handler {
     this.updateState("networkId", networkId);
     this.updateState("network", this.mapNetworkString(networkId));
     
+    // If we don't need account info yet, we're done here.
+    if (!this.accountRequested) {
+      console.log("Account access not requested, so not trying to get it...");
+      return;
+    }
+    
     // If the user has not yet rejected account access, update our account information.
     if (!this.accountAccessRejected) {
       try {
@@ -119,6 +126,7 @@ export default class Web3Handler {
       }
       // User rejected account access.
       catch (error) {
+        console.log(error);
         this.updateState("loggedIn", undefined); // Don't know if they are logged in or not.
         this.updateState("accountAccessEnabled", false);
         this.updateState("accountAccessRejected", true);
@@ -171,6 +179,14 @@ export default class Web3Handler {
       this.updateState("account", undefined);
       this.updateState("networkId", 4);
       this.updateState("network", this.mapNetworkString(3));
+    }
+  }
+  
+  /** Attempt to get the user's account info (trigger a MetaMask connect request.) */
+  requestAccount() {
+    if (!this.accountRequested) {
+      this.accountRequested = true;
+      this.update();
     }
   }
   

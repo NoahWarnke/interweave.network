@@ -13,7 +13,7 @@ export default {
       <button id="button-build" class="navbar-button" v-on:click="buildClick()">
         {{buildButtonLabel}}
       </button>
-      <button id="button-my-nodes" class="navbar-button" v-if="buildMode" v-on:click="myNodesClick()">My Nodes</button>
+      <button id="button-my-nodes" class="navbar-button" v-if="showBuildTools" v-on:click="myNodesClick()">My Nodes</button>
     </div>
   `,
   components: {
@@ -21,16 +21,26 @@ export default {
     ButtonEdge
   },
   props: {
-    node: Object,
-    ownedNodes: Array,
-    buildMode: Boolean
+    currentNodeKey: String,
+    nodes: Object,
+    showBuildTools: Boolean,
+    currentView: String,
+    account: String
   },
   computed: {
     availableEdges: function() {
       let result = {};
-      if (this.node !== undefined && this.node.edgeNodeKeys !== undefined) {
+      if (this.currentNodeKey === undefined) {
+        return [];
+      }
+      let currentNode = this.nodes[this.currentNodeKey];
+      if (currentNode === undefined) {
+        return [];
+      }
+      let edgeNodeKeys = currentNode.edgeNodeKeys;
+      if (edgeNodeKeys !== undefined) {
         
-        return this.node.edgeNodeKeys
+        return edgeNodeKeys
           .map((value, index) => {
             return {
               slot: index,
@@ -43,7 +53,14 @@ export default {
       return [];
     },
     buildButtonLabel: function() {
-      return this.buildMode ? "Explore" : "Build";
+      if (!this.account) {
+        return "Unlock";
+      }
+      if (this.showBuildTools) {
+        return "Hide tools"
+      }
+      
+      return "Build tools"
     }
   },
   methods: {

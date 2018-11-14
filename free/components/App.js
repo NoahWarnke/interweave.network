@@ -17,16 +17,21 @@ export default {
   template: `
     <div id="app">
       <the-navbar
-        v-bind:node="currentNode"
-        v-bind:buildMode="buildMode"
-        v-bind:myNodesMode="myNodesMode"
-        v-on:buildClick="buildModeToggle()"
-        v-on:myNodesClick="myNodesToggle()"
+        v-bind:currentNodeKey="currentNodeKey"
+        v-bind:nodes="nodes"
+        v-bind:showBuildTools="showBuildTools"
+        v-bind:currentView="currentView"
+        v-bind:account="account"
+        v-on:buildClick="buildClick()"
+        v-on:myNodesClick="myNodesClick()"
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
+      <!--
       <the-render-area
-        v-bind:node="currentNode"
-        v-bind:arrivedSlot="arrivedSlot"
+        v-bind:currentNodeKey="currentNodeKey"
+        v-bind:previousNodeKey="previousNodeKey"
+        v-bind:nodes="nodes"
+        v-bind:ipfsData="ipfsData"
         v-bind:formats="formats"
         v-on:edgeStart="edgeStart($event)"
         v-on:edgeBoundary="edgeBoundary()"
@@ -34,11 +39,14 @@ export default {
       </the-render-area>
       <list-nodes
         ref="mynodes"
-        v-if="myNodesMode"
-        v-bind:myNodes="myNodes"
+        v-if="currentView === 'mynodes'"
+        v-bind:myNodeKeys="myNodeKeys"
+        v-bind:nodes="nodes"
+        v-bind:ipfsData="ipfsData"
         v-on:pagedToTheseNodeKeys="pagedToTheseNodeKeys">
       </list-nodes>
       <modal-info v-if="false"></modal-info>
+      -->
     </div>
   `,
   components: {
@@ -51,6 +59,18 @@ export default {
     return {
       web3Handler: undefined,
       contract: undefined,
+      accountPending: false, // Requested account access, don't have it yet.
+      account: undefined,
+      formats: {
+        1: new SimpleText()
+      },
+      currentNodeKey: undefined,
+      previousNodeKey: undefined,
+      myNodeKeys: [],
+      nodes: {},
+      ipfsData: {},
+      
+      /*
       currentNode: {
         key: undefined,
         ownerAddr: undefined,
@@ -59,13 +79,12 @@ export default {
         data: undefined
       },
       arrivedSlot: -1,
-      formats: {
-        1: new SimpleText()
-      },
       pendingNodeKey: undefined,
       myNodes: {},
-      buildMode: false,
-      myNodesMode: false
+      */
+      showBuildTools: false,
+      currentView: "explore"
+      
     }
   },
   methods: {
@@ -74,6 +93,18 @@ export default {
         this.web3Handler = new Web3Handler();
         window.web3Handler = this.web3Handler; // For console access.
         await this.web3Handler.initialize();
+        
+        this.web3Handler.registerListener("accountChanged", (oldAccount, newAccount) => {
+          console.log("Account change handler called!");
+          this.account = newAccount;
+          
+          if (newAccount !== undefined && this.accountPending) {
+            console.log('pending unpended');
+            this.accountPending = false;
+            this.showBuildTools = true;
+          }
+          this.$forceUpdate(); // external event.
+        });
         
         this.contract = new InterweaveFreeHandler();
         window.contract = this.contract; // For console access.
@@ -92,8 +123,11 @@ export default {
       }
     },
     updateNode: async function(nodeKey) {
+      let currentNode;
       try {
-        this.currentNode = await this.contract.getNode(nodeKey);
+        this.currentNodeKey = nodeKey;
+        currentNode = await this.contract.getNode(nodeKey);
+        this.nodes[nodeKey] = currentNode;
         this.pendingEdge = undefined;
       }
       catch (error) {
@@ -103,11 +137,11 @@ export default {
       }
       
       try {
-        this.currentNode.data = await this.fetchIpfs(this.currentNode.ipfs);
+        this.ipfsData[currentNode.ipfs] = await this.fetchIpfs(currentNode.ipfs);
       }
       catch (error) {
         console.log("Ipfs data load failed: " + error);
-        this.currentNode.data = JSON.stringify({
+        this.ipfsData[currentNode.ipfs] = JSON.stringify({
           failed: true,
           error: error
         });
@@ -156,21 +190,31 @@ export default {
       this.updateNode(this.pendingNodeKey);
       this.pendingNodeKey = undefined;
     },
-    buildModeToggle: function() {
-      if (this.web3Handler.loggedIn) {
-        this.buildMode = !this.buildMode;
+    buildClick: function() {
+      
+      // Trigger web3Handler to try and log in, if not already logged in.
+      if (!this.account) {
+        this.accountPending = true;
+        this.web3Handler.requestAccount();
+        return;
       }
-      if (!this.buildMode) {
-        this.myNodesMode = false;
+      
+      this.showBuildTools = !this.showBuildTools;
+      if (!this.showBuildTools) {
+        this.currentView = "explore";
       }
       // TODO watch web3Handler for log-out events and turn off build mode
     },
-    myNodesToggle: async function() {
+    myNodesClick: async function() {
       if (this.web3Handler.loggedIn) {
-        if (!this.myNodesMode) {
+        if (this.currentView !== "mynodes") {
           await this.updateMyNodes();
+          this.currentView = "mynodes";
         }
-        this.myNodesMode = !this.myNodesMode;
+        else {
+          this.currentView = "explore";
+          // TODO delete ipfs data for currently-paged nodes?
+        }
       }
     },
     updateMyNodes: async function() {

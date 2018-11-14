@@ -10,7 +10,7 @@
     },
     "1": {
       "leaveDesc": "You climb the rough stairway about halfway, and duck into the dark opening between the wall pillars. It is very tight and dark, and you soon find yourself crawling along the steeply upward-sloping tunnel by feel.",
-      "enterDesc": "You carefully crawl down the tight, dark tunnel, descending further amid the hexagonal pillars of rock. Eventually you emerge into a large underground room and make your way down a rough stairway to the chamber floor."
+      "enterDesc": "Carefully crawling down the tight, dark tunnel, you descend further amid the hexagonal pillars of rock. Eventually you emerge into a large, bright underground room and make your way down a rough stairway to the chamber floor."
     },
     "2": {
       "leaveDesc": "You climb all the way up the rough stairway, taking care not to fall to the floor a good way below you. The pillar stairs essentially continue into the ceiling, and you continue climbing without interruption. The cable of lights continues along the wall to your left, lighting the hexagonal pillar walls as you ascend.",
@@ -20,7 +20,7 @@
   "targets": {
     "0": [""],
     "1": ["here", "area", "room", "chamber", "cavern"],
-    "2": ["walls", "wall", "floor", "ceiling", "pillars", "rocks", "igneous rocks", "rock pillars", "hexagonal pillars", "hexagonal rocks"],
+    "2": ["walls", "wall", "floor", "ceiling", "pillar", "pillars", "rocks", "igneous rocks", "rock pillars", "hexagonal pillars", "hexagonal rocks"],
     "3": ["stair", "stairway", "stairs"],
     "4": ["tunnel"],
     "5": ["floor tunnel"],
