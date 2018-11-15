@@ -37,6 +37,7 @@ export default {
         v-on:edgeBoundary="edgeBoundary()"
         v-if="!myNodesMode">
       </the-render-area>
+      -->
       <list-nodes
         ref="mynodes"
         v-if="currentView === 'mynodes'"
@@ -46,7 +47,6 @@ export default {
         v-on:pagedToTheseNodeKeys="pagedToTheseNodeKeys">
       </list-nodes>
       <modal-info v-if="false"></modal-info>
-      -->
     </div>
   `,
   components: {
@@ -208,7 +208,7 @@ export default {
     myNodesClick: async function() {
       if (this.web3Handler.loggedIn) {
         if (this.currentView !== "mynodes") {
-          await this.updateMyNodes();
+          await this.updateMyNodeKeys();
           this.currentView = "mynodes";
         }
         else {
@@ -217,15 +217,9 @@ export default {
         }
       }
     },
-    updateMyNodes: async function() {
+    updateMyNodeKeys: async function() {
       try {
-        let nodeKeys = await this.contract.getNodesBelongingTo(this.web3Handler.account);
-        this.myNodes = {};
-        for (var keyKey in nodeKeys) {
-          this.myNodes[nodeKeys[keyKey]] = {
-            key: nodeKeys[keyKey]
-          };
-        }
+        this.myNodeKeys = await this.contract.getNodesBelongingTo(this.web3Handler.account);
       }
       catch (error) {
         console.log(error);
@@ -242,15 +236,17 @@ export default {
     updateMyNodeData: async function(nodeKey) {
       try {
         let node = await this.contract.getNode(nodeKey);
-        this.myNodes[nodeKey] = node;
-        this.myNodes[nodeKey].data = JSON.parse(await this.fetchIpfs(node.ipfs));
+        this.nodes[nodeKey] = node;
+        //this.nodes[nodeKey].data = JSON.parse(await this.fetchIpfs(node.ipfs));
+        /*
         console.log(this.$refs.mynodes);
         this.$refs.mynodes.$forceUpdate();
         console.log("Data loaded for " + nodeKey);
+        */
       }
       catch (error) {
         console.log(error);
-        this.myNodes[nodeKey].data = JSON.stringify({
+        this.nodes[nodeKey].data = JSON.stringify({
           failed: true,
           error: error
         });
