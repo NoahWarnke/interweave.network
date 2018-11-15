@@ -3,18 +3,19 @@ export default {
     <div id="list-nodes">
       <ul>
         <li v-for="nodeKey of pageNodeKeys">
-          {{nodeKey}}
+          {{ipfsData[nodeKey] ? ipfsData[nodeKey].name : (nodes[nodeKey] ? nodes[nodeKey].ipfs : nodeKey)}}
         </li>
       </ul>
       <button v-on:click="pageLeft()"><</button>
-      <span>{{page}}</span>
+      <span>{{page}}/{{maxPage}}</span>
       <button v-on:click="pageRight()">></button>
     </div>
   `,
   data: function() {
     return {
-      nodesPerPage: 1,
-      page: 0
+      nodesPerPage: 2,
+      page: 0,
+      pendingNodeData: {}
     };
   },
   props: {
@@ -24,7 +25,7 @@ export default {
   },
   computed: {
     maxPage: function() {
-      return Math.max(0, Math.floor(this.myNodeKeys.length - 1) / this.nodesPerPage);
+      return Math.max(0, Math.floor((this.myNodeKeys.length - 1) / this.nodesPerPage));
     },
     pageNodeKeys: function() {
       if (this.page > this.maxPage) {
@@ -38,15 +39,14 @@ export default {
         let node = this.nodes[nodeKey];
         result.push(nodeKey);
         
-        if (this.ipfsData[nodeKey] === undefined/* && !node.pending*/) {
+        if (this.ipfsData[nodeKey] === undefined && !this.pendingNodeData[nodeKey]) {
           nodeKeysToGet.push(nodeKey);
-          //node.pending = true;
+          this.pendingNodeData[nodeKey] = true;
         }
       }
       if (nodeKeysToGet.length > 0) {
         this.$emit("pagedToTheseNodeKeys", nodeKeysToGet);
       }
-      console.log(this.myNodeKeys);
       return result;
     }
   },

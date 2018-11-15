@@ -116,7 +116,6 @@ export default {
         
         // Grab starting node data.
         this.updateNode("4802423149786398712975601635277375780486398097217997509586637249159306333648");
-        this.updateMyNodes();
       }
       catch (error) {
         console.log(error);
@@ -234,23 +233,40 @@ export default {
       }
     },
     updateMyNodeData: async function(nodeKey) {
+      let node = undefined;
       try {
-        let node = await this.contract.getNode(nodeKey);
+        node = await this.contract.getNode(nodeKey);
         this.nodes[nodeKey] = node;
-        //this.nodes[nodeKey].data = JSON.parse(await this.fetchIpfs(node.ipfs));
+        this.$refs.mynodes.$forceUpdate();
+      }
+      catch (error) {
+        console.log(error);
+        this.nodes[nodeKey] = {
+          failed: true,
+          error: error
+        };
+      }
+      
+      try {
+        this.ipfsData[nodeKey] = JSON.parse(await this.fetchIpfs(node.ipfs));
+        this.$refs.mynodes.$forceUpdate();
+      }
+      catch (error) {
+        console.log(error);
+        this.ipfsData[nodeKey] = {
+          failed: true,
+          error: error
+        }
+      }
+        //this.$forceUpdate();
+        
+        //this.nodes[nodeKey].data =
         /*
         console.log(this.$refs.mynodes);
         this.$refs.mynodes.$forceUpdate();
         console.log("Data loaded for " + nodeKey);
         */
-      }
-      catch (error) {
-        console.log(error);
-        this.nodes[nodeKey].data = JSON.stringify({
-          failed: true,
-          error: error
-        });
-      }
+
     }
   },
   created: function() {
