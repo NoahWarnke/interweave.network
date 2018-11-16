@@ -6,9 +6,9 @@ export default {
         <div class="error" v-if="nodeDataError !== undefined">
           {{nodeDataError}}
         </div>
-        <div class="node-key-and-ipfs" v-if="node !== undefined">
-          <p>Node key: {{node.key}}</p>
-          <p>Node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + node.ipfs">{{node.ipfs}}</a></p>
+        <div class="node-key-and-ipfs">
+          <p>Node key: {{this.currentNodeKey}}</p>
+          <p v-if="node !== undefined">Node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + node.ipfs">{{node.ipfs}}</a></p>
         </div>
       </div>
       <div
@@ -19,8 +19,10 @@ export default {
   `,
   props: {
     formats: Object,
-    node: Object,
-    arrivedSlot: Number
+    currentNodeKey: String,
+    previousNodeKey: String,
+    nodes: Object,
+    ipfsData: Object
   },
   data: function() {
     return {
@@ -33,6 +35,14 @@ export default {
       nodeRenderer: undefined
     }
   },
+  computed: {
+    node: function() {
+      return this.nodes[this.currentNodeKey];
+    },
+    nodeIpfsData: function() {
+      this.ipfsData[this.currentNodeKey]
+    }
+  },
   methods: {
     parseNodeData: function(data) {
       
@@ -43,7 +53,10 @@ export default {
       this.nodeDataFormatAvailable = false;
       this.nodeDataRenderable = false;
       this.nodeDataError = undefined;
-      this.nodeRenderer = undefined;
+      
+      
+
+
       
       // Get the formod explore slot component
       let exploreEl = this.$refs.formodexploreslot;
@@ -53,7 +66,19 @@ export default {
         return;
       }
       
+      if (this.node === undefined) {
+        console.log('No loaded node...');
+        return;
+        // TODO clear render?
+      }
+      
+      if (this.nodeIpfsData === undefined) {
+        console.log('No loaded node ipfs data...');
+        return;
+      }
+      
       // Clear the formod explore slot, if anything's there.
+      this.nodeRenderer = undefined;
       while (exploreEl.firstChild) {
         exploreEl.removeChild(exploreEl.firstChild);
       }
@@ -103,9 +128,9 @@ export default {
       // Instantiate our renderer component and pass it some props.
       this.nodeRenderer = new (formod.exploreClass())({
         propsData: {
-          node: this.node,
+          node: this.nodes[this.currentNodeKey],
           parsedNodeData: this.parsedNodeData,
-          arrivedSlot: this.arrivedSlot
+          arrivedSlot: 0 // TODO
         }
       });
       // Mount it, passing no element (makes it as an off-document element).
@@ -126,20 +151,39 @@ export default {
     }
   },
   watch: {
-    node: {
+    currentNodeKey: {
+      immediate: true,
+      handler: function(val, oldVal) {
+        console.log("RenderArea currentNodeKey updated.");
+        if (this.nodes[val] !== undefined && this.ipfsData[val] !== undefined) {
+          this.parseNodeData(this.ipfsData[val]);
+        }
+      }
+    },
+    nodes: {
       immediate: true,
       deep: true,
-      handler(val, oldVal) {
-        // If the node's data changes and exists, parse it and update errors or the render component if parse is successful.
-        if (val !== undefined && val.data !== undefined) {
-          this.parseNodeData(val.data);
+      handler: function(val, oldVal) {
+        console.log("RenderArea nodes updated.");
+        if (val[this.currentNodeKey] !== undefined && this.ipfsData[this.currentNodeKey] !== undefined) {
+          this.parseNodeData(this.ipfsData[this.currentNodeKey]);
+        }
+      }
+    },
+    ipfsData: {
+      immediate: true,
+      deep: true,
+      handler: function(val, oldVal) {
+        console.log("RenderArea ipfsData updated.");
+        if (this.nodes[this.currentNodeKey] !== undefined && val[this.currentNodeKey] !== undefined) {
+          this.parseNodeData(val[this.currentNodeKey]);
         }
       }
     }
   },
   mounted: function() {
-    if (this.node!== undefined && this.node.data !== undefined) {
-      this.parseNodeData(this.node.data);
+    if (this.nodes[this.currentNodeKey] !== undefined && this.ipfsData[this.currentNodeKey] !== undefined) {
+      this.parseNodeData(this.ipfsData[this.currentNodeKey]);
     }
   }
 }

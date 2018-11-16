@@ -26,8 +26,8 @@ export default {
         v-on:myNodesClick="myNodesClick()"
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
-      <!--
       <the-render-area
+        ref="renderarea"
         v-bind:currentNodeKey="currentNodeKey"
         v-bind:previousNodeKey="previousNodeKey"
         v-bind:nodes="nodes"
@@ -35,9 +35,8 @@ export default {
         v-bind:formats="formats"
         v-on:edgeStart="edgeStart($event)"
         v-on:edgeBoundary="edgeBoundary()"
-        v-if="!myNodesMode">
+        v-if="currentView !== 'mynodes'">
       </the-render-area>
-      -->
       <list-nodes
         ref="mynodes"
         v-if="currentView === 'mynodes'"
@@ -128,6 +127,8 @@ export default {
         currentNode = await this.contract.getNode(nodeKey);
         this.nodes[nodeKey] = currentNode;
         this.pendingEdge = undefined;
+        this.$refs.renderarea.$forceUpdate();
+        this.$forceUpdate();
       }
       catch (error) {
         console.log("blockchain node load failed: " + error);
@@ -136,15 +137,19 @@ export default {
       }
       
       try {
-        this.ipfsData[currentNode.ipfs] = await this.fetchIpfs(currentNode.ipfs);
+        this.ipfsData[nodeKey] = await this.fetchIpfs(currentNode.ipfs);
+        
+        console.log("Ipfs data loaded for current node.");
       }
       catch (error) {
         console.log("Ipfs data load failed: " + error);
-        this.ipfsData[currentNode.ipfs] = JSON.stringify({
+        this.ipfsData[nodeKey] = JSON.stringify({
           failed: true,
           error: error
         });
       }
+      this.$refs.renderarea.$forceUpdate();
+      this.$forceUpdate();
     },
     getAjax: function(url) {
       return new Promise((resolve, reject) => {
