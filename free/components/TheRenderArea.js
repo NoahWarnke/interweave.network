@@ -39,11 +39,10 @@ export default {
   },
   computed: {
     node: function() {
-      console.log('node computed: ' + this.nodes[this.currentNodeKey]);
       return this.nodes[this.currentNodeKey];
     },
     nodeIpfsData: function() {
-      this.ipfsData[this.currentNodeKey]
+      return this.ipfsData[this.currentNodeKey];
     }
   },
   methods: {
@@ -56,10 +55,6 @@ export default {
       this.nodeDataFormatAvailable = false;
       this.nodeDataRenderable = false;
       this.nodeDataError = undefined;
-      
-      
-
-
       
       // Get the formod explore slot component
       let exploreEl = this.$refs.formodexploreslot;
@@ -157,7 +152,6 @@ export default {
     currentNodeKey: {
       immediate: true,
       handler: function(val, oldVal) {
-        console.log("RenderArea currentNodeKey updated.");
         if (this.nodes[val] !== undefined && this.ipfsData[val] !== undefined) {
           this.parseNodeData(this.ipfsData[val]);
         }
@@ -167,7 +161,6 @@ export default {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
-        console.log("RenderArea nodes updated.");
         if (val[this.currentNodeKey] !== undefined && this.ipfsData[this.currentNodeKey] !== undefined) {
           this.parseNodeData(this.ipfsData[this.currentNodeKey]);
         }
@@ -177,7 +170,6 @@ export default {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
-        console.log("RenderArea ipfsData updated.");
         if (this.nodes[this.currentNodeKey] !== undefined && val[this.currentNodeKey] !== undefined) {
           this.parseNodeData(val[this.currentNodeKey]);
         }

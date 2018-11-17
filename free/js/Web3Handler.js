@@ -39,7 +39,7 @@ export default class Web3Handler {
   }
   
   fireEvent(eventName, oldVal, newVal) {
-    console.log("Event " + eventName + ": " + oldVal + " -> " + newVal);
+    console.log("Web3Handler fireEvent " + eventName + ": " + oldVal + " -> " + newVal);
     if (this.listeners[eventName] !== undefined) {
       this.listeners[eventName].forEach(callback => callback(oldVal, newVal));
     }
@@ -99,7 +99,7 @@ export default class Web3Handler {
     
     // If we don't need account info yet, we're done here.
     if (!this.accountRequested) {
-      console.log("Account access not requested, so not trying to get it...");
+      console.log("Web3Handler updateModern: account access not requested, so not trying to get it...");
       return;
     }
     

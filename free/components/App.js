@@ -1,6 +1,7 @@
 // Blockchain integration
 import Web3Handler from '../js/Web3Handler.js';
 import InterweaveFreeHandler from '../js/InterweaveFreeHandler.js';
+import Utils from '../js/Utils.js';
 
 // Viewer modules
 import TheNavbar from './TheNavbar.js';
@@ -27,7 +28,6 @@ export default {
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
       <the-render-area
-        ref="renderarea"
         v-bind:currentNodeKey="currentNodeKey"
         v-bind:previousNodeKey="previousNodeKey"
         v-bind:nodes="nodes"
@@ -121,15 +121,14 @@ export default {
       }
     },
     updateNode: async function(nodeKey) {
-      let currentNode;
+      let currentNode = undefined;
       try {
         this.currentNodeKey = nodeKey;
         currentNode = await this.contract.getNode(nodeKey);
-        this.nodes[nodeKey] = currentNode;
+        this.$set(this.nodes, nodeKey, currentNode); // Detect change!
+        //this.nodes[nodeKey] = currentNode;
         console.log("App updateNode: blockchain node load succeeded.");
-        console.log(this.$refs.renderarea);
-        this.$refs.renderarea.$forceUpdate();
-        this.$forceUpdate();
+
       }
       catch (error) {
         console.log("App updateNode: blockchain node load failed: " + error);
@@ -137,50 +136,22 @@ export default {
         return;
       }
       
+      let nodeIpfsData = undefined;
       try {
-        this.ipfsData[nodeKey] = await this.fetchIpfs(currentNode.ipfs);
+        nodeIpfsData = await this.fetchIpfs(currentNode.ipfs);
         console.log("App updateNode: ipfs data loaded for current node.");
       }
       catch (error) {
         console.log("App updateNode: ipfs data load failed: " + error);
-        this.ipfsData[nodeKey] = JSON.stringify({
+        nodeIpfsData = JSON.stringify({
           failed: true,
           error: error
         });
       }
-      this.$refs.renderarea.$forceUpdate();
-      this.$forceUpdate();
-    },
-    getAjax: function(url) {
-      return new Promise((resolve, reject) => {
-        
-        // Set up a 30s timeout - IPFS probably doesn't have the data if it takes that long.
-        let interval = setInterval(() => {
-          xhr.abort();
-        }, 30000);
-        
-        let xhr = new XMLHttpRequest();
-        xhr.addEventListener("load", function() {
-          if (xhr.status !== 200) {
-            cancelInterval(interval);
-            reject(url + " replied " + xhr.status);
-          }
-          resolve(xhr.responseText);
-        });
-        xhr.addEventListener("error", function(err) {
-          cancelInterval(interval);
-          reject(err);
-        });
-        xhr.addEventListener("abort", function(progresEvent) {
-          clearInterval(interval);
-          reject("30 second timeout was reached.");
-        });
-        xhr.open("GET", url);
-        xhr.send();
-      });
+      this.$set(this.ipfsData, nodeKey, nodeIpfsData);
     },
     fetchIpfs: async function(ipfs) {
-      return this.getAjax("https://ipfs.io/ipfs/" + ipfs);
+      return Utils.getAjax("https://ipfs.io/ipfs/" + ipfs, 30000);
     },
     edgeStart: function($event) {
       if (this.currentNode.edgeNodeKeys[$event.slot] == 0) {
