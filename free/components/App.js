@@ -126,23 +126,23 @@ export default {
         this.currentNodeKey = nodeKey;
         currentNode = await this.contract.getNode(nodeKey);
         this.nodes[nodeKey] = currentNode;
-        this.pendingEdge = undefined;
+        console.log("App updateNode: blockchain node load succeeded.");
+        console.log(this.$refs.renderarea);
         this.$refs.renderarea.$forceUpdate();
         this.$forceUpdate();
       }
       catch (error) {
-        console.log("blockchain node load failed: " + error);
+        console.log("App updateNode: blockchain node load failed: " + error);
         // TODO pass error on to user.
         return;
       }
       
       try {
         this.ipfsData[nodeKey] = await this.fetchIpfs(currentNode.ipfs);
-        
-        console.log("Ipfs data loaded for current node.");
+        console.log("App updateNode: ipfs data loaded for current node.");
       }
       catch (error) {
-        console.log("Ipfs data load failed: " + error);
+        console.log("App updateNode: ipfs data load failed: " + error);
         this.ipfsData[nodeKey] = JSON.stringify({
           failed: true,
           error: error

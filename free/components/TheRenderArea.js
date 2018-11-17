@@ -7,7 +7,7 @@ export default {
           {{nodeDataError}}
         </div>
         <div class="node-key-and-ipfs">
-          <p>Node key: {{this.currentNodeKey}}</p>
+          <p>Node key: {{currentNodeKey}}</p>
           <p v-if="node !== undefined">Node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + node.ipfs">{{node.ipfs}}</a></p>
         </div>
       </div>
@@ -32,11 +32,14 @@ export default {
       nodeDataFormatAvailable: false,
       nodeDataRenderable: false,
       nodeDataError: undefined,
-      nodeRenderer: undefined
+      nodeRenderer: undefined,
+      localNode: this.node,
+      localNodeIpfsData: this.nodeIpfsData // Trying to get this to be reactive...
     }
   },
   computed: {
     node: function() {
+      console.log('node computed: ' + this.nodes[this.currentNodeKey]);
       return this.nodes[this.currentNodeKey];
     },
     nodeIpfsData: function() {
