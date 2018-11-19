@@ -9,13 +9,15 @@
         - [X] Create Node
         - [X] MyEdgeProposals
         - [X] Delete Node button
-      - [ ] My Nodes
+      - [X] My Nodes
         - [X] Show paged view of all my nodes, by node name (where available).
-        - [ ] Make clicking on one set it to your current Node (and close the MyNodes screen, but keep the page number.)
+        - [X] Make clicking on one set it to your current Node (and close the MyNodes screen, but keep the page number.)
       - [ ] Formod1 create node:
         - [ ] Make a "createnode" App mode
-        - [ ] Make a component slot for this.
-        - [ ]
+        - [ ] Make a component slot for this (in App?)
+        - [ ] Make a basic SimpleTextBuild components
+        - [ ] Make it render when you click Add Node.
+        - [ ] Make it stop rendering when you click Add Node again.
       - [ ] My Edge Proposals]
         - [ ] Create an app mode for myedgeproposals
         - [ ] Create a test EdgeProposal or two.

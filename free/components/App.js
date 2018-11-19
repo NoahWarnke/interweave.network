@@ -300,8 +300,8 @@ export default {
     myNodesClick: async function() {
       if (this.web3Handler.loggedIn) {
         if (this.currentView !== "mynodes") {
-          await this.updateMyNodeKeys();
           this.currentView = "mynodes";
+          await this.updateMyNodeKeys();
         }
         else {
           this.currentView = "explore";

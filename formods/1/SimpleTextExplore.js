@@ -3,7 +3,7 @@ import SimpleTextUtils from "./SimpleTextUtils.js";
 export default {
   template: `
     <div id="simple-text-explore">
-      <h1>{{parsedNodeData.name}}</h1>
+      <h1>{{currentNodeIpfsData.name}}</h1>
       <textarea class="console" readonly="readonly" ref="console">{{consoleText}}</textarea>
       <div id="console-input-area">
         <span id="prompt">&gt;</span>
@@ -17,8 +17,8 @@ export default {
   `,
   props: {
     arrivedSlot: Number,
-    node: Object,
-    parsedNodeData: Object
+    currentNodeEdgeNodeKeys: Array,
+    currentNodeIpfsData: Object
   },
   data: function() {
     return {
@@ -27,8 +27,7 @@ export default {
       verbFailTarget: SimpleTextUtils.verbFailTarget,
       consoleText:"",
       consoleInput: "",
-      edgeStart: false,
-      edgeBoundary: false
+      edgeStart: false
     }
   },
   methods: {
@@ -41,27 +40,26 @@ export default {
       }
       return result;
     },
-    init: async function() {
+    init: function() {
       
       // Invert our verbs and targets arrays for faster lookup.
       this.verbToKey = this.invertLookup(SimpleTextUtils.verbs);
-      this.parsedNodeData.targetToKey = this.invertLookup(this.parsedNodeData.targets);
-      
-      let edge = this.parsedNodeData.edges[this.arrivedSlot + ""];
+
+    },
+    newNodeData: async function(arrivedSlot) {
+      this.currentNodeIpfsData.targetToKey = this.invertLookup(this.currentNodeIpfsData.targets);
+      let edge = this.currentNodeIpfsData.edges[arrivedSlot + ""];
       if (edge !== undefined) {
         await this.addToConsole(edge.enterDesc + "\n");
       }
-      this.addToConsole(this.parsedNodeData.shortDesc);
+      this.addToConsole("_____ " + this.currentNodeIpfsData.name + " _____\n" + this.currentNodeIpfsData.shortDesc);
     },
     consoleInputEntered: async function() {
-      
+      console.log("consoleInputEntered!");
       if (this.edgeStart) {
-        if (!this.edgeBoundary) {
-          // TODO fire edgeBoundary event.
-          this.$emit("edgeBoundary");
-          this.edgeBoundary = true;
-        }
+        this.edgeStart = false;
         this.consoleInput = "";
+        this.$emit("edgeBoundary");
         return;
       }
       
@@ -87,6 +85,7 @@ export default {
       this.$refs.console.scrollTop = this.$refs.console.scrollHeight;
     },
     parseCommand: function(cmd) {
+      console.log("parseCommand!");
       
       let words = cmd.split(" ");
       let mostSpecificVerbKey = undefined;
@@ -112,7 +111,7 @@ export default {
         let targetKey = undefined;
         if (v === words.length) {
           // Check for single-verb command string
-          targetKey = this.parsedNodeData.targetToKey[""];
+          targetKey = this.currentNodeIpfsData.targetToKey[""];
         }
         else {
           for (var t = words.length - v; t > 0; t--) {
@@ -122,7 +121,7 @@ export default {
               .toLowerCase()
             ;
             
-            targetKey = this.parsedNodeData.targetToKey[lastTWords];
+            targetKey = this.currentNodeIpfsData.targetToKey[lastTWords];
             if (targetKey !== undefined) {
               break;
             }
@@ -136,7 +135,7 @@ export default {
         if (mostSpecificVerbKey === verbKey) {
           mostSpecificVerbHadMatches = true;
         }
-        let bindingVerb = this.parsedNodeData.bindings[verbKey];
+        let bindingVerb = this.currentNodeIpfsData.bindings[verbKey];
         if (bindingVerb === undefined) {
           continue;
         }
@@ -146,29 +145,24 @@ export default {
           continue;
         }
         
-        let result = this.parsedNodeData.results[resultId];
+        let result = this.currentNodeIpfsData.results[resultId];
           
         if (result.indexOf("edge") === 0) {
           let slot = parseInt(result.substr(4, result.length - 4));
-          let edge = this.parsedNodeData.edges[slot];
+          let edge = this.currentNodeIpfsData.edges[slot];
           
           if (edge !== undefined) {
             
-            let nodeKey = this.node.edgeNodeKeys[slot];
+            let nodeKey = this.currentNodeEdgeNodeKeys[slot];
             // Not-yet-connected edge, so turn around.
             if (nodeKey == 0) {
-              this.addToConsole(
-                edge.leaveDesc
-                + "\n\nHowever, you cannot go any further, and turn around.\n\n"
-                + edge.enterDesc
-                + "\n\n"
-                + this.parsedNodeData.shortDesc
-              );
+              this.addToConsole(edge.leaveDesc + "\n\nHowever, you cannot go any further, and turn around.\n");
+              this.newNodeData(slot); 
               return;
             }
             
             // Houston, we've had an edge!
-            this.addToConsole(edge.leaveDesc + " [Enter anything to continue]");
+            this.addToConsole(edge.leaveDesc + " [Press enter to continue]\n");
             
             this.$emit("edgeStart", {
               slot: slot,
@@ -202,5 +196,16 @@ export default {
   },
   created() {
     this.init();
+  },
+  watch: {
+    currentNodeIpfsData: {
+      immediate: true,
+      deep: true,
+      handler: function(val, oldVal) {
+        if (val !== oldVal) {
+          this.newNodeData(this.arrivedSlot);
+        }
+      }
+    }
   }
 }
