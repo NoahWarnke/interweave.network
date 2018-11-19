@@ -21,6 +21,7 @@ export default {
     formats: Object,
     currentNodeKey: String,
     previousNodeKey: String,
+    nextNodeKey: String,
     nodes: Object,
     ipfsData: Object
   },
@@ -32,9 +33,7 @@ export default {
       nodeDataFormatAvailable: false,
       nodeDataRenderable: false,
       nodeDataError: undefined,
-      nodeRenderer: undefined,
-      localNode: this.node,
-      localNodeIpfsData: this.nodeIpfsData // Trying to get this to be reactive...
+      nodeRenderer: undefined
     }
   },
   computed: {
@@ -46,11 +45,9 @@ export default {
     }
   },
   methods: {
-    parseNodeData: function(data) {
+    parseNodeData: function(parsedNodeData) {
       
       // Reset everything.
-      this.parsedNodeData = undefined;
-      this.nodeDataParsedSuccessfully = false;
       this.nodeDataLoadedSuccessfully = false;
       this.nodeDataFormatAvailable = false;
       this.nodeDataRenderable = false;
@@ -75,24 +72,16 @@ export default {
         return;
       }
       
+      this.parsedNodeData = parsedNodeData;
+      
       // Clear the formod explore slot, if anything's there.
       this.nodeRenderer = undefined;
       while (exploreEl.firstChild) {
         exploreEl.removeChild(exploreEl.firstChild);
       }
       
-      // Parse.
-      try {
-        this.parsedNodeData = JSON.parse(data);
-      }
-      catch (error) {
-        this.nodeDataError = error;
-        return;
-      }
-      this.nodeDataParsedSuccessfully = true;
-      
       // Confirm no load errors.
-      if (this.parsedNodeData.failed === true) {
+      if (this.parsedNodeData.status === "failed") {
         this.nodeDataError = this.parsedNodeData.error;
         return;
       }
@@ -119,6 +108,15 @@ export default {
       }
       this.nodeDataRenderable = true;
       
+      // Figure out which slot we arrived from.
+      // If there was no previous Node key, or if it's not among the current Node's edges, set to -1.
+      let slot = -1;
+      for (var keyKey in this.node.edgeNodeKeys) {
+        if (this.node.edgeNodeKeys[keyKey] === this.previousNodeKey) {
+          slot = parseInt(keyKey);
+        }
+      }
+      
       // Now let's set up our renderer component.
       // Since we're programmatically picking a component from a potentially very long list of supported formats,
       // we need to set it up this way, rather than having all those elements in the template with a ton of v-ifs on them to pick just one.
@@ -128,7 +126,7 @@ export default {
         propsData: {
           node: this.nodes[this.currentNodeKey],
           parsedNodeData: this.parsedNodeData,
-          arrivedSlot: 0 // TODO
+          arrivedSlot: slot
         }
       });
       // Mount it, passing no element (makes it as an off-document element).

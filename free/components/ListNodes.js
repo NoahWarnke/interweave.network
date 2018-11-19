@@ -2,7 +2,9 @@ export default {
   template: `
     <div id="list-nodes">
       <ul>
-        <li v-for="nodeKey of pageNodeKeys">
+        <li
+          v-for="nodeKey of pageNodeKeys"
+          v-on:click="clickNode(nodeKey)">
           {{ipfsData[nodeKey] ? ipfsData[nodeKey].name : (nodes[nodeKey] ? nodes[nodeKey].ipfs : nodeKey)}}
         </li>
       </ul>
@@ -56,6 +58,9 @@ export default {
     },
     pageRight: function() {
       this.page = Math.min(this.maxPage, this.page + 1);
+    },
+    clickNode: function(nodeKey) {
+      this.$emit("myNodesNodeClick", nodeKey);
     }
   },
   watch: {
@@ -63,7 +68,6 @@ export default {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
-        console.log("myNodeKeys update?");
         this.$forceUpdate();
       }
     },
@@ -71,7 +75,6 @@ export default {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
-        console.log("ipfsData update?");
         this.$forceUpdate();
       }
     },
@@ -79,7 +82,6 @@ export default {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
-        console.log("nodes update?");
         this.$forceUpdate();
       }
     }

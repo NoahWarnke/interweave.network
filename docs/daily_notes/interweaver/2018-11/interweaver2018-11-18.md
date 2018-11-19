@@ -1,22 +1,30 @@
-# Interweaver's to-do items, 2018-11-17:
+# Interweaver's to-do items, 2018-11-18:
 
-- Vue reactivity:
-  - Object properties aren't reactified.
-  - You need to do this.$set(this.prop, key, value);
-  
-- Bash:
-  - "bash: !: event not found"
-  - This was caused by having a ! in my commit message (there shall be no excitement.)
-  - echo reboot your instance\!
-  - This seems to fix it.
+- How should formod components work when you're changing from one
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
-  - [ ] DApp
-    - [ ] Build mode
-      - [ ] Formod1 build mode (triggered by 'add node' button and then picking formod1 in the dropdown)
+  - [ ] Create functional DApp:
+    - [ ] Make build mode:
+      - [X] Add buttons:
+        - [X] Create Node
+        - [X] MyEdgeProposals
+        - [X] Delete Node button
       - [ ] My Nodes
-      - [ ] My Edge Proposals
+        - [X] Show paged view of all my nodes, by node name (where available).
+        - [ ] Make clicking on one set it to your current Node (and close the MyNodes screen, but keep the page number.)
+      - [ ] Formod1 create node:
+        - [ ] Make a "createnode" App mode
+        - [ ] Make a component slot for this.
+        - [ ]
+      - [ ] My Edge Proposals]
+        - [ ] Create an app mode for myedgeproposals
+        - [ ] Create a test EdgeProposal or two.
+        - [ ] Show paged view of all my EdgeProposal keys.
+        - [ ] Load EdgeProposal blockchain data (so getting the two Node keys and epmess and slots).
       - [ ] Edge Proposal
+        - [ ] Create an App mode for edgeproposal
+        - [ ] Show current EdgeProposal key
+        - [ ]
     - [ ] Extensively test!
     - [ ] Share somewhere, and fix bugs that people find, haha. This being the "free version", less (but not nothing) is at stake.
   - [ ] Smart contracts

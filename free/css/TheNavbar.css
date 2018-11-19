@@ -11,9 +11,48 @@
   width: 80px;
   height: 50px;
   border-radius: 15px;
+  border: 1px solid grey;
+  margin: 5px;
   background-color: white;
 }
 
-#navbar #button-build, #button-my-nodes {
+#navbar .right {
   float: right;
+}
+
+#navbar .left {
+  float: left;
+}
+
+#navbar #home {
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: black;
+  background-image: linear-gradient(to bottom, #ffffff, #ff5555 25%, #ff5555 75%, #990000);
+}
+
+#navbar #dropdown-edges {
+  background-image: linear-gradient(to bottom, #ffffff, #ffaa55 25%, #ffaa55 75%, #994400);
+}
+
+#navbar #button-add-node {
+  background-image: linear-gradient(to bottom, #ffffff, #ffff55 25%, #ffff55 75%, #999900);
+}
+
+#navbar #button-delete-node {
+  background-image: linear-gradient(to bottom, #ffffff, #55ff55 25%, #55ff55 75%, #009900);
+}
+
+#navbar #button-my-nodes {
+  background-image: linear-gradient(to bottom, #ffffff, #55ffff 25%, #55ffff 75%, #009999);
+}
+
+#navbar #button-my-edge-proposals {
+  background-image: linear-gradient(to bottom, #ffffff, #5555ff 25%, #5555ff 75%, #000099);
+}
+
+#navbar #button-build {
+  background-image: linear-gradient(to bottom, #ffffff, #ff55ff 25%, #ff55ff 75%, #990099);
 }

@@ -123,3 +123,14 @@
 
 ## 2018-11-03
 - Why doing routing isn't going to work at the moment (with GitHub hosting and http-server)
+
+## 2018-11-04
+- Validating ipfs data per its format
+- SimpleText format update
+
+## 2018-11-13
+- A better way to organize the dapp's model variables
+
+## 2018-11-17
+- How to keep objects reactive in Vue
+- How to fix bash !: issue

@@ -1,28 +1,73 @@
-import ButtonHome from "./ButtonHome.js";
 import ButtonEdge from "./ButtonEdge.js";
 
 export default {
   template: `
     <div id="navbar">
-      <button-home></button-home>
+      <a
+        role="button"
+        id="home"
+        class="navbar-button left"
+        href="../../">
+        Home
+      </a>
+      <!--
       <button-edge
         v-for="edge in availableEdges" :key="edge.nodeKey"
         v-bind:edge="edge"
         v-on:edgeClick="edgeClick">
       </button-edge>
-      <button id="button-build" class="navbar-button" v-on:click="buildClick()">
+      -->
+      <button
+        id="dropdown-edges"
+        class="navbar-button left"
+        v-if="showBuildTools"
+        v-on:click="addNodeClick()">
+        Edges
+      </button>
+      <button
+        id="button-build"
+        class="navbar-button right"
+        v-on:click="buildClick()">
         {{buildButtonLabel}}
       </button>
-      <button id="button-my-nodes" class="navbar-button" v-if="showBuildTools" v-on:click="myNodesClick()">My Nodes</button>
+      <button
+        id="button-my-edge-proposals"
+        class="navbar-button right"
+        v-if="showBuildTools"
+        v-on:click="myEdgeProposalsClick()">
+        My Edge Proposals
+      </button>
+      <button
+        id="button-my-nodes"
+        class="navbar-button right"
+        v-if="showBuildTools"
+        v-on:click="myNodesClick()">
+        My Nodes
+      </button>
+      <button
+        id="button-delete-node"
+        class="navbar-button right"
+        v-if="showBuildTools"
+        v-on:click="deleteNodeClick()">
+        Delete Node
+      </button>
+      <button
+        id="button-add-node"
+        class="navbar-button right"
+        v-if="showBuildTools"
+        v-on:click="addNodeClick()">
+        Add Node
+      </button>
+
     </div>
   `,
   components: {
-    ButtonHome,
     ButtonEdge
   },
   props: {
     currentNodeKey: String,
     nodes: Object,
+    ipfsData: Object,
     showBuildTools: Boolean,
     currentView: String,
     account: String
@@ -54,13 +99,12 @@ export default {
     },
     buildButtonLabel: function() {
       if (!this.account) {
-        return "Unlock";
+        return "Connect MetaMask";
       }
       if (this.showBuildTools) {
         return "Hide tools"
       }
-      
-      return "Build tools"
+      return "Show tools"
     }
   },
   methods: {
@@ -72,6 +116,15 @@ export default {
     },
     myNodesClick: function() {
       this.$emit("myNodesClick");
+    },
+    myEdgeProposalsClick: function() {
+      this.$emit("myEdgeProposalsClick");
+    },
+    addNodeClick: function() {
+      this.$emit("addNodeClick");
+    },
+    deleteNodeClick: function() {
+      this.$emit("deleteNodeClick");
     }
   }
 }
