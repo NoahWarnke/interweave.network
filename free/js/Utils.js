@@ -12,7 +12,7 @@ export default {
       
       xhr.addEventListener("load", function() {
         if (xhr.status !== 200) {
-          cancelInterval(interval);
+          clearInterval(interval);
           reject(url + " replied " + xhr.status);
         }
         resolve(xhr.responseText);

@@ -129,6 +129,11 @@ export default {
         return;
       }
       
+      // Reactively detect object property change.
+      this.$set(this.nodes, nodeKey, {
+        status: "pending"
+      });
+      
       let node = undefined;
       try {
         node = await this.contract.getNode(nodeKey);
@@ -142,6 +147,7 @@ export default {
         }
       }
       this.$set(this.nodes, nodeKey, node); // Reactively detect object property change.
+      
     },
     /**
      * Update the ipfsData object to contain the latest IPFS data for the given Node key.
@@ -158,10 +164,13 @@ export default {
       let node = this.nodes[nodeKey];
       
       // Make sure we've loaded the Node's blockchain data first.
-      if (node === undefined) {
+      if (node === undefined || node.status !== "successful") {
         return;
       }
       
+      this.$set(this.ipfsData, nodeKey, {
+        status: "pending"
+      });
       // Load IFPS data from the Node's ipfs hash.
       let nodeIpfsData = undefined;
       try {
@@ -213,7 +222,7 @@ export default {
       
       // Load blockchain data first (rather than just doing updateNode) so we can start updating the edge Nodes as needed.
       await this.updateNodeBlockchain(nodeKey, false);
-      if (this.nodes[nodeKey].status === "failed") {
+      if (this.nodes[nodeKey].status !== "successful") {
         return;
       }
       

@@ -1,18 +1,11 @@
-# Interweaver's to-do items, 2018-11-18:
+# Interweaver's to-do items, 2018-11-19:
 
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:
-    - [ ] Make TheRenderArea display loading text when the Node blockchain/ipfs data is loading.
+    - [X] Make TheRenderArea display loading text when the Node blockchain/ipfs data is loading.
     - [ ] Make ListNodes display loading text when the Nodes' blockchain/ipfs data is loading.
     - [ ] Make build mode:
-      - [X] Add buttons:
-        - [X] Create Node
-        - [X] MyEdgeProposals
-        - [X] Delete Node button
-      - [X] My Nodes
-        - [X] Show paged view of all my nodes, by node name (where available).
-        - [X] Make clicking on one set it to your current Node (and close the MyNodes screen, but keep the page number.)
       - [ ] Formod1 create node:
         - [ ] Make a "createnode" App mode
         - [ ] Make a component slot for this (in App?)
@@ -27,7 +20,9 @@
       - [ ] Edge Proposal
         - [ ] Create an App mode for edgeproposal
         - [ ] Show current EdgeProposal key
-        - [ ]
+        - [ ] Show blockchain data
+        - [ ] Load Node data and show the names
+        - [ ] Make clicking on the Nodes go to them.
     - [ ] Extensively test!
     - [ ] Share somewhere, and fix bugs that people find, haha. This being the "free version", less (but not nothing) is at stake.
   - [ ] Smart contracts
