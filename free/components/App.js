@@ -133,7 +133,6 @@ export default {
       this.$set(this.nodes, nodeKey, {
         status: "pending"
       });
-      
       let node = undefined;
       try {
         node = await this.contract.getNode(nodeKey);
@@ -147,7 +146,6 @@ export default {
         }
       }
       this.$set(this.nodes, nodeKey, node); // Reactively detect object property change.
-      
     },
     /**
      * Update the ipfsData object to contain the latest IPFS data for the given Node key.

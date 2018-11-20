@@ -5,7 +5,7 @@ export default {
         <li
           v-for="nodeKey of pageNodeKeys"
           v-on:click="clickNode(nodeKey)">
-          {{ipfsData[nodeKey] ? ipfsData[nodeKey].name : (nodes[nodeKey] ? nodes[nodeKey].ipfs : nodeKey)}}
+          {{nodeString(nodeKey)}}
         </li>
       </ul>
       <button v-on:click="pageLeft()"><</button>
@@ -15,7 +15,7 @@ export default {
   `,
   data: function() {
     return {
-      nodesPerPage: 2,
+      nodesPerPage: 1,
       page: 0,
       pendingNodeData: {}
     };
@@ -61,6 +61,27 @@ export default {
     },
     clickNode: function(nodeKey) {
       this.$emit("myNodesNodeClick", nodeKey);
+    },
+    nodeString: function(nodeKey) {
+      if (this.nodes[nodeKey] === undefined) {
+        return nodeKey;
+      }
+      if (this.nodes[nodeKey].status === "pending") {
+        return nodeKey + " (blockchain data pending)";
+      }
+      if (this.nodes[nodeKey].status === "failed") {
+        return nodeKey + " (blockchain load failed: " + this.nodes[nodeKey].error + ")";
+      }
+      if (this.ipfsData[nodeKey] === undefined) {
+        return this.nodes[nodeKey].ipfs;
+      }
+      if (this.ipfsData[nodeKey].status === "pending") {
+        return this.nodes[nodeKey].ipfs + " (IPFS data pending)";
+      }
+      if (this.ipfsData[nodeKey].status === "failed") {
+        return this.nodes[nodeKey].ipfs + " (IPFS load failed: " + this.ipfsData[nodeKey].error + ")";
+      }
+      return this.ipfsData[nodeKey].name;
     }
   },
   watch: {
