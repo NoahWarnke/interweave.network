@@ -70,7 +70,7 @@ export default {
         return nodeKey + " (blockchain data pending)";
       }
       if (this.nodes[nodeKey].status === "failed") {
-        return nodeKey + " (blockchain load failed: " + this.nodes[nodeKey].error + ")";
+        return nodeKey + " (" + this.nodes[nodeKey].error + ")";
       }
       if (this.ipfsData[nodeKey] === undefined) {
         return this.nodes[nodeKey].ipfs;
@@ -79,7 +79,7 @@ export default {
         return this.nodes[nodeKey].ipfs + " (IPFS data pending)";
       }
       if (this.ipfsData[nodeKey].status === "failed") {
-        return this.nodes[nodeKey].ipfs + " (IPFS load failed: " + this.ipfsData[nodeKey].error + ")";
+        return this.nodes[nodeKey].ipfs + " (" + this.ipfsData[nodeKey].error + ")";
       }
       return this.ipfsData[nodeKey].name;
     }

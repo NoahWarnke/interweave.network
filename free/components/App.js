@@ -6,6 +6,7 @@ import Utils from '../js/Utils.js';
 // Viewer modules
 import TheNavbar from './TheNavbar.js';
 import TheRenderArea from './TheRenderArea.js';
+import TheNodeBuilder from './TheNodeBuilder.js';
 import ListNodes from './ListNodes.js';
 import ModalInfo from './ModalInfo.js';
 
@@ -42,6 +43,9 @@ export default {
         v-on:edgeBoundary="edgeBoundary()"
         v-show="currentView === 'explore'">
       </the-render-area>
+      <the-node-builder
+        v-if="currentView === 'addnode'">
+      </the-node-builder>
       <list-nodes
         v-if="currentView === 'mynodes'"
         v-bind:myNodeKeys="myNodeKeys"
@@ -56,6 +60,7 @@ export default {
   components: {
     TheNavbar,
     TheRenderArea,
+    TheNodeBuilder,
     ListNodes,
     ModalInfo
   },
@@ -142,7 +147,7 @@ export default {
         console.log("App updateNodeBlockchain: load failed: " + error);
         node = {
           status: "failed",
-          error: error
+          error: "Node blockchain load failed: " + error
         }
       }
       this.$set(this.nodes, nodeKey, node); // Reactively detect object property change.
@@ -180,7 +185,7 @@ export default {
         console.log("App updateNodeIpfs: ipfs data load failed: " + error);
         nodeIpfsData = {
           status: "failed",
-          error: error
+          error: "Node IPFS load failed: " + error
         };
       }
       this.$set(this.ipfsData, nodeKey, nodeIpfsData);
@@ -330,7 +335,7 @@ export default {
       
     },
     addNodeClick: async function() {
-      
+      this.currentView = (this.currentView === "addnode" ? "explore" : "addnode");
     },
     deleteNodeClick: async function() {
       

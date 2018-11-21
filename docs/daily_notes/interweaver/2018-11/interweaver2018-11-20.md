@@ -1,26 +1,24 @@
-# Interweaver's to-do items, 2018-11-19:
+# Interweaver's to-do items, 2018-11-20:
 
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:
-    - [X] Make TheRenderArea display loading text when the Node blockchain/ipfs data is loading.
-    - [X] Make ListNodes display loading text when the Nodes' blockchain/ipfs data is loading.
     - [ ] Make build mode:
       - [ ] Formod1 create node:
-        - [ ] Make a "createnode" App mode
-        - [ ] Make a CreateNode component
-        - [ ] Have it render when createnode mode.
+        - [X] Make a "createnode" App mode
+        - [X] Make a TheNodeBuilder component
+        - [X] Have it render when createnode mode.
         - [ ] Give it a dropdown to pick one of the formods (may need to add formod string names.)
         - [ ] When a formod is selected, set a variable to the correct one.
         - [ ] Make a component slot for the actual formod build component.
         - [ ] Make a basic SimpleTextBuild component.
-        - [ ] Make it render when you select it in CreateNode
+        - [ ] Make it render when you select it in TheNodeBuilder
         - [ ] Make it stop rendering when you click Add Node again.
         - [ ] Give it an 'output' button.
         - [ ] Make clicking it open a modal with a text area containing the JSON output (for your IPFS file).
         - [ ] Make the modal have an 'x' that closes it.
         - [ ] Add fields for various SimpleText properties:
-          - [ ] 
+          - [ ]
       - [ ] My Edge Proposals
         - [ ] Create an app mode for myedgeproposals
         - [ ] Create a test EdgeProposal or two.
