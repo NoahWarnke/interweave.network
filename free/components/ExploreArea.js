@@ -1,7 +1,7 @@
 
 export default {
   template: `
-    <div id="render">
+    <div id="explore">
       <div id="norender-info" v-if="nodeRenderer === undefined">
         <div v-bind:class="[nodeDataStatus]" v-if="nodeDataError !== undefined">
           {{nodeDataError}}

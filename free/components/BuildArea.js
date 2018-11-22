@@ -1,7 +1,7 @@
 
 export default {
   template: `
-    <div id="nodebuilder">
+    <div id="build">
       Create your node here! :D
     </div>
   `

@@ -31,4 +31,9 @@ export default class SimpleText {
   validateParsedData(data) {
     SimpleTextUtils.validateParsedData(data);
   }
+  
+  /** Return the name (for the build mode dropdown) of this format module. */
+  getFormodName() {
+    return "SimpleText";
+  }
 }

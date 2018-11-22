@@ -5,8 +5,8 @@ import Utils from '../js/Utils.js';
 
 // Viewer modules
 import TheNavbar from './TheNavbar.js';
-import TheRenderArea from './TheRenderArea.js';
-import TheNodeBuilder from './TheNodeBuilder.js';
+import ExploreArea from './ExploreArea.js';
+import BuildArea from './BuildArea.js';
 import ListNodes from './ListNodes.js';
 import ModalInfo from './ModalInfo.js';
 
@@ -32,7 +32,7 @@ export default {
         v-on:deleteNodeClick="deleteNodeClick()"
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
-      <the-render-area
+      <explore-area
         v-bind:currentNodeKey="currentNodeKey"
         v-bind:previousNodeKey="previousNodeKey"
         v-bind:nextNodeKey="nextNodeKey"
@@ -42,10 +42,10 @@ export default {
         v-on:edgeStart="edgeStart($event)"
         v-on:edgeBoundary="edgeBoundary()"
         v-show="currentView === 'explore'">
-      </the-render-area>
-      <the-node-builder
+      </explore-area>
+      <build-area
         v-if="currentView === 'addnode'">
-      </the-node-builder>
+      </build-area>
       <list-nodes
         v-if="currentView === 'mynodes'"
         v-bind:myNodeKeys="myNodeKeys"
@@ -59,8 +59,8 @@ export default {
   `,
   components: {
     TheNavbar,
-    TheRenderArea,
-    TheNodeBuilder,
+    ExploreArea,
+    BuildArea,
     ListNodes,
     ModalInfo
   },
