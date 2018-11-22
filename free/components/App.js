@@ -1,6 +1,8 @@
 // Blockchain integration
 import Web3Handler from '../js/Web3Handler.js';
 import InterweaveFreeHandler from '../js/InterweaveFreeHandler.js';
+
+// Utilities
 import Utils from '../js/Utils.js';
 
 // Viewer modules
@@ -13,7 +15,9 @@ import ModalInfo from './ModalInfo.js';
 // Format modules
 import SimpleText from '../../formods/1/SimpleText.js';
 
-
+/**
+ * The App Vue module. Represents the Interweave Free frontend browser application.
+ */
 export default {
   name: 'App',
   template: `
@@ -44,6 +48,7 @@ export default {
         v-show="currentView === 'explore'">
       </explore-area>
       <build-area
+        v-bind:formats="formats"
         v-if="currentView === 'addnode'">
       </build-area>
       <list-nodes

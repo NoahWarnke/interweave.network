@@ -5,8 +5,11 @@
   - [ ] Create functional DApp:
     - [ ] Make build mode:
       - [ ] Formod1 create node:
-        - [ ] Give it a dropdown to pick one of the formods (may need to add formod string names.)
-        - [ ] When a formod is selected, set a variable to the correct one.
+        - [X] Give it a formats property
+        - [X] Pass in the formats list from App
+        - [X] Give it a computed property with a mapping from formod name to actual formod object (or the Build item it returns)
+        - [X] Give it a dropdown to pick one of the formods (may need to add formod string names.)
+        - [X] When a formod is selected, set a variable to the correct one.
         - [ ] Make a component slot for the actual formod build component.
         - [ ] Make a basic SimpleTextBuild component.
         - [ ] Make it render when you select it in TheNodeBuilder

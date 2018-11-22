@@ -33,7 +33,7 @@ export default class SimpleText {
   }
   
   /** Return the name (for the build mode dropdown) of this format module. */
-  getFormodName() {
+  name() {
     return "SimpleText";
   }
 }
