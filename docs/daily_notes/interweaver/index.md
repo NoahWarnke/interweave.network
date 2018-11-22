@@ -134,3 +134,9 @@
 ## 2018-11-17
 - How to keep objects reactive in Vue
 - How to fix bash !: issue
+
+## 2018-11-21
+- Node building process: what steps are needed
+- Automating the IPFS load and pin during this process via the IPFS API
+- Draft nodes in cookies that show up in My Nodes (via filters)
+- 'edit' and 'view' buttons on My Nodes nodes, letting you explore (and hence test) a draft node just like a normal one.
