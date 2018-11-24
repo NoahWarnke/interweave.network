@@ -82,10 +82,14 @@ export default {
       previousNodeKey: undefined,
       nextNodeKey: undefined, // For when an edge transition is in progress.
       myNodeKeys: [],
-      myEdgeProposalKeys: [],
+      myDraftNodeKeys: [],
       nodes: {},
       ipfsData: {},
+      draftIpfsData: {},
+      myEdgeProposalKeys: [],
+      myDraftEdgeProposalKeys: [],
       edgeProposals: {},
+      draftEdgeProposals: {},
       showBuildTools: false,
       currentView: "explore"
     }
