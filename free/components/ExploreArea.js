@@ -8,8 +8,8 @@ export default {
         </div>
         <div class="node-key-and-ipfs">
           <p>Node key: {{currentNodeKey}}</p>
-          <p v-if="currentNodeStatus === 'successful'">
-            Node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + currentNode.ipfs">{{currentNode.ipfs}}</a>
+          <p v-if="currentNodeBStatus === 'successful'">
+            Node IPFS: <a target="_blank" v-bind:href="'https://ipfs.io/ipfs/' + currentNode.bData.ipfs">{{currentNode.bData.ipfs}}</a>
           </p>
         </div>
       </div>
@@ -24,14 +24,12 @@ export default {
     currentNodeKey: String,
     previousNodeKey: String,
     nextNodeKey: String,
-    nodes: Object,
-    ipfsData: Object
+    nodes: Object
   },
   data: function() {
     return {
       currentValidatedNodeKey: undefined,
       currentValidatedNode: undefined,
-      currentValidatedNodeIpfsData: undefined,
       nodeDataLoadedSuccessfully: false,
       nodeDataFormatAvailable: false,
       nodeDataRenderable: false,
@@ -47,22 +45,16 @@ export default {
       return this.nodes[this.currentNodeKey];
     },
     currentNodeEdgeNodeKeys: function() {
-      return this.currentNode.edgeNodeKeys;
+      if (this.currentNode.bStatus !== "successful") {
+        return ["0", "0", "0", "0", "0", "0"];
+      }
+      return this.currentNode.bData.edgeNodeKeys;
     },
-    currentNodeIpfsData: function() {
-      return this.ipfsData[this.currentNodeKey];
-    },
-    currentNodeStatus: function() {
+    currentNodeBStatus: function() {
       if (this.currentNode === undefined) {
         return "none";
       }
-      return this.currentNode.status;
-    },
-    currentNodeIpfsDataStatus: function() {
-      if (this.currentNodeIpfsData === undefined) {
-        return "none";
-      }
-      return this.currentNodeIpfsData.status;
+      return this.currentNode.bStatus;
     }
   },
   methods: {
@@ -80,15 +72,14 @@ export default {
       }
       
       // Don't do anything if we are already ran validation on this Node's data.
-      if (
-        this.currentNodeKey === this.currentValidatedNodeKey
-        && this.currentNode === this.currentValidatedNode
-        && this.currentNodeIpfsData === this.currentValidatedNodeIpfsData) {
+      /*
+      if (this.currentNodeKey === this.currentValidatedNodeKey) {
         return;
       }
+      */
       
       // Make sure the new node data is all present and accounted for.
-      this.checkNodeData(this.currentNodeIpfsData);
+      this.checkNodeData();
       
       // If there was an error, remove our render slot.
       // If there was no error and the previous Node's format is the same as the current one, keep the render slot and just update its contents.
@@ -96,9 +87,9 @@ export default {
       
       let previousNodeFormod = undefined;
       if (this.previousNodeKey !== undefined) {
-        let previousNodeIpfs = this.ipfsData[this.previousNodeKey];
-        if (previousNodeIpfs !== undefined) {
-          previousNodeFormod = this.formats[previousNodeIpfs.format];
+        let previousNode = this.nodes[this.previousNodeKey];
+        if (previousNode.iStatus === "successful") {
+          previousNodeFormod = this.formats[previousNode.iData.format];
         }
       }
       
@@ -107,7 +98,7 @@ export default {
         
         // Have to explicitly update the nodeRenderer's props, since it's not actually bound.
         this.nodeRenderer._props.currentNodeEdgeNodeKeys = this.currentNodeEdgeNodeKeys;
-        this.nodeRenderer._props.currentNodeIpfsData = this.currentNodeIpfsData;
+        this.nodeRenderer._props.currentNodeIpfsData = this.currentNode.iData;
         this.nodeRenderer._props.arrivedSlot = this.arrivedSlot;
         return;
       }
@@ -131,7 +122,7 @@ export default {
       this.nodeRenderer = new (this.currentFormod.exploreClass())({
         propsData: {
           currentNodeEdgeNodeKeys: this.currentNodeEdgeNodeKeys,
-          currentNodeIpfsData: this.currentNodeIpfsData,
+          currentNodeIpfsData: this.currentNode.iData,
           arrivedSlot: this.arrivedSlot
         }
       });
@@ -145,7 +136,7 @@ export default {
       // Finally, add it to the formod explore slot element.
       exploreEl.appendChild(this.nodeRenderer.$el);
     },
-    checkNodeData: function(currentNodeIpfsData) {
+    checkNodeData: function() {
       
       // Reset everything.
       this.nodeDataLoadedSuccessfully = false;
@@ -157,55 +148,54 @@ export default {
       // Keep track that we've run a validation on this Node key and IPFS data.
       this.currentValidatedNodeKey = this.currentNodeKey;
       this.currentValidatedNode = this.currentNode;
-      this.currentValidatedNodeIpfsData = this.currentNodeIpfsData;
       
       if (this.currentNode === undefined) {
-        this.nodeDataError = "No loaded Node!";
+        this.nodeDataError = "No current node.";
+        this.nodeDataStatus === "error";
+        return;
+      }
+      
+      if (this.currentNode.bStatus === "init") {
+        this.nodeDataError = "Node blockchain data never loaded!";
         this.nodeDataStatus = "error";
         return;
       }
       
-      if (this.currentNode.status === "pending") {
+      if (this.currentNode.bStatus === "pending") {
         this.nodeDataError = "Loading node blockchain data...";
         this.nodeDataStatus = "warn";
         return;
       }
       
-      if (this.currentNode.status === "failure") {
-        this.nodeDataError = this.currentNode.error;
+      if (this.currentNode.bStatus === "failed") {
+        this.nodeDataError = this.currentNode.bError;
         this.nodeDataStatus = "error";
         return;
       }
       
-      if (this.currentNodeIpfsData === undefined) {
-        this.nodeDataError = "No loaded Node IPFS data!";
+      if (this.currentNode.iStatus === "init") {
+        this.nodeDataError = "Node IPFS data never loaded!";
         this.nodeDataStatus = "error";
         return;
       }
       
       // Confirm loaded and no errors.
-      if (this.currentNodeIpfsData.status === "pending") {
+      if (this.currentNode.iStatus === "pending") {
         this.nodeDataError = "Loading node IPFS data...";
         this.nodeDataStatus = "warn";
         return;
       }
       
-      if (this.currentNodeIpfsData.status === "failed") {
-        this.nodeDataError = this.currentNodeIpfsData.error;
+      if (this.currentNode.iStatus === "failed") {
+        this.nodeDataError = this.currentNode.iError;
         this.nodeDataStatus = "error";
         return;
       }
       this.nodeDataLoadedSuccessfully = true;
       
-      // Check if we have an available format.
-      if (this.currentNodeIpfsData.format === undefined) {
-        this.nodeDataError = "JSON was missing a format value.";
-        this.nodeDataStatus = "error";
-        return;
-      }
-      this.currentFormod = this.formats[this.currentNodeIpfsData.format];
+      this.currentFormod = this.formats[this.currentNode.iData.format];
       if (this.currentFormod === undefined) {
-        this.nodeDataError = "Format " + this.currentNodeIpfsData.format + " is not supported.";
+        this.nodeDataError = "Format " + this.currentNode.iData.format + " is not supported.";
         this.nodeDataStatus = "error";
         return;
       }
@@ -216,8 +206,8 @@ export default {
       // Figure out which slot we arrived from.
       // If there was no previous Node key, or if it's not among the current Node's edges, set to -1.
       this.arrivedSlot = -1;
-      for (var keyKey in this.currentNode.edgeNodeKeys) {
-        if (this.currentNode.edgeNodeKeys[keyKey] === this.previousNodeKey) {
+      for (var keyKey in this.currentNode.bData.edgeNodeKeys) {
+        if (this.currentNode.bData.edgeNodeKeys[keyKey] === this.previousNodeKey) {
           this.arrivedSlot = parseInt(keyKey);
         }
       }
@@ -243,15 +233,6 @@ export default {
       deep: true,
       handler: function(val, oldVal) {
         //if (val[this.currentNodeKey] !== undefined && this.ipfsData[this.currentNodeKey] !== undefined) {
-          this.maybeUpdate();
-        //}
-      }
-    },
-    ipfsData: {
-      immediate: true,
-      deep: true,
-      handler: function(val, oldVal) {
-        //if (this.nodes[this.currentNodeKey] !== undefined && val[this.currentNodeKey] !== undefined) {
           this.maybeUpdate();
         //}
       }

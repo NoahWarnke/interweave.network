@@ -67,7 +67,6 @@ export default {
   props: {
     currentNodeKey: String,
     nodes: Object,
-    ipfsData: Object,
     showBuildTools: Boolean,
     currentView: String,
     account: String
@@ -79,10 +78,10 @@ export default {
         return [];
       }
       let currentNode = this.nodes[this.currentNodeKey];
-      if (currentNode === undefined) {
+      if (currentNode === undefined || currentNode.bStatus !== "successful") {
         return [];
       }
-      let edgeNodeKeys = currentNode.edgeNodeKeys;
+      let edgeNodeKeys = currentNode.bData.edgeNodeKeys;
       if (edgeNodeKeys !== undefined) {
         
         return edgeNodeKeys
@@ -92,7 +91,9 @@ export default {
               nodeKey: value
             };
           })
-          .filter((value) => {return value.nodeKey != 0;})
+          .filter((value) => {
+            return value.nodeKey != 0;
+          })
         ;
       }
       return [];

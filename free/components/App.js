@@ -5,6 +5,7 @@ import InterweaveFreeHandler from '../js/InterweaveFreeHandler.js';
 // General
 import Utils from '../js/Utils.js';
 import NodeData from '../js/NodeData.js';
+import Node from '../js/Node.js';
 
 // Viewer modules
 import TheNavbar from './TheNavbar.js';
@@ -26,7 +27,6 @@ export default {
       <the-navbar
         v-bind:currentNodeKey="currentNodeKey"
         v-bind:nodes="nodes"
-        v-bind:ipfsData="ipfsData"
         v-bind:showBuildTools="showBuildTools"
         v-bind:currentView="currentView"
         v-bind:account="account"
@@ -42,7 +42,6 @@ export default {
         v-bind:previousNodeKey="previousNodeKey"
         v-bind:nextNodeKey="nextNodeKey"
         v-bind:nodes="nodes"
-        v-bind:ipfsData="ipfsData"
         v-bind:formats="formats"
         v-on:edgeStart="edgeStart($event)"
         v-on:edgeBoundary="edgeBoundary()"
@@ -50,15 +49,17 @@ export default {
       </explore-area>
       <build-area
         v-bind:formats="formats"
+        v-bind:currentNodeKey="currentNodeKey"
+        v-bind:nodes="nodes"
         v-if="currentView === 'addnode'">
       </build-area>
       <list-nodes
         v-if="currentView === 'mynodes'"
         v-bind:myNodeKeys="myNodeKeys"
         v-bind:nodes="nodes"
-        v-bind:ipfsData="ipfsData"
         v-on:pagedToTheseNodeKeys="updateNodes($event)"
-        v-on:myNodesNodeClick="myNodesNodeClick($event)">
+        v-on:myNodesViewClick="myNodesViewClick($event)"
+        v-on:myNodesEditClick="myNodesEditClick($event)">
       </list-nodes>
       <modal-info v-if="false"></modal-info>
     </div>
@@ -69,7 +70,7 @@ export default {
     BuildArea,
     ListNodes,
     ModalInfo,
-    NodeData
+    Node
   },
   data: function() {
     return {
@@ -89,22 +90,15 @@ export default {
       previousNodeKey: undefined,
       nextNodeKey: undefined, // For when an edge transition is in progress.
       
-      // Deployed Nodes
+      // Nodes
       myNodeKeys: [],
-      nodes: {},
-      ipfsData: {},
-      
-      // Draft Nodes
       myDraftNodeKeys: [],
-      draftIpfsData: {},
+      nodes: {},
       
       // Deployed edge (proposals)
       myEdgeProposalKeys: [],
-      edgeProposals: {},
-      
-      // Draft edges
       myDraftEdgeProposalKeys: [],
-      draftEdgeProposals: {},
+      edgeProposals: {},
       
       // Build-related DApp state
       showBuildTools: false,
@@ -142,11 +136,20 @@ export default {
         window.interweave = this.contract;
         
         // Grab starting node data.
-        await this.setCurrentNode("4802423149786398712975601635277375780486398097217997509586637249159306333648");
+        await this.setCurrentNode("4802423149786398712975601635277375780486398097217997509586637249159306333648", "deployed");
       }
       catch (error) {
         console.log("App init: " + error);
       }
+    },
+    initializeNode: function(nodeKey, type, force) {
+      
+      // If not forcing, don't overwrite existing Node.
+      if (!force && this.nodes[nodeKey] !== undefined) {
+        return;
+      }
+      
+      this.$set(this.nodes, nodeKey, new Node(nodeKey, type));
     },
     /**
      * Update the nodes object to contain the latest blockchain data for the given Node key.
@@ -155,35 +158,39 @@ export default {
      */
     updateNodeBlockchain: async function(nodeKey, force) {
       
-      // If not forcing, don't reload existing data.
-      if (!force && this.nodes[nodeKey] !== undefined) {
+      let node = this.nodes[nodeKey];
+      
+      if (node === undefined) {
         return;
       }
       
-      // Reactively detect object property change.
-      this.$set(this.nodes, nodeKey, {
-        status: "pending"
-      });
-      let node = undefined;
+      // If not forcing, don't overwrite existing blockchain data.
+      if (!force && node.bStatus !== "init") {
+        return;
+      }
+      
+      // Pending...
+      node.setBlockchainState("pending", undefined, undefined);
+      this.$set(this.nodes, nodeKey, node); // Let child components know it changed.
+      
+      let blockchainData = undefined;
       try {
-        node = await this.contract.getNode(nodeKey);
+        blockchainData = await this.contract.getNode(nodeKey);
         
         // TEMP
-        if (node.ipfs === "QmWSEucjdTRcCbrx4FLTuNEAv6XrJrUVTzY1Lh9bFCoUfV") {
-          node.ipfs = "QmTTfMB5ZVZnJ9k76c8oTrwVBG4zvtD2WYw2HNGtMonKq5";
+        if (blockchainData.ipfs === "QmWSEucjdTRcCbrx4FLTuNEAv6XrJrUVTzY1Lh9bFCoUfV") {
+          blockchainData.ipfs = "QmTTfMB5ZVZnJ9k76c8oTrwVBG4zvtD2WYw2HNGtMonKq5";
         }
-        if (node.ipfs === "QmbFwA929KA1waxL95uQ5VQGJc4MtQUPVzLnLHrg2WF8Ei") {
-          node.ipfs = "QmVNLqAe4F6bqSZiXQafsmDxpRQkFnULyFkEE8kCMXdwaV";
+        if (blockchainData.ipfs === "QmbFwA929KA1waxL95uQ5VQGJc4MtQUPVzLnLHrg2WF8Ei") {
+          blockchainData.ipfs = "QmVNLqAe4F6bqSZiXQafsmDxpRQkFnULyFkEE8kCMXdwaV";
         }
         
-        node.status = "successful";
+        node.setBlockchainState("successful", blockchainData, undefined);
       }
       catch (error) {
         console.log("App updateNodeBlockchain: load failed: " + error);
-        node = {
-          status: "failed",
-          error: "Node blockchain load failed: " + error
-        }
+        
+        node.setBlockchainState("failed", undefined, "Node blockchain load failed: " + error);
       }
       this.$set(this.nodes, nodeKey, node); // Reactively detect object property change.
     },
@@ -194,32 +201,31 @@ export default {
      */
     updateNodeIpfs: async function(nodeKey, force) {
       
-      // If not forcing, don't reload existing data.
-      if (!force && this.ipfsData[nodeKey] !== undefined) {
-        return;
-      }
-      
       let node = this.nodes[nodeKey];
       
       // Make sure we've loaded the Node's blockchain data first.
-      if (node === undefined || node.status !== "successful") {
+      if (node === undefined || node.bStatus !== "successful") {
         return;
       }
       
-      this.$set(this.ipfsData, nodeKey, {
-        status: "pending"
-      });
+      // If not forcing, don't overwrite existing IPFS data.
+      if (!force && node.iStatus !== "init") {
+        return;
+      }
+      
+      node.setIPFSState("pending", undefined, undefined);
+      this.$set(this.nodes, nodeKey, node);
+      
       // Load IFPS JSON data from the Node's ipfs hash.
       let parsedNodeIpfsJson = undefined;
       try {
-        parsedNodeIpfsJson = JSON.parse(await Utils.getAjax("https://ipfs.io/ipfs/" + node.ipfs, 30000));
+        parsedNodeIpfsJson = JSON.parse(await Utils.getAjax("https://ipfs.io/ipfs/" + node.bData.ipfs, 30000));
       }
       catch (error) {
         console.log("App updateNodeIpfs: ipfs data load failed: " + error);
-        this.$set(this.ipfsData, nodeKey, {
-          status: "failed",
-          error: "Node IPFS load failed: " + error
-        });
+        
+        node.setIPFSState("failed", undefined, "Node IPFS load failed: " + error);
+        this.$set(this.nodes, nodeKey, node);
         return;
       }
       
@@ -230,14 +236,13 @@ export default {
           nodeIpfsData.formatVersion,
           parsedNodeIpfsJson.content
         );
-        this.$set(this.ipfsData, nodeKey, nodeIpfsData);
+        node.setIPFSState("successful", nodeIpfsData, undefined);
+        this.$set(this.nodes, nodeKey, node);
       }
       catch (error) {
         console.log("App updateNodeIpfs: ipfs data import failed: " + error);
-        this.$set(this.ipfsData, nodeKey, {
-          status: "failed",
-          error: "Node IPFS import failed: " + error
-        });
+        node.setIPFSState("failed", undefined, "Node IPFS import failed: " + error);
+        this.$set(this.nodes, nodeKey, node);
         return;
       }
     },
@@ -247,6 +252,13 @@ export default {
     * @param force Whether to force-update if it's already loaded.
     */
     updateNode: async function(nodeKey, force) {
+      
+      // Don't update draft Nodes.
+      if (this.nodes[nodeKey] !== undefined && this.nodes[nodeKey].type === "draft") {
+        return;
+      }
+      
+            this.initializeNode      (nodeKey, "deployed", force);
       await this.updateNodeBlockchain(nodeKey, force);
       await this.updateNodeIpfs      (nodeKey, force);
     },
@@ -274,9 +286,14 @@ export default {
       }
       this.currentNodeKey = nodeKey;
       
+      // Initialize the Node if needed (if it doesn't already exist, it's a deployed Node we're referencing here.)
+      if (this.nodes[nodeKey] === undefined) {
+        this.initializeNode(nodeKey, "deployed", false);
+      }
+      
       // Load blockchain data first (rather than just doing updateNode) so we can start updating the edge Nodes as needed.
       await this.updateNodeBlockchain(nodeKey, false);
-      if (this.nodes[nodeKey].status !== "successful") {
+      if (this.nodes[nodeKey].bStatus !== "successful") {
         return;
       }
       
@@ -284,7 +301,7 @@ export default {
       let promises = [];
       promises.push(this.updateNodeIpfs(nodeKey, false));
       
-      let adjacentNodeKeys = this.nodes[nodeKey]
+      let adjacentNodeKeys = this.nodes[nodeKey].bData
         .edgeNodeKeys
         .filter((key) => {
           return key != 0;
@@ -314,13 +331,13 @@ export default {
       
       // Make sure current Node's blockchain data has loaded.
       let currentNode = this.nodes[this.currentNodeKey];
-      if (currentNode === undefined) {
+      if (currentNode === undefined || currentNode.bStatus !== "successful") {
         console.log("App edgeStart: current Node not loaded, so cannot transition away from it.");
         return;
       }
       
       // Make sure the Node's outgoing slot has been set to another Node key.
-      let edgeNodeKey = currentNode.edgeNodeKeys[event.slot];
+      let edgeNodeKey = currentNode.bData.edgeNodeKeys[event.slot];
       if (edgeNodeKey == 0) {
         console.log("App edgeStart: Formod attempted to trigger an edge start, but the edge slot is not set for the current Node in the blockchain.");
         return;
@@ -373,23 +390,40 @@ export default {
       }
     },
     /**
-     * When a Node in the My Nodes list is clicked.
+     * When a Node in the My Nodes list has its 'view' button clicked.
      * @param nodeKey The key of the Node clicked.
      */
-    myNodesNodeClick: async function(nodeKey) {
+    myNodesViewClick: async function(nodeKey) {
       this.setCurrentNode(nodeKey);
       this.previousNodeKey = undefined;
       this.nextNodeKey = undefined;
       this.currentView = "explore";
     },
+    /**
+     * When a Node in the My Nodes list has its 'edit' button clicked.
+     * @param nodeKey The key of the Node clicked.
+     */
+    myNodesEditClick: async function(nodeKey) {
+      console.log("Edit " + nodeKey);
+      // TODO
+    },
     myEdgeProposalsClick: async function() {
-      
+      // TODO
     },
     addNodeClick: async function() {
+      // Create a new draft Node.
+      let draftNodeKey = "draft" + (Math.random() * 10E16);
+      this.myDraftNodeKeys.push(draftNodeKey);
+      this.draftIpfsData[draftNodeKey] = new NodeData(
+        "simpletext",
+        this.formats["simpletext"].latestVersion(),
+        "New Node"
+      );
+      
       this.currentView = (this.currentView === "addnode" ? "explore" : "addnode");
     },
     deleteNodeClick: async function() {
-      
+      // TODO
     }
   },
   created: function() {

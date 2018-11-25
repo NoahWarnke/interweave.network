@@ -2,10 +2,10 @@ export default {
   template: `
     <div id="list-nodes">
       <ul>
-        <li
-          v-for="nodeKey of pageNodeKeys"
-          v-on:click="clickNode(nodeKey)">
-          {{nodeString(nodeKey)}}
+        <li v-for="nodeKey of pageNodeKeys">
+          <span>{{nodeString(nodeKey)}}</span>
+          <button v-on:click="viewNode(nodeKey)">View</button>
+          <button v-on:click="editNode(nodeKey)">Edit</button>
         </li>
       </ul>
       <button v-on:click="pageLeft()"><</button>
@@ -22,8 +22,8 @@ export default {
   },
   props: {
     myNodeKeys: Array,
-    nodes: Object,
-    ipfsData: Object
+    myDraftNodeKeys: Array,
+    nodes: Object
   },
   computed: {
     maxPage: function() {
@@ -41,7 +41,7 @@ export default {
         let node = this.nodes[nodeKey];
         result.push(nodeKey);
         
-        if (this.ipfsData[nodeKey] === undefined && !this.pendingNodeData[nodeKey]) {
+        if (node === undefined || node.iStatus === "init" && !this.pendingNodeData[nodeKey]) {
           nodeKeysToGet.push(nodeKey);
           this.pendingNodeData[nodeKey] = true;
         }
@@ -59,40 +59,38 @@ export default {
     pageRight: function() {
       this.page = Math.min(this.maxPage, this.page + 1);
     },
-    clickNode: function(nodeKey) {
-      this.$emit("myNodesNodeClick", nodeKey);
+    viewNode: function(nodeKey) {
+      this.$emit("myNodesViewClick", nodeKey);
+    },
+    editNode: function(nodeKey) {
+      this.$emit("myNodesEditClick", nodeKey);
     },
     nodeString: function(nodeKey) {
-      if (this.nodes[nodeKey] === undefined) {
+      let node = this.nodes[nodeKey];
+      
+      if (node === undefined || node.bStatus === "init") {
         return nodeKey;
       }
-      if (this.nodes[nodeKey].status === "pending") {
+      if (node.bStatus === "pending") {
         return nodeKey + " (blockchain data pending)";
       }
-      if (this.nodes[nodeKey].status === "failed") {
-        return nodeKey + " (" + this.nodes[nodeKey].error + ")";
+      if (node.bStatus === "failed") {
+        return nodeKey + " (" + this.nodes[nodeKey].ebError + ")";
       }
-      if (this.ipfsData[nodeKey] === undefined) {
-        return this.nodes[nodeKey].ipfs;
+      if (node.iStatus === "init") {
+        return node.bData.ipfs;
       }
-      if (this.ipfsData[nodeKey].status === "pending") {
-        return this.nodes[nodeKey].ipfs + " (IPFS data pending)";
+      if (node.iStatus === "pending") {
+        return node.bData.ipfs + " (IPFS data pending)";
       }
-      if (this.ipfsData[nodeKey].status === "failed") {
-        return this.nodes[nodeKey].ipfs + " (" + this.ipfsData[nodeKey].error + ")";
+      if (node.iStatus === "failed") {
+        return node.bData.ipfs + " (" + node.iError + ")";
       }
-      return this.ipfsData[nodeKey].name;
+      return node.iData.name;
     }
   },
   watch: {
     myNodeKeys: {
-      immediate: true,
-      deep: true,
-      handler: function(val, oldVal) {
-        this.$forceUpdate();
-      }
-    },
-    ipfsData: {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
