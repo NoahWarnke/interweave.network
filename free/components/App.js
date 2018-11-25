@@ -71,25 +71,40 @@ export default {
   },
   data: function() {
     return {
+      // Blockchain stuff
       web3Handler: undefined,
       contract: undefined,
       accountPending: false, // Requested account access, don't have it yet.
       account: undefined,
+      
+      // Formods
       formats: {
         1: new SimpleText()
       },
+      
+      // Navigation
       currentNodeKey: undefined,
       previousNodeKey: undefined,
       nextNodeKey: undefined, // For when an edge transition is in progress.
+      
+      // Deployed Nodes
       myNodeKeys: [],
-      myDraftNodeKeys: [],
       nodes: {},
       ipfsData: {},
+      
+      // Draft Nodes
+      myDraftNodeKeys: [],
       draftIpfsData: {},
+      
+      // Deployed edge (proposals)
       myEdgeProposalKeys: [],
-      myDraftEdgeProposalKeys: [],
       edgeProposals: {},
+      
+      // Draft edges
+      myDraftEdgeProposalKeys: [],
       draftEdgeProposals: {},
+      
+      // Build-related DApp state
       showBuildTools: false,
       currentView: "explore"
     }
