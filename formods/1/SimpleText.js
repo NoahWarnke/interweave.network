@@ -40,4 +40,11 @@ export default class SimpleText {
   name() {
     return "SimpleText";
   }
+  
+  /**
+   * @returns the latest version integer for this format module.
+   */
+  latestVersion() {
+    return 1;
+  }
 }

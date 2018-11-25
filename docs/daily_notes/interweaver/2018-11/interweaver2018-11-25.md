@@ -5,24 +5,16 @@
   - [ ] Create functional DApp:
     - [ ] Make build mode:
       - [ ] Add 'draft' Nodes
-        - [X] Make a NodeData object with space for all the common fields
-        - [X] Make it do a basic validation on the data, excluding 'content'.
-        - [X] Make a SimpleTextNodeData object whose constructor does a deep clone of the IPFS 'content' field, and also validates at the same time.
-        - [X] Upload modified IPFS files (and temporarily insert ipfs hash redirects...)
-          - ipfs add -q assets/interweavegrotto.json
-          - ipfs pin add ...
-          - QmTTfMB5ZVZnJ9k76c8oTrwVBG4zvtD2WYw2HNGtMonKq5
-          - QmVNLqAe4F6bqSZiXQafsmDxpRQkFnULyFkEE8kCMXdwaV
-        - [X] Update ipfsData to import via the new NodeData stuff.
-        - [X] Add a myDraftNodeKeys array to App
-        - [X] Add a draftIpfsData object to App
-        - [ ] Give BuildArea a 'currentStep' value
-        - [ ] Make the first step be picking a format (via dropdown), version (automatically latest), and name string (via text box)
-        - [ ] Enable next step once those are done (both number selector on top, and a 'next' button)
+        - [X] Give BuildArea a 'currentStep' data value
+        - [X] Give BuildArea several divs that only show up when each of the steps are current.
+        - [X] Give BuildArea 'clickNext' and 'clickPrevious' buttons and functions that (for now) show all the steps.
+        - [X] Make the first step be picking a format (via dropdown), version (automatically latest), and name string (via text box)
+        - [X] Enable the 'next' button once those are done
         - [ ] Also emit a message up to App that a new NodeData was created for a draft Node - give it a fake key, too.
         - [ ] Temporary: generate an automatic SimpleTextNodeData content object, and put it into the CurrentNode object.
         - [ ] Make a next button to proceed from this step.
         - [ ] Make a button to deploy to IPFS.
+        - [ ] Give SimpleTextNodeData and NodeData methods to export JSON-able objects.
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
         - [ ] Make a button to deploy to blockchain.
           - [ ] Actually add the new Node
