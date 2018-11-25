@@ -1,6 +1,6 @@
 import Explore from './SimpleTextExplore.js';
 import Build from './SimpleTextBuild.js';
-import SimpleTextUtils from "./SimpleTextUtils.js";
+import SimpleTextNodeData from './SimpleTextNodeData.js';
 
 /** A Class for a format module whose instances contain:
  * - an explore component instantiator
@@ -27,9 +27,13 @@ export default class SimpleText {
     return this.build;
   }
   
-  /** Validate parsed data for this format module. Throws if there is an error, does nothing otherwise. */
-  validateParsedData(data) {
-    SimpleTextUtils.validateParsedData(data);
+  /** Validate and import data for this format module. Throws if there is an error, return an imported object if successful. */
+  validateAndImportContent(version, data) {
+    
+    if (version === 1) {
+      return new SimpleTextNodeData(data);
+    }
+    throw new Error("Invalid SimpleText version number (" + version + ")");
   }
   
   /** Return the name (for the build mode dropdown) of this format module. */

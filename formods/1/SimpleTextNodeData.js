@@ -1,6 +1,6 @@
 
 
-return default class SimpleTextData {
+export default class SimpleTextData {
   
   /** Starting from the 'content' variable in an IPFS file, assemble a SimpleTextData object. */
   constructor(content) {

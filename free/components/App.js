@@ -2,8 +2,9 @@
 import Web3Handler from '../js/Web3Handler.js';
 import InterweaveFreeHandler from '../js/InterweaveFreeHandler.js';
 
-// Utilities
+// General
 import Utils from '../js/Utils.js';
+import NodeData from '../js/NodeData.js';
 
 // Viewer modules
 import TheNavbar from './TheNavbar.js';
@@ -67,7 +68,8 @@ export default {
     ExploreArea,
     BuildArea,
     ListNodes,
-    ModalInfo
+    ModalInfo,
+    NodeData
   },
   data: function() {
     return {
@@ -79,7 +81,7 @@ export default {
       
       // Formods
       formats: {
-        1: new SimpleText()
+        "simpletext": new SimpleText()
       },
       
       // Navigation
@@ -165,6 +167,15 @@ export default {
       let node = undefined;
       try {
         node = await this.contract.getNode(nodeKey);
+        
+        // TEMP
+        if (node.ipfs === "QmWSEucjdTRcCbrx4FLTuNEAv6XrJrUVTzY1Lh9bFCoUfV") {
+          node.ipfs = "QmTTfMB5ZVZnJ9k76c8oTrwVBG4zvtD2WYw2HNGtMonKq5";
+        }
+        if (node.ipfs === "QmbFwA929KA1waxL95uQ5VQGJc4MtQUPVzLnLHrg2WF8Ei") {
+          node.ipfs = "QmVNLqAe4F6bqSZiXQafsmDxpRQkFnULyFkEE8kCMXdwaV";
+        }
+        
         node.status = "successful";
       }
       catch (error) {
@@ -198,21 +209,37 @@ export default {
       this.$set(this.ipfsData, nodeKey, {
         status: "pending"
       });
-      // Load IFPS data from the Node's ipfs hash.
-      let nodeIpfsData = undefined;
+      // Load IFPS JSON data from the Node's ipfs hash.
+      let parsedNodeIpfsJson = undefined;
       try {
-        let rawNodeIpfsData = await Utils.getAjax("https://ipfs.io/ipfs/" + node.ipfs, 30000);
-        nodeIpfsData = JSON.parse(rawNodeIpfsData);
-        nodeIpfsData.status = "successful";
+        parsedNodeIpfsJson = JSON.parse(await Utils.getAjax("https://ipfs.io/ipfs/" + node.ipfs, 30000));
       }
       catch (error) {
         console.log("App updateNodeIpfs: ipfs data load failed: " + error);
-        nodeIpfsData = {
+        this.$set(this.ipfsData, nodeKey, {
           status: "failed",
           error: "Node IPFS load failed: " + error
-        };
+        });
+        return;
       }
-      this.$set(this.ipfsData, nodeKey, nodeIpfsData);
+      
+      let nodeIpfsData = undefined;
+      try {
+        nodeIpfsData = new NodeData(parsedNodeIpfsJson);
+        nodeIpfsData.content = this.formats[nodeIpfsData.format].validateAndImportContent(
+          nodeIpfsData.formatVersion,
+          parsedNodeIpfsJson.content
+        );
+        this.$set(this.ipfsData, nodeKey, nodeIpfsData);
+      }
+      catch (error) {
+        console.log("App updateNodeIpfs: ipfs data import failed: " + error);
+        this.$set(this.ipfsData, nodeKey, {
+          status: "failed",
+          error: "Node IPFS import failed: " + error
+        });
+        return;
+      }
     },
     /**
      * Update the Node blockchain and ipfs data for the given Node key.

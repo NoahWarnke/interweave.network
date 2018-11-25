@@ -87,8 +87,8 @@ export default {
         return;
       }
       
-      // Do all of our validation checks on the new data.
-      this.validateNodeData(this.currentNodeIpfsData);
+      // Make sure the new node data is all present and accounted for.
+      this.checkNodeData(this.currentNodeIpfsData);
       
       // If there was an error, remove our render slot.
       // If there was no error and the previous Node's format is the same as the current one, keep the render slot and just update its contents.
@@ -145,7 +145,7 @@ export default {
       // Finally, add it to the formod explore slot element.
       exploreEl.appendChild(this.nodeRenderer.$el);
     },
-    validateNodeData: function(currentNodeIpfsData) {
+    checkNodeData: function(currentNodeIpfsData) {
       
       // Reset everything.
       this.nodeDataLoadedSuccessfully = false;
@@ -210,15 +210,6 @@ export default {
         return;
       }
       
-      // Validate the data via its format module validator:
-      try {
-        this.currentFormod.validateParsedData(this.currentNodeIpfsData);
-      }
-      catch (error) {
-        this.nodeDataError = error.message;
-        this.nodeDataStatus = "error";
-        return;
-      }
       this.nodeDataRenderable = true;
       this.nodeDataStatus = "good";
       

@@ -38,7 +38,9 @@ export default {
     "8": "You can't follow that.",
     "9": "That is not somewhere you could swim!",
     "10": "You can't climb that!"
-  },
+  }
+  
+  /*,
   validateParsedData: function(data) {
     
     // format
@@ -144,4 +146,5 @@ export default {
     
     // Yay, no errors!
   }
+  */
 }

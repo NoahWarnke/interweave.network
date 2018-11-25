@@ -47,12 +47,12 @@ export default {
 
     },
     newNodeData: async function(arrivedSlot) {
-      this.currentNodeIpfsData.targetToKey = this.invertLookup(this.currentNodeIpfsData.targets);
-      let edge = this.currentNodeIpfsData.edges[arrivedSlot + ""];
+      this.currentNodeIpfsData.content.targetToKey = this.invertLookup(this.currentNodeIpfsData.content.targets);
+      let edge = this.currentNodeIpfsData.content.edges[arrivedSlot + ""];
       if (edge !== undefined) {
         await this.addToConsole(edge.enterDesc + "\n");
       }
-      this.addToConsole("_____ " + this.currentNodeIpfsData.name + " _____\n" + this.currentNodeIpfsData.shortDesc);
+      this.addToConsole("_____ " + this.currentNodeIpfsData.name + " _____\n" + this.currentNodeIpfsData.content.shortDesc);
     },
     consoleInputEntered: async function() {
       console.log("consoleInputEntered!");
@@ -111,7 +111,7 @@ export default {
         let targetKey = undefined;
         if (v === words.length) {
           // Check for single-verb command string
-          targetKey = this.currentNodeIpfsData.targetToKey[""];
+          targetKey = this.currentNodeIpfsData.content.targetToKey[""];
         }
         else {
           for (var t = words.length - v; t > 0; t--) {
@@ -121,7 +121,7 @@ export default {
               .toLowerCase()
             ;
             
-            targetKey = this.currentNodeIpfsData.targetToKey[lastTWords];
+            targetKey = this.currentNodeIpfsData.content.targetToKey[lastTWords];
             if (targetKey !== undefined) {
               break;
             }
@@ -135,7 +135,7 @@ export default {
         if (mostSpecificVerbKey === verbKey) {
           mostSpecificVerbHadMatches = true;
         }
-        let bindingVerb = this.currentNodeIpfsData.bindings[verbKey];
+        let bindingVerb = this.currentNodeIpfsData.content.bindings[verbKey];
         if (bindingVerb === undefined) {
           continue;
         }
@@ -145,11 +145,11 @@ export default {
           continue;
         }
         
-        let result = this.currentNodeIpfsData.results[resultId];
+        let result = this.currentNodeIpfsData.content.results[resultId];
           
         if (result.indexOf("edge") === 0) {
           let slot = parseInt(result.substr(4, result.length - 4));
-          let edge = this.currentNodeIpfsData.edges[slot];
+          let edge = this.currentNodeIpfsData.content.edges[slot];
           
           if (edge !== undefined) {
             
@@ -157,7 +157,7 @@ export default {
             // Not-yet-connected edge, so turn around.
             if (nodeKey == 0) {
               this.addToConsole(edge.leaveDesc + "\n\nHowever, you cannot go any further, and turn around.\n");
-              this.newNodeData(slot); 
+              this.newNodeData(slot);
               return;
             }
             

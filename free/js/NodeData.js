@@ -7,7 +7,7 @@ export default class NodeData {
     
     // format
     if (typeof data.format !== "string" || data.format.length === 0) {
-      throw new Error("NodeData must have a non-empty format string.");
+      throw new Error("NodeData format must be a non-empty string.");
     }
     this._format = data.format;
     
