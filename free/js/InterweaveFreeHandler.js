@@ -216,8 +216,7 @@ export default class InterweaveFreeHandler {
       key: nodeKey,
       ownerAddr: rawData[0],
       ipfs: this.bytes32ArrayToString(rawData[1]),
-      edgeNodeKeys: rawData[2],
-      data: undefined
+      edgeNodeKeys: rawData[2]
     };
   }
   

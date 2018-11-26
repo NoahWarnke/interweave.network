@@ -4,7 +4,6 @@ import InterweaveFreeHandler from '../js/InterweaveFreeHandler.js';
 
 // General
 import Utils from '../js/Utils.js';
-import NodeData from '../js/NodeData.js';
 import Node from '../js/Node.js';
 
 // Viewer modules
@@ -51,7 +50,8 @@ export default {
         v-bind:formats="formats"
         v-bind:currentNodeKey="currentNodeKey"
         v-bind:nodes="nodes"
-        v-if="currentView === 'addnode'">
+        v-bind:account="account"
+        v-if="currentView === 'editnode'">
       </build-area>
       <list-nodes
         v-if="currentView === 'mynodes'"
@@ -91,7 +91,7 @@ export default {
       nextNodeKey: undefined, // For when an edge transition is in progress.
       
       // Nodes
-      myNodeKeys: [],
+      myDeployedNodeKeys: [],
       myDraftNodeKeys: [],
       nodes: {},
       
@@ -103,6 +103,11 @@ export default {
       // Build-related DApp state
       showBuildTools: false,
       currentView: "explore"
+    }
+  },
+  computed: {
+    myNodeKeys: function() {
+      return this.myDeployedNodeKeys.concat(this.myDraftNodeKeys);
     }
   },
   methods: {
@@ -136,7 +141,7 @@ export default {
         window.interweave = this.contract;
         
         // Grab starting node data.
-        await this.setCurrentNode("4802423149786398712975601635277375780486398097217997509586637249159306333648", "deployed");
+        await this.setCurrentNode("4802423149786398712975601635277375780486398097217997509586637249159306333648");
       }
       catch (error) {
         console.log("App init: " + error);
@@ -229,14 +234,15 @@ export default {
         return;
       }
       
-      let nodeIpfsData = undefined;
       try {
-        nodeIpfsData = new NodeData(parsedNodeIpfsJson);
-        nodeIpfsData.content = this.formats[nodeIpfsData.format].validateAndImportContent(
-          nodeIpfsData.formatVersion,
+        node.name = parsedNodeIpfsJson.name;
+        node.format = parsedNodeIpfsJson.format;
+        node.formatVersion = parsedNodeIpfsJson.formatVersion;
+        let content = this.formats[node.format].validateAndImportContent(
+          node.formatVersion,
           parsedNodeIpfsJson.content
         );
-        node.setIPFSState("successful", nodeIpfsData, undefined);
+        node.setIPFSState("successful", content, undefined);
         this.$set(this.nodes, nodeKey, node);
       }
       catch (error) {
@@ -281,19 +287,27 @@ export default {
      */
     setCurrentNode: async function(nodeKey) {
       
+      // Update previous and current nodeKey values.
       if (this.currentNodeKey !== undefined) {
         this.previousNodeKey = this.currentNodeKey;
       }
       this.currentNodeKey = nodeKey;
       
       // Initialize the Node if needed (if it doesn't already exist, it's a deployed Node we're referencing here.)
-      if (this.nodes[nodeKey] === undefined) {
+      let node = this.nodes[nodeKey];
+      if (node === undefined) {
         this.initializeNode(nodeKey, "deployed", false);
+        node = this.nodes[nodeKey];
+      }
+      
+      // If it's a draft Node, nothing else needs to be done.
+      if (node.type === "draft") {
+        return;
       }
       
       // Load blockchain data first (rather than just doing updateNode) so we can start updating the edge Nodes as needed.
       await this.updateNodeBlockchain(nodeKey, false);
-      if (this.nodes[nodeKey].bStatus !== "successful") {
+      if (node.bStatus !== "successful") {
         return;
       }
       
@@ -301,8 +315,7 @@ export default {
       let promises = [];
       promises.push(this.updateNodeIpfs(nodeKey, false));
       
-      let adjacentNodeKeys = this.nodes[nodeKey].bData
-        .edgeNodeKeys
+      let adjacentNodeKeys = node.bData.edgeNodeKeys
         .filter((key) => {
           return key != 0;
         })
@@ -314,13 +327,13 @@ export default {
     /**
      * Get the latest list of all of the current account's Nodes.
      */
-    updateMyNodeKeys: async function() {
+    updateMyDeployedNodeKeys: async function() {
       try {
-        this.myNodeKeys = await this.contract.getNodesBelongingTo(this.web3Handler.account);
+        this.myDeployedNodeKeys = await this.contract.getNodesBelongingTo(this.web3Handler.account);
       }
       catch (error) {
-        this.myNodeKeys = [];
-        console.log("App updateMyNodeKeys: " + error);
+        this.myDeployedNodeKeys = [];
+        console.log("App updateMyDeployedNodeKeys: " + error);
       }
     },
     /**
@@ -381,7 +394,7 @@ export default {
       if (this.web3Handler.loggedIn) {
         if (this.currentView !== "mynodes") {
           this.currentView = "mynodes";
-          await this.updateMyNodeKeys();
+          await this.updateMyDeployedNodeKeys();
         }
         else {
           this.currentView = "explore";
@@ -404,23 +417,29 @@ export default {
      * @param nodeKey The key of the Node clicked.
      */
     myNodesEditClick: async function(nodeKey) {
-      console.log("Edit " + nodeKey);
+      this.setCurrentNode(nodeKey);
+      this.previousNodeKey = undefined;
+      this.nextNodeKey = undefined;
+      this.currentView = "editnode";
       // TODO
     },
     myEdgeProposalsClick: async function() {
       // TODO
     },
     addNodeClick: async function() {
-      // Create a new draft Node.
-      let draftNodeKey = "draft" + (Math.random() * 10E16);
-      this.myDraftNodeKeys.push(draftNodeKey);
-      this.draftIpfsData[draftNodeKey] = new NodeData(
-        "simpletext",
-        this.formats["simpletext"].latestVersion(),
-        "New Node"
-      );
       
-      this.currentView = (this.currentView === "addnode" ? "explore" : "addnode");
+      if (this.currentView !== "editnode") {
+        
+        // Create a new draft Node, without any content yet.
+        let draftNodeKey = "draft" + (Math.random() * 10E16);
+        this.myDraftNodeKeys.push(draftNodeKey);
+        this.initializeNode(draftNodeKey, "draft");
+        this.setCurrentNode(draftNodeKey);
+        this.currentView = "editnode";
+      }
+      else {
+        this.currentView = "explore";
+      }
     },
     deleteNodeClick: async function() {
       // TODO

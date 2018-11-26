@@ -3,19 +3,19 @@ export default {
     <div id="list-nodes">
       <ul>
         <li v-for="nodeKey of pageNodeKeys">
-          <span>{{nodeString(nodeKey)}}</span>
           <button v-on:click="viewNode(nodeKey)">View</button>
-          <button v-on:click="editNode(nodeKey)">Edit</button>
+          <button v-on:click="editNode(nodeKey)" v-if="nodeType(nodeKey) !== 'deployed'">Edit</button>
+          <span>{{nodeString(nodeKey)}}</span>
         </li>
       </ul>
       <button v-on:click="pageLeft()"><</button>
-      <span>{{page}}/{{maxPage}}</span>
+      <span>{{page+1}}/{{maxPage+1}}</span>
       <button v-on:click="pageRight()">></button>
     </div>
   `,
   data: function() {
     return {
-      nodesPerPage: 1,
+      nodesPerPage: 8,
       page: 0,
       pendingNodeData: {}
     };
@@ -86,7 +86,10 @@ export default {
       if (node.iStatus === "failed") {
         return node.bData.ipfs + " (" + node.iError + ")";
       }
-      return node.iData.name;
+      return node.name;
+    },
+    nodeType: function(nodeKey) {
+      return this.nodes[nodeKey].type;
     }
   },
   watch: {

@@ -47,4 +47,26 @@ export default class SimpleText {
   latestVersion() {
     return 1;
   }
+  
+  /**
+   * @returns soem default SimpleText data, as if from parsed JSON.
+   */
+  defaultData() {
+    return {
+      "shortDesc": "You are standing on a hard, flat, white plain, with no features in sight, under a sky that is pitch black except for a bright point of light directly overhead.",
+      "edges": {
+      },
+      "targets": {
+        "0": ["", "here", "area", "plain", "ground", "light", "point"]
+      },
+      "results": {
+        "0": "Half the world is purest white, and the other half deepest black, except for that painfully bright point of light overhead."
+      },
+      "bindings": {
+        "0": {
+          "0": "0"
+        }
+      }
+    };
+  }
 }

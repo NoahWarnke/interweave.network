@@ -1,37 +1,40 @@
+import Node from "../js/Node.js";
 
 export default {
   template: `
     <div id="build">
-      <h1>Create your node here! :D</h1>
       <div id="format-and-name" v-if="currentStep === 'formatandname'">
-        <table
+        <h2>Set your Node's format and name</h2>
         <p>
           <span>Node format: </span>
-          <select v-model="currentFormod">
+          <select v-model="currentFormat">
             <option disabled value="undefined">Select</option>
             <option
-              v-for="(formod, formodName) in formodsByName"
-              v-bind:value="formod">
-              {{formodName}}
+              v-for="(formod, format) in formats"
+              v-bind:value="format">
+              {{formod.name()}}
             </option>
           </select>
         </p>
         <p>
-          <span v-if="currentVersion !== undefined">Node version: {{currentVersion}}</span>
+          <span>Node version: {{currentNode.formatVersion}}</span>
         </p>
         <p>
           <span>Node name: </span>
-          <input v-model="currentName"></input>
+          <input v-model="currentNode.name"></input>
         </p>
       </div>
       <div id="format-specific" v-show="currentStep === 'formatspecific'">
+        <h2>Set your Node's format-specific details</h2>
         <div ref="formodbuildslot"></div>
       </div>
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
-        Deploy to IPFS!
+        <h2>Deploy your Node's content to IPFS</h2>
+        <button>Do it!</button>
       </div>
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
-        Deploy to blockchain!
+        <h2>Deploy your Node to the Ethereum blockchain</h2>
+        <button>Do it!</button>
       </div>
       <div id="next-prev-buttons">
         <button v-if="canClickPrev" v-on:click="clickPrev()">Previous</button>
@@ -40,27 +43,24 @@ export default {
     </div>
   `,
   props: {
-    formats: Object
+    formats: Object,
+    currentNodeKey: String,
+    nodes: Object,
+    account: String
   },
   data: function() {
     return {
       currentStep: "formatandname",
-      currentName: "New Node",
-      currentVersion: undefined,
-      currentFormod: undefined,
+      currentFormat: undefined,
       buildRenderer: undefined,
     }
   },
   computed: {
-    formodsByName: function() {
-      if (this.formats === undefined) {
-        return [];
-      }
-      let result = {};
-      for (var key in this.formats) {
-        result[this.formats[key].name()] = this.formats[key];
-      }
-      return result;
+    currentNode: function() {
+      return this.nodes[this.currentNodeKey];
+    },
+    currentFormod: function() {
+      return this.formats[this.currentFormat];
     },
     canClickNext: function() {
       if (this.currentStep === "deployblockchain") {
@@ -78,6 +78,12 @@ export default {
     }
   },
   methods: {
+    init: function() {
+      if (this.currentNode.iStatus === "init") {
+        this.currentNode.name = "New Node Kitty";
+      }
+      this.currentFormat = this.currentNode.format;
+    },
     clearBuildSlot: function() {
       let buildEl = this.$refs.formodbuildslot;
       this.buildRenderer = undefined;
@@ -105,6 +111,35 @@ export default {
       
       // Finally, add it to the formod build slot element.
       buildEl.appendChild(this.buildRenderer.$el);
+    },
+    removeOldFormod: function() {
+      this.clearBuildSlot();
+      this.currentNode.format = undefined;
+    },
+    setNewFormod: function() {
+      this.setBuildSlot();
+      
+      // Nothing else to do if the current Node already has this new format.
+      if (this.currentFormat === this.currentNode.format) {
+        return;
+      }
+      
+      this.currentNode.format = this.currentFormat;
+      this.currentNode.formatVersion = this.currentFormod.latestVersion();
+      
+      let fakeBlockchain = {
+        key: this.currentNodeKey,
+        ownerAddr: this.account,
+        ipfs: undefined,
+        edgeNodeKeys: ["0", "0", "0", "0", "0", "0"]
+      };
+      this.currentNode.setBlockchainState("successful", fakeBlockchain, undefined);
+      
+      let content = this.currentFormod.validateAndImportContent(
+        this.currentNode.formatVersion,
+        this.currentFormod.defaultData()
+      );
+      this.currentNode.setIPFSState("successful", content, undefined);
     },
     clickPrev: function() {
       if (!this.canClickPrev) {
@@ -152,17 +187,20 @@ export default {
     }
   },
   watch: {
-    currentFormod: function(val, oldVal) {
+    currentFormat: function(val, oldVal) {
       if (val !== oldVal) {
         if (oldVal !== undefined) {
-          this.currentVersion = undefined;
-          this.clearBuildSlot();
+          this.currentNode.formatVersion = undefined;
+          this.removeOldFormod();
         }
         if (val !== undefined) {
-          this.currentVersion = this.currentFormod.latestVersion();
-          this.setBuildSlot();
+          this.setNewFormod();
+          this.currentNode.formatVersion = this.currentFormod.latestVersion();
         }
       }
     }
+  },
+  created: function() {
+    this.init();
   }
 }

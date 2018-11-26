@@ -28,11 +28,6 @@ export default {
   },
   data: function() {
     return {
-      currentValidatedNodeKey: undefined,
-      currentValidatedNode: undefined,
-      nodeDataLoadedSuccessfully: false,
-      nodeDataFormatAvailable: false,
-      nodeDataRenderable: false,
       nodeDataError: undefined,
       nodeDataStatus: "good",
       arrivedSlot: undefined,
@@ -43,12 +38,6 @@ export default {
   computed: {
     currentNode: function() {
       return this.nodes[this.currentNodeKey];
-    },
-    currentNodeEdgeNodeKeys: function() {
-      if (this.currentNode.bStatus !== "successful") {
-        return ["0", "0", "0", "0", "0", "0"];
-      }
-      return this.currentNode.bData.edgeNodeKeys;
     },
     currentNodeBStatus: function() {
       if (this.currentNode === undefined) {
@@ -71,13 +60,6 @@ export default {
         return;
       }
       
-      // Don't do anything if we are already ran validation on this Node's data.
-      /*
-      if (this.currentNodeKey === this.currentValidatedNodeKey) {
-        return;
-      }
-      */
-      
       // Make sure the new node data is all present and accounted for.
       this.checkNodeData();
       
@@ -89,16 +71,15 @@ export default {
       if (this.previousNodeKey !== undefined) {
         let previousNode = this.nodes[this.previousNodeKey];
         if (previousNode.iStatus === "successful") {
-          previousNodeFormod = this.formats[previousNode.iData.format];
+          previousNodeFormod = this.formats[previousNode.format];
         }
       }
       
       // Keep renderer if no validation errors and the previous Node's format is the same as the current one.
-      if (this.nodeDataError === undefined && previousNodeFormod === this.currentFormod) {
+      if (this.nodeRenderer !== undefined && this.nodeDataError === undefined && previousNodeFormod === this.currentFormod) {
         
         // Have to explicitly update the nodeRenderer's props, since it's not actually bound.
-        this.nodeRenderer._props.currentNodeEdgeNodeKeys = this.currentNodeEdgeNodeKeys;
-        this.nodeRenderer._props.currentNodeIpfsData = this.currentNode.iData;
+        this.nodeRenderer._props.currentNode = this.currentNode;
         this.nodeRenderer._props.arrivedSlot = this.arrivedSlot;
         return;
       }
@@ -121,8 +102,7 @@ export default {
       // Instantiate our renderer component and pass it some props.
       this.nodeRenderer = new (this.currentFormod.exploreClass())({
         propsData: {
-          currentNodeEdgeNodeKeys: this.currentNodeEdgeNodeKeys,
-          currentNodeIpfsData: this.currentNode.iData,
+          currentNode: this.currentNode,
           arrivedSlot: this.arrivedSlot
         }
       });
@@ -139,15 +119,8 @@ export default {
     checkNodeData: function() {
       
       // Reset everything.
-      this.nodeDataLoadedSuccessfully = false;
-      this.nodeDataFormatAvailable = false;
-      this.nodeDataRenderable = false;
       this.nodeDataError = undefined;
       this.nodeDataStatus = undefined;
-      
-      // Keep track that we've run a validation on this Node key and IPFS data.
-      this.currentValidatedNodeKey = this.currentNodeKey;
-      this.currentValidatedNode = this.currentNode;
       
       if (this.currentNode === undefined) {
         this.nodeDataError = "No current node.";
@@ -191,16 +164,14 @@ export default {
         this.nodeDataStatus = "error";
         return;
       }
-      this.nodeDataLoadedSuccessfully = true;
       
-      this.currentFormod = this.formats[this.currentNode.iData.format];
+      this.currentFormod = this.formats[this.currentNode.format];
       if (this.currentFormod === undefined) {
-        this.nodeDataError = "Format " + this.currentNode.iData.format + " is not supported.";
+        this.nodeDataError = "Format " + this.currentNode.format + " is not supported.";
         this.nodeDataStatus = "error";
         return;
       }
       
-      this.nodeDataRenderable = true;
       this.nodeDataStatus = "good";
       
       // Figure out which slot we arrived from.

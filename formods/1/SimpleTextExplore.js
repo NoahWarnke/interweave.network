@@ -3,7 +3,7 @@ import SimpleTextUtils from "./SimpleTextUtils.js";
 export default {
   template: `
     <div id="simple-text-explore">
-      <h1>{{currentNodeIpfsData.name}}</h1>
+      <h1>{{currentNode.name}}</h1>
       <textarea class="console" readonly="readonly" ref="console">{{consoleText}}</textarea>
       <div id="console-input-area">
         <span id="prompt">&gt;</span>
@@ -17,8 +17,7 @@ export default {
   `,
   props: {
     arrivedSlot: Number,
-    currentNodeEdgeNodeKeys: Array,
-    currentNodeIpfsData: Object
+    currentNode: Object
   },
   data: function() {
     return {
@@ -47,15 +46,15 @@ export default {
 
     },
     newNodeData: async function(arrivedSlot) {
-      this.currentNodeIpfsData.content.targetToKey = this.invertLookup(this.currentNodeIpfsData.content.targets);
-      let edge = this.currentNodeIpfsData.content.edges[arrivedSlot + ""];
+      this.currentNode.iData.targetToKey = this.invertLookup(this.currentNode.iData.targets);
+      let edge = this.currentNode.iData.edges[arrivedSlot + ""];
       if (edge !== undefined) {
         await this.addToConsole(edge.enterDesc + "\n");
       }
-      this.addToConsole("_____ " + this.currentNodeIpfsData.name + " _____\n" + this.currentNodeIpfsData.content.shortDesc);
+      this.addToConsole("_____ " + this.currentNode.name + " _____\n" + this.currentNode.iData.shortDesc);
     },
     consoleInputEntered: async function() {
-      console.log("consoleInputEntered!");
+      
       if (this.edgeStart) {
         this.edgeStart = false;
         this.consoleInput = "";
@@ -85,7 +84,6 @@ export default {
       this.$refs.console.scrollTop = this.$refs.console.scrollHeight;
     },
     parseCommand: function(cmd) {
-      console.log("parseCommand!");
       
       let words = cmd.split(" ");
       let mostSpecificVerbKey = undefined;
@@ -111,7 +109,7 @@ export default {
         let targetKey = undefined;
         if (v === words.length) {
           // Check for single-verb command string
-          targetKey = this.currentNodeIpfsData.content.targetToKey[""];
+          targetKey = this.currentNode.iData.targetToKey[""];
         }
         else {
           for (var t = words.length - v; t > 0; t--) {
@@ -121,7 +119,7 @@ export default {
               .toLowerCase()
             ;
             
-            targetKey = this.currentNodeIpfsData.content.targetToKey[lastTWords];
+            targetKey = this.currentNode.iData.targetToKey[lastTWords];
             if (targetKey !== undefined) {
               break;
             }
@@ -135,7 +133,7 @@ export default {
         if (mostSpecificVerbKey === verbKey) {
           mostSpecificVerbHadMatches = true;
         }
-        let bindingVerb = this.currentNodeIpfsData.content.bindings[verbKey];
+        let bindingVerb = this.currentNode.iData.bindings[verbKey];
         if (bindingVerb === undefined) {
           continue;
         }
@@ -145,15 +143,15 @@ export default {
           continue;
         }
         
-        let result = this.currentNodeIpfsData.content.results[resultId];
+        let result = this.currentNode.iData.results[resultId];
           
         if (result.indexOf("edge") === 0) {
           let slot = parseInt(result.substr(4, result.length - 4));
-          let edge = this.currentNodeIpfsData.content.edges[slot];
+          let edge = this.currentNode.iData.edges[slot];
           
           if (edge !== undefined) {
             
-            let nodeKey = this.currentNodeEdgeNodeKeys[slot];
+            let nodeKey = this.currentNode.bData.edgeNodeKeys[slot];
             // Not-yet-connected edge, so turn around.
             if (nodeKey == 0) {
               this.addToConsole(edge.leaveDesc + "\n\nHowever, you cannot go any further, and turn around.\n");
@@ -198,7 +196,7 @@ export default {
     this.init();
   },
   watch: {
-    currentNodeIpfsData: {
+    currentNode: {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
