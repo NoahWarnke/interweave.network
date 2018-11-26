@@ -53,3 +53,25 @@
 #simple-text-explore #console-input:focus {
   outline-width: 0;
 }
+
+#simple-text-build .tag {
+  padding: 5px;
+  margin: 5px;
+  border-radius: 5px;
+  display: inline-block;
+}
+
+#simple-text-build .verb-tag {
+  background-color: pink;
+  border: 1px solid red;
+}
+
+#simple-text-build .target-tag {
+  background-color: lightgreen;
+  border: 1px solid green;
+}
+
+#simple-text-build .result-tag {
+  background-color: lightblue;
+  border: 1px solid blue;
+}

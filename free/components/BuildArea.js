@@ -80,9 +80,10 @@ export default {
   methods: {
     init: function() {
       if (this.currentNode.iStatus === "init") {
-        this.currentNode.name = "New Node Kitty";
+        this.currentNode.name = "New Node";
       }
       this.currentFormat = this.currentNode.format;
+      this.setBuildSlot();
     },
     clearBuildSlot: function() {
       let buildEl = this.$refs.formodbuildslot;
@@ -94,20 +95,17 @@ export default {
     setBuildSlot: function() {
       let buildEl = this.$refs.formodbuildslot;
       
+      if (buildEl === undefined) {
+        return;
+      }
       // Instantiate our renderer component and pass it some props.
       this.buildRenderer = new (this.currentFormod.buildClass())({
         propsData: {
-          //currentNodeEdgeNodeKeys: this.currentNodeEdgeNodeKeys,
-          //currentNodeIpfsData: this.currentNodeIpfsData,
-          //arrivedSlot: this.arrivedSlot
+          content: this.currentNode.iData
         }
       });
       // Mount it, passing no element (makes it as an off-document element).
       this.buildRenderer.$mount();
-      
-      // Trap edge events coming from it.
-      //this.buildRenderer.$on("edgeStart", this.edgeStart);
-      //this.buildRenderer.$on("edgeBoundary", this.edgeBoundary);
       
       // Finally, add it to the formod build slot element.
       buildEl.appendChild(this.buildRenderer.$el);
@@ -117,8 +115,6 @@ export default {
       this.currentNode.format = undefined;
     },
     setNewFormod: function() {
-      this.setBuildSlot();
-      
       // Nothing else to do if the current Node already has this new format.
       if (this.currentFormat === this.currentNode.format) {
         return;
@@ -140,6 +136,8 @@ export default {
         this.currentFormod.defaultData()
       );
       this.currentNode.setIPFSState("successful", content, undefined);
+      
+      this.setBuildSlot();
     },
     clickPrev: function() {
       if (!this.canClickPrev) {
@@ -187,6 +185,17 @@ export default {
     }
   },
   watch: {
+    nodes: {
+      immediate: true,
+      deep: true,
+      handler: function(val, oldVal) {
+        console.log("nodes change!");
+        if (this.buildRenderer !== undefined) {
+          console.log("buildRenderer change!");
+          this.buildRenderer._props.content = this.nodes[this.currentNodeKey].iData;
+        }
+      }
+    },
     currentFormat: function(val, oldVal) {
       if (val !== oldVal) {
         if (oldVal !== undefined) {
@@ -200,7 +209,7 @@ export default {
       }
     }
   },
-  created: function() {
+  mounted: function() {
     this.init();
   }
 }

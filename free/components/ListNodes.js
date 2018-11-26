@@ -4,7 +4,7 @@ export default {
       <ul>
         <li v-for="nodeKey of pageNodeKeys">
           <button v-on:click="viewNode(nodeKey)">View</button>
-          <button v-on:click="editNode(nodeKey)" v-if="nodeType(nodeKey) !== 'deployed'">Edit</button>
+          <button v-on:click="editNode(nodeKey)">Edit</button>
           <span>{{nodeString(nodeKey)}}</span>
         </li>
       </ul>
