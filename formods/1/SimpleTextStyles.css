@@ -75,3 +75,8 @@
   background-color: lightblue;
   border: 1px solid blue;
 }
+
+#simple-text-build .edge-tag {
+  background-color: #ff88ff;
+  border: 1px solid purple;
+}
