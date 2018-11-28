@@ -1,4 +1,4 @@
-# Interweaver's to-do items, 2018-11-27:
+# Interweaver's to-do items, 2018-11-28:
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:
@@ -6,20 +6,9 @@
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.
-            - [X] Results:
-              - [X] Add a currentEditingResult variable, which takes a resultKey
-              - [X] Create a new SimpleTextEditableField component.
-              - [X] Make it get set when you click on a given result
-              - [X] Make that result show an input binding to the text, instead of a span.
-              - [X] Make typing escape unselect it.
-              - [X] Make it also show a 'done' and 'delete' button next to it.
-              - [X] Make the 'x' delete it and 'done' close it.
-              - [X] Add an empty input at the bottom of results.
-              - [X] Make typing something in it and then hitting enter add a new result.
-            - [ ] Edges:
-              - [X] Make enterDesc and leaveDesc editable like results (but not deletable)
-              - [ ] Make an edge deletable
-              - [ ] Make each empty slot creatable
+            - [X] Edges:
+              - [X] Make an edge deletable
+              - [X] Make each empty slot creatable
             - [ ] Make target sets editable
               - [ ] Add a 'addTargetSet' method and a button in the target sets area that triggers it
               - [ ] Make it add a new targetset with no entries.

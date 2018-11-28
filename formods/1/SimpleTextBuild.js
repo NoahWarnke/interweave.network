@@ -44,10 +44,8 @@ export default {
               v-bind:dataKey="'leaveDesc'">
             </simple-text-editable-field>
             
-            <!--
-            <span class="tag edge-tag" v-if="content.edges[slot] !== undefined">{{shorten(content.edges[slot].enterDesc)}}</span>
-            <span class="tag edge-tag" v-if="content.edges[slot] !== undefined">{{shorten(content.edges[slot].leaveDesc)}}</span>
-            -->
+            <button v-on:click="deleteKeyEdge(slot)" v-if="content.edges[slot] !== undefined">Delete</button>
+            <button v-on:click="addEdge(slot)" v-if="content.edges[slot] === undefined">Add</button>
             <hr>
           </li>
         </ul>
@@ -145,14 +143,27 @@ export default {
     },
     selectKey: function(key) {
       this.editingKey = key;
-      
-
     },
     deleteKey: function() {
+      // TODO check for bindings first.
       if (this.view === "results") {
         delete this.content.results[this.editingKey];
       }
+      if (this.view === "edges") {
+        delete this.content.edges[this.editingKey];
+      }
       this.doneKey();
+    },
+    deleteKeyEdge: function(slot) {
+      // TODO check for bindings first.
+      this.editingKey = slot;
+      this.deleteKey();
+    },
+    addEdge: function(slot) {
+      this.$set(this.content.edges, slot, {
+        enterDesc: "You arrive.",
+        leaveDesc: "You leave."
+      });
     },
     doneKey: function() {
       if (this.editingKey === undefined && this.newEntry !== "") {
