@@ -83,7 +83,9 @@ export default {
         this.currentNode.name = "New Node";
       }
       this.currentFormat = this.currentNode.format;
-      this.setBuildSlot();
+      if (this.currentFormat !== undefined) {
+        this.setBuildSlot();
+      }
     },
     clearBuildSlot: function() {
       let buildEl = this.$refs.formodbuildslot;
@@ -139,6 +141,7 @@ export default {
       
       this.setBuildSlot();
     },
+    
     clickPrev: function() {
       if (!this.canClickPrev) {
         return;
@@ -189,9 +192,7 @@ export default {
       immediate: true,
       deep: true,
       handler: function(val, oldVal) {
-        console.log("nodes change!");
         if (this.buildRenderer !== undefined) {
-          console.log("buildRenderer change!");
           this.buildRenderer._props.content = this.nodes[this.currentNodeKey].iData;
         }
       }

@@ -1,4 +1,4 @@
-# Interweaver's to-do items, 2018-11-26:
+# Interweaver's to-do items, 2018-11-27:
 
 - Thoughts about how to make SimpleText building/editing as easy as possible...
   - To add, have an input with a 'add' button that appears next to it when you've typed anything into it.
@@ -16,8 +16,16 @@
     - [ ] Make build mode:
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
-          - [X] Add edges.
           - [ ] Make all the properties addable/removable/editable.
+            - [ ] Results:
+              - [ ] Add a currentEditingResult variable, which takes a resultKey
+              - [ ] Make it get set when you click on a given result
+              - [ ] Make that result show an input binding to the text, instead of a span.
+              - [ ] Make typing enter or escape unselect it.
+              - [ ] Make it also show an 'x'button next to it.
+              - [ ] Make the 'x' delete it.
+              - [ ] Add an empty input at the bottom
+              - [ ] Make typing something in it and then hitting enter add a new result.
             - [ ] Make target sets editable
               - [ ] Add a 'addTargetSet' method and a button in the target sets area that triggers it
               - [ ] Make it add a new targetset with no entries.

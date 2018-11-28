@@ -20,8 +20,7 @@ export default {
       <button
         id="dropdown-edges"
         class="navbar-button left"
-        v-if="showBuildTools"
-        v-on:click="addNodeClick()">
+        v-if="showBuildTools">
         Edges
       </button>
       <button

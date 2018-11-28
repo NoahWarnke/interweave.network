@@ -80,3 +80,8 @@
   background-color: #ff88ff;
   border: 1px solid purple;
 }
+
+#simple-text-build textarea {
+  width: 400px;
+  height: 200px;
+}

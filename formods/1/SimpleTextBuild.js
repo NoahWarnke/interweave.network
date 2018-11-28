@@ -5,11 +5,11 @@ export default {
   template: `
     <div id="simple-text-build">
       <div>
-        <button v-on:click="view = 'description'">Description</button>
-        <button v-on:click="view = 'edges'">Edges</button>
-        <button v-on:click="view = 'targets'">Target Sets</button>
-        <button v-on:click="view = 'results'">Results</button>
-        <button v-on:click="view = 'bindings'">Bindings</button>
+        <button v-on:click="setView('description')">Description</button>
+        <button v-on:click="setView('edges')">Edges</button>
+        <button v-on:click="setView('targets')">Target Sets</button>
+        <button v-on:click="setView('results')">Results</button>
+        <button v-on:click="setView('bindings')">Bindings</button>
       </div>
       <div v-if="view === 'description'">
         <p>Enter a short description for the Node. Explorers will see it when they first arrive.</p>
@@ -41,8 +41,24 @@ export default {
           Edit the results (text strings that the explorer will see in their console when they do various things.)
         </p>
         <ul>
-          <li v-for="result of content.results">
-            <span class="tag" v-bind:class="resultClass(result)">{{shorten(result)}}</span>
+          <li v-for="(result, resultKey) of content.results">
+            <div v-if="editingKey === resultKey" class="tag" v-bind:class="resultClass(result)" v-on:keyup.esc="doneKey()">
+              <textarea v-model="content.results[resultKey]" ref="entry"></textarea>
+            </div>
+            <button v-if="editingKey === resultKey" v-on:click="xKey()">X</button>
+            <span
+              v-if="editingKey !== resultKey"
+              v-on:click="selectKey(resultKey)"
+              class="tag"
+              v-bind:class="resultClass(result)">
+              {{shorten(result)}}
+            </span>
+          </li>
+          <li>
+            <span>Add a new result! Hit esc when you're done.</span>
+            <div v-on:keyup.esc="doneKey()">
+              <textarea v-model="newEntry"></textarea>
+            </div>
           </li>
         </ul>
       </div>
@@ -71,7 +87,9 @@ export default {
   },
   data: function() {
     return {
-      view: "description"
+      view: "description",
+      editingKey: undefined,
+      newEntry: ""
     }
   },
   computed: {
@@ -87,6 +105,36 @@ export default {
     }
   },
   methods: {
+    setView: function(newView) {
+      this.view = newView;
+      this.editingKey = undefined;
+    },
+    selectKey: function(key) {
+      this.editingKey = key;
+      
+      // Focus the textarea so you can start typing right away, and 'esc' key presses stop the editing.
+      this.$nextTick(function() {
+        this.$refs.entry[0].focus();
+      });
+    },
+    xKey: function() {
+      if (this.view === "results") {
+        delete this.content.results[this.editingKey];
+      }
+      this.doneKey();
+    },
+    doneKey: function() {
+      if (this.editingKey === undefined && this.newEntry !== "") {
+        if (this.view === "results") {
+          let newKey = Object.keys(this.content.results).length;
+          this.content.results[newKey] = this.newEntry;
+          this.newEntry = "";
+        }
+      }
+      else {
+        this.editingKey = undefined;
+      }
+    },
     shorten: function(result) {
       return (result.length < 32
         ? result
@@ -94,14 +142,11 @@ export default {
       );
     },
     firstNonEmptyTarget: function(target) {
-      console.log(target);
       for (var key in target) {
         if (target[key].length > 0) {
-          console.log("result: " + target[key]);
           return target[key];
         }
       }
-      console.log("result: " + target[key]);
       return "&nbsp;";
     },
     resultClass: function(result) {
@@ -109,9 +154,6 @@ export default {
         return 'edge-tag';
       }
       return 'result-tag';
-    },
-    addResult: function() {
-      content.result
     }
   }
 }
