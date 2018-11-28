@@ -1,5 +1,6 @@
 
 import SimpleTextUtils from './SimpleTextUtils.js';
+import SimpleTextEditableField from './SimpleTextEditableField.js';
 
 export default {
   template: `
@@ -18,10 +19,36 @@ export default {
       <div v-if="view === 'edges'">
         <p>Edit the incoming/outgoing text for edges, and add or remove them.</p>
         <ul>
-          <li v-for="(edge, index) of content.edges">
-            <span class="tag edge-tag">edge{{index}}</span>:
-            <span class="tag edge-tag">{{shorten(edge.enterDesc)}}</span>
-            <span class="tag edge-tag">{{shorten(edge.leaveDesc)}}</span>
+          <li v-for="slot of slots">
+            <span class="tag edge-tag">edge{{slot}}</span>:
+            
+            <simple-text-editable-field
+              v-if="content.edges[slot] !== undefined"
+              v-on:selectKey="selectKey(slot + 'enterDesc')"
+              v-on:doneKey="doneKey"
+              v-on:deleteKey="deleteKey"
+              v-bind:type="'edge'"
+              v-bind:selected="editingKey === slot + 'enterDesc'"
+              v-bind:dataParent="content.edges[slot]"
+              v-bind:dataKey="'enterDesc'">
+            </simple-text-editable-field>
+            
+            <simple-text-editable-field
+              v-if="content.edges[slot] !== undefined"
+              v-on:selectKey="selectKey(slot + 'leaveDesc')"
+              v-on:doneKey="doneKey"
+              v-on:deleteKey="deleteKey"
+              v-bind:type="'edge'"
+              v-bind:selected="editingKey === slot + 'leaveDesc'"
+              v-bind:dataParent="content.edges[slot]"
+              v-bind:dataKey="'leaveDesc'">
+            </simple-text-editable-field>
+            
+            <!--
+            <span class="tag edge-tag" v-if="content.edges[slot] !== undefined">{{shorten(content.edges[slot].enterDesc)}}</span>
+            <span class="tag edge-tag" v-if="content.edges[slot] !== undefined">{{shorten(content.edges[slot].leaveDesc)}}</span>
+            -->
+            <hr>
           </li>
         </ul>
       </div>
@@ -42,17 +69,15 @@ export default {
         </p>
         <ul>
           <li v-for="(result, resultKey) of content.results">
-            <div v-if="editingKey === resultKey" class="tag" v-bind:class="resultClass(result)" v-on:keyup.esc="doneKey()">
-              <textarea v-model="content.results[resultKey]" ref="entry"></textarea>
-            </div>
-            <button v-if="editingKey === resultKey" v-on:click="xKey()">X</button>
-            <span
-              v-if="editingKey !== resultKey"
-              v-on:click="selectKey(resultKey)"
-              class="tag"
-              v-bind:class="resultClass(result)">
-              {{shorten(result)}}
-            </span>
+            <simple-text-editable-field
+              v-on:selectKey="selectKey(resultKey)"
+              v-on:doneKey="doneKey"
+              v-on:deleteKey="deleteKey"
+              v-bind:type="'result'"
+              v-bind:selected="editingKey === resultKey"
+              v-bind:dataParent="content.results"
+              v-bind:dataKey="resultKey">
+            </simple-text-editable-field>
           </li>
           <li>
             <span>Add a new result! Hit esc when you're done.</span>
@@ -82,6 +107,9 @@ export default {
       </div>
     </div>
   `,
+  components: {
+    SimpleTextEditableField
+  },
   props: {
     content: Object
   },
@@ -89,7 +117,8 @@ export default {
     return {
       view: "description",
       editingKey: undefined,
-      newEntry: ""
+      newEntry: "",
+      slots: [0, 1, 2, 3, 4, 5]
     }
   },
   computed: {
@@ -112,12 +141,9 @@ export default {
     selectKey: function(key) {
       this.editingKey = key;
       
-      // Focus the textarea so you can start typing right away, and 'esc' key presses stop the editing.
-      this.$nextTick(function() {
-        this.$refs.entry[0].focus();
-      });
+
     },
-    xKey: function() {
+    deleteKey: function() {
       if (this.view === "results") {
         delete this.content.results[this.editingKey];
       }
@@ -135,12 +161,6 @@ export default {
         this.editingKey = undefined;
       }
     },
-    shorten: function(result) {
-      return (result.length < 32
-        ? result
-        : result.substr(0, 32) + "..."
-      );
-    },
     firstNonEmptyTarget: function(target) {
       for (var key in target) {
         if (target[key].length > 0) {
@@ -148,12 +168,6 @@ export default {
         }
       }
       return "&nbsp;";
-    },
-    resultClass: function(result) {
-      if (result.indexOf("edge") === 0 && result.length === 5) {
-        return 'edge-tag';
-      }
-      return 'result-tag';
     }
   }
 }
