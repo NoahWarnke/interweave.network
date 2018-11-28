@@ -6,11 +6,11 @@ export default {
         v-if="selected"
         class="tag"
         v-bind:class="getClass(dataParent[dataKey])"
-        v-on:keyup.esc="doneKey()">
+        v-on:keyup.esc="doneKey()"
+        v-on:keyup.enter="doneKey()">
         <textarea v-model="dataParent[dataKey]" ref="entry"></textarea>
       </div>
       <button v-if="selected" v-on:click="doneKey()">Done</button>
-      <button v-if="selected && deletable" v-on:click="deleteKey()">Delete</button>
       <span
         v-on:click="selectKey()"
         v-if="!selected"
@@ -18,6 +18,7 @@ export default {
         v-bind:class="getClass(dataParent[dataKey])">
         {{shorten(dataParent[dataKey])}}
       </span>
+      <button v-if="deletable" v-on:click="deleteKey()">Delete</button>
     </div>
   `,
   props: {

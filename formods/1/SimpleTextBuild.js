@@ -70,7 +70,7 @@ export default {
             <simple-text-editable-field
               v-on:selectKey="selectKey(resultKey)"
               v-on:doneKey="doneKey"
-              v-on:deleteKey="deleteKey"
+              v-on:deleteKey="editingKey = resultKey; deleteKey();"
               v-bind:type="'result'"
               v-bind:selected="editingKey === resultKey"
               v-bind:dataParent="content.results"
@@ -79,7 +79,7 @@ export default {
           </li>
           <li>
             <span>Add a new result! Hit esc when you're done.</span>
-            <div v-on:keyup.esc="doneKey()">
+            <div v-on:keyup.esc="doneKey()" v-on:keyup.enter="doneKey()">
               <textarea v-model="newEntry"></textarea>
             </div>
           </li>
@@ -166,6 +166,7 @@ export default {
       });
     },
     doneKey: function() {
+      // TODO check for duplicates first.
       if (this.editingKey === undefined && this.newEntry !== "") {
         if (this.view === "results") {
           let newKey = Object.keys(this.content.results).length;
