@@ -99,7 +99,12 @@ export default {
             <div v-for="(resultKey, targetKey) of binding">
               <span class="tag verb-tag">{{bindingKey}}</span>
               <span class="tag target-tag" v-html="firstNonEmptyTarget(content.targets[targetKey])"></span> =>
-              <span class="tag" v-bind:class="resultClass(content.results[resultKey])">{{shorten(content.results[resultKey])}}</span>
+              <simple-text-editable-field
+                v-bind:type="'result'"
+                v-bind:selected="false"
+                v-bind:dataParent="content.results"
+                v-bind:dataKey="resultKey">
+              </simple-text-editable-field>
             </div>
             <hr>
           </li>

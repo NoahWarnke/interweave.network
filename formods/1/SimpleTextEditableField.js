@@ -1,7 +1,7 @@
 
 export default {
   template: `
-    <div>
+    <div class="tag-holder">
       <div
         v-if="selected"
         class="tag"
@@ -10,7 +10,7 @@ export default {
         <textarea v-model="dataParent[dataKey]" ref="entry"></textarea>
       </div>
       <button v-if="selected" v-on:click="doneKey()">Done</button>
-      <button v-if="selected" v-on:click="deleteKey()">Delete</button>
+      <button v-if="selected && deletable" v-on:click="deleteKey()">Delete</button>
       <span
         v-on:click="selectKey()"
         v-if="!selected"
@@ -25,6 +25,11 @@ export default {
     selected: Boolean,
     dataParent: Object,
     dataKey: String
+  },
+  computed: {
+    deletable: function() {
+      return this.type === "result";
+    }
   },
   methods: {
     shorten: function(result) {
