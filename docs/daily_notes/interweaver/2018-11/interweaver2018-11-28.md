@@ -1,27 +1,31 @@
 # Interweaver's to-do items, 2018-11-28:
 
+- Thoughts on better SimpleTextBuild workflow:
+  - 1. Choose a verb
+    - The list should show the first verb, and also how many bindings each verb already has.
+    - Once you have, show a list of the verb and its synonyms, below which:
+  - 2. choose a target set (or create one)
+    - The list should show whether the target set has a result or not yet.
+    - If you create one, enter the first target to get it going.
+    - Once you choose a target set, you can add more into an input.
+    - Once you choose a target set, show a 'delete' button that unbinds it from the verb and removes its result (give a modal confirm if it's going to do that.)
+  - 3. Choose a result (or create one)
+    - Once result is chosen, show a 'delete' button to remove it and return to post-2.
+    - Also show a 'done' button, which returns to step 1).
+    - So there's no way to see all the bindings, results, or target sets at once, but each drop-down will show all the options, and you can add targets and results at the appropriate times.
+
+
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:
     - [ ] Make build mode:
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.
-            - [ ] Results:
-              - [ ] Add a 'done' button to the 'add a new result' thing, so you can also click that (if not empty).
-            - [X] Edges:
-              - [X] Make an edge deletable
-              - [X] Make each empty slot creatable
-            - [ ] Make target sets editable
-              - [ ] Add a 'addTargetSet' method and a button in the target sets area that triggers it
-              - [ ] Make it add a new targetset with no entries.
-              - [ ] Add a 'deleteTargetSet' method and a button in any empty targetset that triggers it
-              - [ ] Make it delete an empty targetset.
-              - [ ] Add a 'addTarget' method and a button at the end of each target set that triggers it
-              - [ ] Make it add a new target to the given targetset (what should it start as? needs to be unique.)
-              - [ ] Make clicking on a target turn it into an input where you can edit it (and also show trash/done buttons)
-              - [ ] Make the trash button work to delete the target
-              - [ ] Make the done button work to close the input
-            - [ ] Make bindings editable
+            - [X] Create new cascading binding editor.
+            - [ ] Fix binding textareas having trailing newline from enter.
+            - [ ] Make sure you can only select edges that exist as a result
+            - [ ] Make sure targets and results are unique
+            - [ ] Figure out how to remove (or not) unbound targetsets and results and edges
         - [ ] Give Node a method to export JSON version of the contained iData (plus name/format/formatVersion)
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
         - [ ] Make a button to deploy to blockchain.
