@@ -51,11 +51,11 @@ export default {
         Delete Node
       </button>
       <button
-        id="button-add-node"
+        id="button-edit-node"
         class="navbar-button right"
         v-if="showBuildTools"
-        v-on:click="addNodeClick()">
-        Add Node
+        v-on:click="editNodeClick()">
+        Edit Node
       </button>
 
     </div>
@@ -120,8 +120,9 @@ export default {
     myEdgeProposalsClick: function() {
       this.$emit("myEdgeProposalsClick");
     },
-    addNodeClick: function() {
-      this.$emit("addNodeClick");
+    editNodeClick: function() {
+      console.log(this.currentNodeKey);
+      this.$emit("editNodeClick", this.currentNodeKey);
     },
     deleteNodeClick: function() {
       this.$emit("deleteNodeClick");

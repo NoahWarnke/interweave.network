@@ -32,7 +32,7 @@ export default {
         v-on:buildClick="buildClick()"
         v-on:myNodesClick="myNodesClick()"
         v-on:myEdgeProposalsClick="myEdgeProposalsClick()"
-        v-on:addNodeClick="addNodeClick()"
+        v-on:editNodeClick="editNodeClick($event)"
         v-on:deleteNodeClick="deleteNodeClick()"
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
@@ -59,7 +59,7 @@ export default {
         v-bind:nodes="nodes"
         v-on:pagedToTheseNodeKeys="updateNodes($event)"
         v-on:myNodesViewClick="myNodesViewClick($event)"
-        v-on:myNodesEditClick="myNodesEditClick($event)">
+        v-on:editNodeClick="editNodeClick($event)">
       </list-nodes>
       <modal-info v-if="false"></modal-info>
     </div>
@@ -413,15 +413,19 @@ export default {
       this.currentView = "explore";
     },
     /**
-     * When a Node in the My Nodes list has its 'edit' button clicked.
+     * When a Node (in the My Nodes list or directly) has its 'edit' button clicked.
      * @param nodeKey The key of the Node clicked.
      */
-    myNodesEditClick: async function(nodeKey) {
-      this.setCurrentNode(nodeKey);
-      this.previousNodeKey = undefined;
-      this.nextNodeKey = undefined;
-      this.currentView = "editnode";
-      // TODO
+    editNodeClick: async function(nodeKey) {
+      if (this.currentView !== "editnode") {
+        this.setCurrentNode(nodeKey);
+        this.previousNodeKey = undefined;
+        this.nextNodeKey = undefined;
+        this.currentView = "editnode";
+      }
+      else {
+        this.currentView = "explore";
+      }
     },
     myEdgeProposalsClick: async function() {
       // TODO

@@ -63,7 +63,7 @@ export default {
       this.$emit("myNodesViewClick", nodeKey);
     },
     editNode: function(nodeKey) {
-      this.$emit("myNodesEditClick", nodeKey);
+      this.$emit("editNodeClick", nodeKey);
     },
     nodeString: function(nodeKey) {
       let node = this.nodes[nodeKey];

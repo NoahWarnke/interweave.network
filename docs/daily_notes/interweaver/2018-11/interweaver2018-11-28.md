@@ -14,6 +14,10 @@
     - Also show a 'done' button, which returns to step 1).
     - So there's no way to see all the bindings, results, or target sets at once, but each drop-down will show all the options, and you can add targets and results at the appropriate times.
 
+- Further thoughts:
+  - Should have the dropdowns stay in a line, rather than separate divs and deselect buttons, etc.
+  - Synonyms should accumulate vertically below the dropdowns?
+  
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:
@@ -22,6 +26,8 @@
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.
             - [X] Create new cascading binding editor.
+            - [ ] Make dropdowns be in line.
+            - [ ] Make targets addable to existing target sets
             - [ ] Fix binding textareas having trailing newline from enter.
             - [ ] Make sure you can only select edges that exist as a result
             - [ ] Make sure targets and results are unique

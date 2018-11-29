@@ -274,7 +274,7 @@ export default {
   },
   watch: {
     targetSetKey: function(val, oldVal) {
-      if (this.verbKey !== undefined && val !== undefined) {
+      if (this.verbKey !== undefined && val !== undefined && this.content.bindings[this.verbKey] !== undefined) {
         let resultKey = this.content.bindings[this.verbKey][val];
         if (resultKey !== undefined) {
           this.resultKey = resultKey;
