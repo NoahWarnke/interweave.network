@@ -6,6 +6,8 @@
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.
+            - [ ] Results:
+              - [ ] Add a 'done' button to the 'add a new result' thing, so you can also click that (if not empty).
             - [X] Edges:
               - [X] Make an edge deletable
               - [X] Make each empty slot creatable

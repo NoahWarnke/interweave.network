@@ -5,6 +5,69 @@ import SimpleTextEditableField from './SimpleTextEditableField.js';
 export default {
   template: `
     <div id="simple-text-build">
+      <p>Enter a short description for the Node. Explorers will see it when they first arrive.</p>
+      <textarea v-model="content.shortDesc"></textarea>
+      
+      <div v-if="verbKey === undefined">
+        <p>Now start creating bindings: verb-object-result combos. For example, 'examine cat' could produce 'A fluffy kitty that is purring on the floor.</p>
+        <select v-model="verbKey">
+          <option disabled value="undefined">Select verb</option>
+          <option
+            v-for="(binding, vKey) of verbs"
+            v-bind:value="vKey">
+            {{verbNameFromKey(vKey) + "(" + numVerbBindings(vKey) + ")"}}
+          </option>
+        </select>
+      </div>
+      
+      <div v-if="verbKey !== undefined && targetSetKey === undefined">
+        <span class="tag verb-tag">{{verbNameFromKey(verbKey)}}</span>
+        <hr>
+        <p>Synonyms for this verb: </p>
+        <span class="tag verb-tag" v-for="(verb, index) of verbsFromKey(verbKey)">{{verb}}</span>
+        
+        <p>Pick a target that the verb will apply to.</p>
+        <select v-model="targetSetKey">
+          <option disabled value="undefined">Select target</option>
+          <option
+            v-for="(targetSet, tKey) of content.targets"
+            v-bind:value="tKey">
+            {{targetNameFromKey(tKey)}}
+          </option>
+        </select>
+        <p>Or add a new target.</p>
+        <input v-model="newTarget" v-on:keyup.stop.prevent.enter="addTargetSet" v-on:keyup.esc="addTargetSet"></input>
+      </div>
+      
+      <div v-if="targetSetKey !== undefined && resultKey === undefined">
+        <span class="tag verb-tag">{{verbNameFromKey(verbKey)}}</span>
+        <span class="tag target-tag">{{targetNameFromKey(targetSetKey)}}</span>
+        <hr>
+        <p>Synonyms for this target: </p>
+        <span class="tag target-tag" v-for="(target, index) of targetsFromKey(targetSetKey)">{{target}}</span>
+        <p>Pick the result of applying the verb to the target.</p>
+        <select v-model="resultKey">
+          <option disabled value="undefined">Select result</option>
+          <option
+            v-for="(result, rKey) of content.results"
+            v-bind:value="rKey">
+            {{shorten(result)}}
+          </option>
+        </select>
+        <p>Or add a new result.</p>
+        <textarea v-model="newResult" v-on:keyup.stop.prevent.enter="addResult" v-on:keyup.esc="addResult"></textarea>
+      </div>
+      
+      <div v-if="resultKey !== undefined">
+        <span class="tag verb-tag">{{verbNameFromKey(verbKey)}}</span>
+        <span class="tag target-tag">{{targetNameFromKey(targetSetKey)}}</span>:
+        <span class="tag result-tag">{{content.results[resultKey]}}</span>
+        <button v-on:click="doneBinding">Finish this binding!</button>
+      </div>
+      
+      
+      
+      <!--
       <div>
         <button v-on:click="setView('description')">Description</button>
         <button v-on:click="setView('edges')">Edges</button>
@@ -108,6 +171,7 @@ export default {
           </li>
         </ul>
       </div>
+      -->
     </div>
   `,
   components: {
@@ -118,13 +182,35 @@ export default {
   },
   data: function() {
     return {
+      verbs: SimpleTextUtils.verbs,
+      verbKey: undefined,
+      targetSetKey: undefined,
+      newTarget: "",
+      resultKey: undefined,
+      newResult: "",
+      /*
       view: "description",
       editingKey: undefined,
       newEntry: "",
       slots: [0, 1, 2, 3, 4, 5]
+      */
     }
   },
   computed: {
+    slot: function() {
+      if (resultKey === undefined) {
+        return undefined;
+      }
+      let result = this.content.results[resultKey];
+      if (result.indexOf('edge' === 0 && result.length === 5)) {
+        let slot = parseInt(result.substr(4, 5));
+        if (slot >= 0 && slot < 6) {
+          return slot;
+        }
+        return undefined;
+      }
+    },
+    /*
     bindingsByVerb: function() {
       let verbs = SimpleTextUtils.verbs;
       
@@ -135,8 +221,85 @@ export default {
       }
       return result;
     }
+    */
   },
   methods: {
+    verbsFromKey: function(verbKey) {
+      return SimpleTextUtils.verbs[verbKey];
+    },
+    verbNameFromKey: function(verbKey) {
+      return this.verbsFromKey(verbKey)[0];
+    },
+    numVerbBindings: function(verbKey) {
+      if (this.content.bindings[verbKey] === undefined) {
+        return 0;
+      }
+      return Object.keys(this.content.bindings[verbKey]).length;
+    },
+    targetNameFromKey: function(targetKey) {
+      return this.targetsFromKey(targetKey)[0];
+    },
+    targetsFromKey: function(targetKey) {
+      return this.content.targets[targetKey];
+    },
+    addTargetSet: function() {
+      if (this.newTarget === "") {
+        return;
+      }
+      let newTargetSetKey = Object.keys(this.content.targets).length;
+      let newTargetSet = [
+        this.newTarget.toLowerCase()
+      ];
+      // TODO verify it's unique
+      this.$set(this.content.targets, newTargetSetKey, newTargetSet);
+      this.newTarget = "";
+      this.targetSetKey = newTargetSetKey; // Also select it.
+    },
+    addResult: function() {
+      if (this.newResult === "") {
+        return;
+      }
+      let newResultKey = Object.keys(this.content.results).length;
+      // TODO verify it's unique
+      this.$set(this.content.results, newResultKey, this.newResult);
+      this.newResult = "";
+      this.resultKey = newResultKey; // Also select it.
+    },
+    doneBinding: function() {
+      if (this.verbKey === undefined || this.targetSetKey === undefined || this.resultKey === undefined) {
+        return;
+      }
+      
+      // Create/set the new binding.
+      if (this.content.bindings[this.verbKey] === undefined) {
+        this.content.bindings[this.verbKey] = {};
+      }
+      this.content.bindings[this.verbKey][this.targetSetKey] = this.resultKey;
+      
+      // Clean up.
+      this.verbKey = undefined;
+      this.targetSetKey = undefined;
+      this.resultKey = undefined;
+    },
+    shorten: function(result) {
+      return (result.length < 32
+        ? result
+        : result.substr(0, 32) + "..."
+      );
+    }
+  },
+  watch: {
+    targetKey: function(val, oldVal) {
+      if (this.verbKey !== undefined && val !== undefined) {
+        let resultKey = this.content.bindings[this.verbKey][val];
+        if (resultKey !== undefined) {
+          this.resultKey = resultKey;
+        }
+      }
+    }
+  }
+    
+    /*
     setView: function(newView) {
       this.view = newView;
       this.editingKey = undefined;
@@ -186,5 +349,7 @@ export default {
       }
       return "&nbsp;";
     }
+    
   }
+  */
 }
