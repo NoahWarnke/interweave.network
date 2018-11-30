@@ -11,6 +11,9 @@ export default {
       <button v-on:click="pageLeft()"><</button>
       <span>{{page+1}}/{{maxPage+1}}</span>
       <button v-on:click="pageRight()">></button>
+      <p>
+        <button v-on:click="addNode">Add New Node</button>
+      </p>
     </div>
   `,
   data: function() {
@@ -64,6 +67,9 @@ export default {
     },
     editNode: function(nodeKey) {
       this.$emit("editNodeClick", nodeKey);
+    },
+    addNode: function(nodeKey) {
+      this.$emit("addNodeClick");
     },
     nodeString: function(nodeKey) {
       let node = this.nodes[nodeKey];

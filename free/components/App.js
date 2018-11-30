@@ -59,7 +59,8 @@ export default {
         v-bind:nodes="nodes"
         v-on:pagedToTheseNodeKeys="updateNodes($event)"
         v-on:myNodesViewClick="myNodesViewClick($event)"
-        v-on:editNodeClick="editNodeClick($event)">
+        v-on:editNodeClick="editNodeClick($event)"
+        v-on:addNodeClick="addNodeClick()">
       </list-nodes>
       <modal-info v-if="false"></modal-info>
     </div>
