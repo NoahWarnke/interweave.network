@@ -18,12 +18,13 @@ export default {
       
       <div v-if="view === 'edges'">
         <p>Edit the incoming/outgoing text for edges, and add or remove them.</p>
-        <select v-model="slot">
-          <option disabled value="undefined">Select edge slot</option>
+        <select v-model="slot" class="tag" v-bind:class="slot !== undefined ? 'edge-tag' : 'no-tag'">
+          <option disabled value="undefined" class="no-tag">Select edge slot</option>
           <option
+            class="edge-tag"
             v-for="slot of slots"
             v-bind:value="slot">
-            {{slot + (content.edges[slot] === undefined ? '' : ' (existing)')}}
+            edge{{slot + (content.edges[slot] === undefined ? '' : ' (existing)')}}
           </option>
         </select>
         
@@ -50,7 +51,7 @@ export default {
         <p>
         
           <select v-model="verbKey" class="tag verb-tag">
-            <option disabled value="undefined">Select verb</option>
+            <option disabled value="undefined" class="no-tag">Select verb</option>
             <option
               v-for="(binding, vKey) of verbs"
               v-bind:value="vKey">
@@ -81,7 +82,7 @@ export default {
             v-if="targetSetKey !== undefined"
             class="tag"
             v-bind:class="resultClass(content.results[resultKey])">
-            <option v-bind:value="undefined" class="result-tag">Select result</option>
+            <option v-bind:value="undefined">Select result</option>
             <option
               v-for="(result, rKey) of content.results"
               v-bind:value="rKey"
@@ -121,8 +122,19 @@ export default {
         </p>
         
         <p v-if="targetSetKey !== undefined">
-          <span>Synonyms for this target: </span>
-          <span class="tag target-tag" v-for="(target, index) of targetsFromKey(targetSetKey)">{{target}}</span>
+          <span>Synonyms for this target (click to delete): </span>
+          <span
+            class="tag target-tag"
+            v-for="(target, index) of targetsFromKey(targetSetKey)"
+            v-on:click="removeTargetFromSet(index)">
+            {{target}}
+          </span>
+          <input
+            class="tag target-tag"
+            placeholder="Add a synonym"
+            v-model="newTarget"
+            v-on:keypress.stop.prevent.enter="addTargetToSet"
+            v-on:keypress.esc="addTargetToSet"></input>
         </p>
           
         <p v-if="resultKey !== undefined">
@@ -195,12 +207,31 @@ export default {
       }
       let newTargetSetKey = Object.keys(this.content.targets).length;
       let newTargetSet = [
-        this.newTarget.toLowerCase()
+        this.newTarget.toLowerCase().trim()
       ];
       // TODO verify it's unique
       this.$set(this.content.targets, newTargetSetKey, newTargetSet);
       this.newTarget = "";
       this.targetSetKey = newTargetSetKey; // Also select it.
+    },
+    addTargetToSet: function() {
+      if (this.newTarget === "" || this.targetSetKey === undefined) {
+        return;
+      }
+      this.content.targets[this.targetSetKey].push(this.newTarget.toLowerCase().trim());
+      this.newTarget = "";
+    },
+    removeTargetFromSet: function(index) {
+      if (this.targetSetKey === undefined || this.content.targets[this.targetSetKey][index] === undefined) {
+        return;
+      }
+      
+      // Check if we deleted the last one, and remove the whole set if so.
+      this.content.targets[this.targetSetKey].splice(index, 1);
+      if (this.content.targets[this.targetSetKey].length === 0) {
+        delete this.content.targets[this.targetSetKey];
+        this.targetSetKey = undefined;
+      }
     },
     addResult: function() {
       if (this.newResult === "") {

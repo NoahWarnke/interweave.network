@@ -85,6 +85,10 @@
   border: 1px solid purple;
 }
 
+#simple-text-build .no-tag {
+  background-color: #ffffff;
+}
+
 #simple-text-build textarea {
   width: 400px;
   height: 140px;
