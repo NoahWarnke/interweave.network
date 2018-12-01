@@ -47,61 +47,89 @@ export default {
       
         <p>Create or edit a verb-target-result binding:</p>
         
-        <select v-model="verbKey" class="tag verb-tag">
-          <option disabled value="undefined">Select verb</option>
-          <option
-            v-for="(binding, vKey) of verbs"
-            v-bind:value="vKey">
-            {{verbNameFromKey(vKey) + " (" + numVerbBindings(vKey) + ")"}}
-          </option>
-        </select>
+        <p>
         
-        <select v-model="targetSetKey" v-if="verbKey !== undefined" class="tag target-tag">
-          <option disabled value="undefined">Select target</option>
-          <option value="addNewTargetSet">(Add new)</option>
-          <option
-            v-for="(targetSet, tKey) of content.targets"
-            v-bind:value="tKey">
-            {{targetNameFromKey(tKey) + (verbTargetHasBinding(tKey) ? ' (existing)' : '')}}
-          </option>
-        </select>
+          <select v-model="verbKey" class="tag verb-tag">
+            <option disabled value="undefined">Select verb</option>
+            <option
+              v-for="(binding, vKey) of verbs"
+              v-bind:value="vKey">
+              {{verbNameFromKey(vKey) + " (" + numVerbBindings(vKey) + ")"}}
+            </option>
+          </select>
+          
+          <select v-model="targetSetKey" v-if="verbKey !== undefined" class="tag target-tag">
+            <option v-bind:value="undefined">Select target</option>
+            <option
+              v-for="(targetSet, tKey) of content.targets"
+              v-bind:value="tKey">
+              {{targetNameFromKey(tKey) + (verbTargetHasBinding(tKey) ? ' (existing)' : '')}}
+            </option>
+          </select>
+          
+          <input
+            class="tag target-tag"
+            placeholder="Add a new target"
+            v-if="verbKey !== undefined && targetSetKey === undefined"
+            v-model="newTarget"
+            v-on:keypress.stop.prevent.enter="addTargetSet"
+            v-on:keypress.esc="addTargetSet">
+          </input>
+          
+          <select
+            v-model="resultKey"
+            v-if="targetSetKey !== undefined"
+            class="tag"
+            v-bind:class="resultClass(content.results[resultKey])">
+            <option v-bind:value="undefined" class="result-tag">Select result</option>
+            <option
+              v-for="(result, rKey) of content.results"
+              v-bind:value="rKey"
+              v-bind:class="resultClass(result)">
+              {{shorten(result)}}
+            </option>
+          </select>
+          
+        </p>
         
-        <select v-model="resultKey" v-if="targetSetKey !== undefined && targetSetKey !== 'addNewTargetSet'" class="tag result-tag">
-          <option disabled value="undefined">Select result</option>
-          <option value="addNewResult">(Add new)</option>
-          <option
-            v-for="(result, rKey) of content.results"
-            v-bind:value="rKey">
-            {{shorten(result)}}
-          </option>
-        </select>
-
+        <p v-if="targetSetKey !== undefined">
+        
+          <!-- For adding a new result. -->
+          <textarea
+            v-if="resultKey === undefined"
+            class="tag"
+            v-bind:class="resultClass(newResult)"
+            placeholder="Add a new result"
+            v-model="newResult"
+            v-on:keypress.stop.prevent.enter="addResult"
+            v-on:keypress.esc="addResult">
+          </textarea>
+          
+          <!-- For editing an existing result. -->
+          <textarea
+            v-if="resultKey !== undefined"
+            class="tag"
+            v-bind:class="resultClass(content.results[resultKey])"
+            v-model="content.results[resultKey]"
+            v-on:keypress.stop.prevent.enter>
+          </textarea>
+        </p>
+        
         <p v-if="verbKey !== undefined">
-          <span>Synonyms for this verb (not editable): <span>
+          <span>Synonyms for this verb (not editable): </span>
           <span class="tag verb-tag" v-for="(verb, index) of verbsFromKey(verbKey)">{{verb}}</span>
         </p>
         
-        <p v-if="targetSetKey !== undefined && targetSetKey !== 'addNewTargetSet'">
+        <p v-if="targetSetKey !== undefined">
           <span>Synonyms for this target: </span>
           <span class="tag target-tag" v-for="(target, index) of targetsFromKey(targetSetKey)">{{target}}</span>
         </p>
           
-        <div v-if="targetSetKey === 'addNewTargetSet'">
-          <p>Add a new target.</p>
-          <input v-model="newTarget" v-on:keyup.stop.prevent.enter="addTargetSet" v-on:keyup.esc="addTargetSet"></input>
-        </div>
-        
-        <div v-if="resultKey === 'addNewResult'">
-          <p>Add a new result.</p>
-          <textarea v-model="newResult" v-on:keyup.stop.prevent.enter="addResult" v-on:keyup.esc="addResult"></textarea>
-        </div>
-        
-        <div v-if="resultKey !== undefined && resultKey !== 'addNewResult'">
-          <button v-on:click="restartBindingProcess">Cancel changes</button>
+        <p v-if="resultKey !== undefined">
           <button v-if="showSave()" v-on:click="saveBinding">Save new binding</button>
           <button v-if="showUpdate()" v-on:click="saveBinding">Update binding</button>
           <button v-if="showDelete()" v-on:click="deleteBinding">Delete binding</button>
-        </div>
+        </p>
       </div>
       
     </div>
@@ -260,17 +288,32 @@ export default {
         ? result
         : result.substr(0, 32) + "..."
       );
+    },
+    resultClass: function(result) {
+      if (result !== undefined && result.indexOf("edge") === 0 && result.length === 5) {
+        let num = parseInt(result.substr(4, 5));
+        if (num >= 0 && num < 6) {
+          return 'edge-tag';
+        }
+      }
+      return 'result-tag';
     }
   },
   watch: {
+    verbKey: function(val, oldVal) {
+      // Changed verbKey, so reset targetSetKey and resultKey to undefined.
+      this.targetSetKey = undefined;
+      this.resultKey = undefined;
+    },
     targetSetKey: function(val, oldVal) {
-      if (this.verbKey !== undefined && val !== undefined && this.content.bindings[this.verbKey] !== undefined) {
-        let resultKey = this.content.bindings[this.verbKey][val];
-        if (resultKey !== undefined) {
-          this.resultKey = resultKey;
-        }
+      // Set the resultKey to whatever the binding is, if there is one, or undefined otherwise.
+      this.resultKey = undefined;
+      if ( this.verbKey !== undefined
+        && this.targetSetKey !== undefined
+        && this.content.bindings[this.verbKey] !== undefined
+      ) {
+        this.resultKey = this.content.bindings[this.verbKey][this.targetSetKey];
       }
     }
   }
-  
 }
