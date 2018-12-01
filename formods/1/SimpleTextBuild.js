@@ -1,6 +1,5 @@
 
 import SimpleTextUtils from './SimpleTextUtils.js';
-import SimpleTextEditableField from './SimpleTextEditableField.js';
 
 export default {
   template: `
@@ -46,63 +45,55 @@ export default {
       
       <div v-if="view === 'bindings'">
       
-        <div v-if="verbKey === undefined">
-          <p>Now start creating bindings: verb-object-result combos. For example, 'examine cat' could produce 'A fluffy kitty that is purring on the floor.</p>
-          <select v-model="verbKey">
-            <option disabled value="undefined">Select verb</option>
-            <option
-              v-for="(binding, vKey) of verbs"
-              v-bind:value="vKey">
-              {{verbNameFromKey(vKey) + "(" + numVerbBindings(vKey) + ")"}}
-            </option>
-          </select>
-        </div>
+        <p>Create or edit a verb-target-result binding:</p>
+        <select v-model="verbKey" class="tag verb-tag">
+          <option disabled value="undefined">Select verb</option>
+          <option
+            v-for="(binding, vKey) of verbs"
+            v-bind:value="vKey">
+            {{verbNameFromKey(vKey) + "(" + numVerbBindings(vKey) + ")"}}
+          </option>
+        </select>
+        <select v-model="targetSetKey" v-if="verbKey !== undefined" class="tag target-tag">
+          <option disabled value="undefined">Select target</option>
+          <option
+            v-for="(targetSet, tKey) of content.targets"
+            v-bind:value="tKey">
+            {{targetNameFromKey(tKey) + (verbTargetHasBinding(tKey) ? ' (existing)' : '')}}
+          </option>
+        </select>
+        <select v-model="resultKey" v-if="targetSetKey !== undefined" class="tag result-tag">
+          <option disabled value="undefined">Select result</option>
+          <option
+            v-for="(result, rKey) of content.results"
+            v-bind:value="rKey">
+            {{shorten(result)}}
+          </option>
+        </select>
+        
         
         <div v-if="verbKey !== undefined && targetSetKey === undefined">
-          <span class="tag verb-tag">{{verbNameFromKey(verbKey)}}</span>
-          <hr>
           <p>Synonyms for this verb: </p>
           <span class="tag verb-tag" v-for="(verb, index) of verbsFromKey(verbKey)">{{verb}}</span>
           <button v-on:click="verbKey = undefined">Deselect this verb</button>
           <p>Pick a target that the verb will apply to.</p>
-          <select v-model="targetSetKey">
-            <option disabled value="undefined">Select target</option>
-            <option
-              v-for="(targetSet, tKey) of content.targets"
-              v-bind:value="tKey">
-              {{targetNameFromKey(tKey) + (verbTargetHasBinding(tKey) ? ' (existing)' : '')}}
-            </option>
-          </select>
+        
           <p>Or add a new target.</p>
           <input v-model="newTarget" v-on:keyup.stop.prevent.enter="addTargetSet" v-on:keyup.esc="addTargetSet"></input>
         </div>
         
         <div v-if="targetSetKey !== undefined && resultKey === undefined">
-          <span class="tag verb-tag">{{verbNameFromKey(verbKey)}}</span>
-          <span class="tag target-tag">{{targetNameFromKey(targetSetKey)}}</span>
           <button v-on:click="targetSetKey = undefined">Deselect this target</button>
-          <hr>
           <p>Synonyms for this target: </p>
           <span class="tag target-tag" v-for="(target, index) of targetsFromKey(targetSetKey)">{{target}}</span>
           <p>Pick the result of applying the verb to the target.</p>
-          <select v-model="resultKey">
-            <option disabled value="undefined">Select result</option>
-            <option
-              v-for="(result, rKey) of content.results"
-              v-bind:value="rKey">
-              {{shorten(result)}}
-            </option>
-          </select>
+          
           <p>Or add a new result.</p>
           <textarea v-model="newResult" v-on:keyup.stop.prevent.enter="addResult" v-on:keyup.esc="addResult"></textarea>
         </div>
         
         <div v-if="resultKey !== undefined">
-          <span class="tag verb-tag">{{verbNameFromKey(verbKey)}}</span>
-          <span class="tag target-tag">{{targetNameFromKey(targetSetKey)}}</span>:
-          <span class="tag result-tag">{{shorten(content.results[resultKey])}}</span>
           <button v-on:click="resultKey = undefined">Deselect this result</button>
-          <hr>
           <!-- cancel, save (new binding), delete (existing binding), update (existing binding that is different) -->
           <button v-on:click="restartBindingProcess">Cancel changes</button>
           <button v-if="showSave()" v-on:click="saveBinding">Save new binding</button>
@@ -113,9 +104,6 @@ export default {
       
     </div>
   `,
-  components: {
-    SimpleTextEditableField
-  },
   props: {
     content: Object
   },
