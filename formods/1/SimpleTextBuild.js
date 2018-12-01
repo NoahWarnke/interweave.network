@@ -46,55 +46,57 @@ export default {
       <div v-if="view === 'bindings'">
       
         <p>Create or edit a verb-target-result binding:</p>
+        
         <select v-model="verbKey" class="tag verb-tag">
           <option disabled value="undefined">Select verb</option>
           <option
             v-for="(binding, vKey) of verbs"
             v-bind:value="vKey">
-            {{verbNameFromKey(vKey) + "(" + numVerbBindings(vKey) + ")"}}
+            {{verbNameFromKey(vKey) + " (" + numVerbBindings(vKey) + ")"}}
           </option>
         </select>
+        
         <select v-model="targetSetKey" v-if="verbKey !== undefined" class="tag target-tag">
           <option disabled value="undefined">Select target</option>
+          <option value="addNewTargetSet">(Add new)</option>
           <option
             v-for="(targetSet, tKey) of content.targets"
             v-bind:value="tKey">
             {{targetNameFromKey(tKey) + (verbTargetHasBinding(tKey) ? ' (existing)' : '')}}
           </option>
         </select>
-        <select v-model="resultKey" v-if="targetSetKey !== undefined" class="tag result-tag">
+        
+        <select v-model="resultKey" v-if="targetSetKey !== undefined && targetSetKey !== 'addNewTargetSet'" class="tag result-tag">
           <option disabled value="undefined">Select result</option>
+          <option value="addNewResult">(Add new)</option>
           <option
             v-for="(result, rKey) of content.results"
             v-bind:value="rKey">
             {{shorten(result)}}
           </option>
         </select>
-        
-        
-        <div v-if="verbKey !== undefined && targetSetKey === undefined">
-          <p>Synonyms for this verb: </p>
+
+        <p v-if="verbKey !== undefined">
+          <span>Synonyms for this verb (not editable): <span>
           <span class="tag verb-tag" v-for="(verb, index) of verbsFromKey(verbKey)">{{verb}}</span>
-          <button v-on:click="verbKey = undefined">Deselect this verb</button>
-          <p>Pick a target that the verb will apply to.</p>
+        </p>
         
-          <p>Or add a new target.</p>
+        <p v-if="targetSetKey !== undefined && targetSetKey !== 'addNewTargetSet'">
+          <span>Synonyms for this target: </span>
+          <span class="tag target-tag" v-for="(target, index) of targetsFromKey(targetSetKey)">{{target}}</span>
+        </p>
+          
+        <div v-if="targetSetKey === 'addNewTargetSet'">
+          <p>Add a new target.</p>
           <input v-model="newTarget" v-on:keyup.stop.prevent.enter="addTargetSet" v-on:keyup.esc="addTargetSet"></input>
         </div>
         
-        <div v-if="targetSetKey !== undefined && resultKey === undefined">
-          <button v-on:click="targetSetKey = undefined">Deselect this target</button>
-          <p>Synonyms for this target: </p>
-          <span class="tag target-tag" v-for="(target, index) of targetsFromKey(targetSetKey)">{{target}}</span>
-          <p>Pick the result of applying the verb to the target.</p>
-          
-          <p>Or add a new result.</p>
+        <div v-if="resultKey === 'addNewResult'">
+          <p>Add a new result.</p>
           <textarea v-model="newResult" v-on:keyup.stop.prevent.enter="addResult" v-on:keyup.esc="addResult"></textarea>
         </div>
         
-        <div v-if="resultKey !== undefined">
-          <button v-on:click="resultKey = undefined">Deselect this result</button>
-          <!-- cancel, save (new binding), delete (existing binding), update (existing binding that is different) -->
+        <div v-if="resultKey !== undefined && resultKey !== 'addNewResult'">
           <button v-on:click="restartBindingProcess">Cancel changes</button>
           <button v-if="showSave()" v-on:click="saveBinding">Save new binding</button>
           <button v-if="showUpdate()" v-on:click="saveBinding">Update binding</button>
