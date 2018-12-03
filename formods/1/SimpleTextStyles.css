@@ -90,6 +90,12 @@
 }
 
 #simple-text-build textarea {
-  width: 400px;
+  width: 100%;
+  border-radius: 5px;
+  padding: 5px;
   height: 140px;
+}
+
+#simple-text-build .existing {
+  font-weight: bold;
 }

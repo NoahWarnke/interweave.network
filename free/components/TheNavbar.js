@@ -44,16 +44,9 @@ export default {
         My Nodes
       </button>
       <button
-        id="button-delete-node"
-        class="navbar-button right"
-        v-if="showBuildTools"
-        v-on:click="deleteNodeClick()">
-        Delete Node
-      </button>
-      <button
         id="button-edit-node"
         class="navbar-button right"
-        v-if="showBuildTools"
+        v-if="showBuildTools && currentNode !== undefined && currentNode.isOwnedBy(account)"
         v-on:click="editNodeClick()">
         Edit Node
       </button>
@@ -71,6 +64,9 @@ export default {
     account: String
   },
   computed: {
+    currentNode: function() {
+      return this.nodes[this.currentNodeKey];
+    },
     availableEdges: function() {
       let result = {};
       if (this.currentNodeKey === undefined) {
@@ -121,11 +117,7 @@ export default {
       this.$emit("myEdgeProposalsClick");
     },
     editNodeClick: function() {
-      console.log(this.currentNodeKey);
       this.$emit("editNodeClick", this.currentNodeKey);
-    },
-    deleteNodeClick: function() {
-      this.$emit("deleteNodeClick");
     }
   }
 }

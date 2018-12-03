@@ -4,6 +4,7 @@ import SimpleTextUtils from './SimpleTextUtils.js';
 export default {
   template: `
     <div id="simple-text-build">
+      <h1>Set up your new SimpleText Node!</h1>
       
       <div>
         <button v-on:click="setView('description')">Description</button>
@@ -22,37 +23,38 @@ export default {
           <option disabled value="undefined" class="no-tag">Select edge slot</option>
           <option
             class="edge-tag"
+            v-bind:class="content.edges[slot] !== undefined ? 'existing' : ''"
             v-for="slot of slots"
             v-bind:value="slot">
-            edge{{slot + (content.edges[slot] === undefined ? '' : ' (existing)')}}
+            edge{{slot}}
           </option>
         </select>
         
-        <div v-if="slot !== undefined">
-          <div v-if="content.edges[slot] !== undefined">
-            <button v-on:click="deleteEdge(slot)">Delete edge</button>
-            <p>Description of what happens on the half of the connection entering the Node:</p>
-            <textarea v-model="content.edges[slot].enterDesc"></textarea>
-            <p>Description of what happens on the half of the connection leaving the Node:</p>
-            <textarea v-model="content.edges[slot].leaveDesc"></textarea>
-          </div>
+        <button v-if="slot !== undefined && content.edges[slot] !== undefined" v-on:click="deleteEdge(slot)">Delete edge</button>
+        <button v-if="slot !== undefined && content.edges[slot] === undefined" v-on:click="addEdge(slot)">Add edge</button>
+        
+        <div v-if="slot !== undefined && content.edges[slot] !== undefined">
+          <p>Description of what happens on the half of the connection entering the Node:</p>
+          <textarea v-model="content.edges[slot].enterDesc"></textarea>
+          <p>Description of what happens on the half of the connection leaving the Node:</p>
+          <textarea v-model="content.edges[slot].leaveDesc"></textarea>
+        </div>
           
-          <div v-if="content.edges[slot] === undefined">
-            <p>This slot doesn't have an edge right now.</p>
-            <button v-on:click="addEdge(slot)">Add edge</button>
-          </div>
+        <div v-if="content.edges[slot] === undefined">
+          <p>This slot doesn't have an edge right now.</p>
         </div>
       </div>
       
       <div v-if="view === 'bindings'">
       
-        <p>Create or edit a verb-target-result binding:</p>
+        <p>Create or edit verb-target-result bindings.</p>
         
         <p>
         
           <select v-model="verbKey" class="tag verb-tag">
-            <option disabled value="undefined" class="no-tag">Select verb</option>
+            <option disabled value="undefined" class="no-tag">(Select verb)</option>
             <option
+              v-bind:class="numVerbBindings(vKey) > 0 ? 'existing' : ''"
               v-for="(binding, vKey) of verbs"
               v-bind:value="vKey">
               {{verbNameFromKey(vKey) + " (" + numVerbBindings(vKey) + ")"}}
@@ -60,11 +62,12 @@ export default {
           </select>
           
           <select v-model="targetSetKey" v-if="verbKey !== undefined" class="tag target-tag">
-            <option v-bind:value="undefined">Select target</option>
+            <option v-bind:value="undefined">(Select target)</option>
             <option
+              v-bind:class="verbTargetHasBinding(tKey) ? 'existing' : ''"
               v-for="(targetSet, tKey) of content.targets"
               v-bind:value="tKey">
-              {{targetNameFromKey(tKey) + (verbTargetHasBinding(tKey) ? ' (existing)' : '')}}
+              {{targetNameFromKey(tKey)}}
             </option>
           </select>
           
@@ -82,7 +85,7 @@ export default {
             v-if="targetSetKey !== undefined"
             class="tag"
             v-bind:class="resultClass(content.results[resultKey])">
-            <option v-bind:value="undefined">Select result</option>
+            <option v-bind:value="undefined" class="result-tag">(Select result)</option>
             <option
               v-for="(result, rKey) of content.results"
               v-bind:value="rKey"
@@ -95,21 +98,19 @@ export default {
         
         <p v-if="targetSetKey !== undefined">
         
-          <!-- For adding a new result. -->
+          <!-- For adding a new result's first character (will create a new result when you do). -->
           <textarea
             v-if="resultKey === undefined"
-            class="tag"
             v-bind:class="resultClass(newResult)"
             placeholder="Add a new result"
             v-model="newResult"
-            v-on:keypress.stop.prevent.enter="addResult"
-            v-on:keypress.esc="addResult">
+            v-on:keypress.stop.prevent.enter>
           </textarea>
           
           <!-- For editing an existing result. -->
           <textarea
+            ref="existingresulttextarea"
             v-if="resultKey !== undefined"
-            class="tag"
             v-bind:class="resultClass(content.results[resultKey])"
             v-model="content.results[resultKey]"
             v-on:keypress.stop.prevent.enter>
@@ -126,8 +127,8 @@ export default {
           <span
             class="tag target-tag"
             v-for="(target, index) of targetsFromKey(targetSetKey)"
-            v-on:click="removeTargetFromSet(index)">
-            {{target}}
+            v-on:click="removeTargetFromSet(index)"
+            v-html="target !== '' ? target : '&nbsp;'">
           </span>
           <input
             class="tag target-tag"
@@ -140,7 +141,7 @@ export default {
         <p v-if="resultKey !== undefined">
           <button v-if="showSave()" v-on:click="saveBinding">Save new binding</button>
           <button v-if="showUpdate()" v-on:click="saveBinding">Update binding</button>
-          <button v-if="showDelete()" v-on:click="deleteBinding">Delete binding</button>
+          <button v-if="showDelete()" v-on:click="deleteBinding(); restartBindingProcess();">Delete binding</button>
         </p>
       </div>
       
@@ -159,7 +160,8 @@ export default {
       newResult: "",
       view: "description",
       slot: undefined,
-      slots: [0, 1, 2, 3, 4, 5]
+      slots: [0, 1, 2, 3, 4, 5],
+      oldEditingResult: undefined
     }
   },
   methods: {
@@ -201,21 +203,35 @@ export default {
     targetsFromKey: function(targetKey) {
       return this.content.targets[targetKey];
     },
+    targetExists: function(target) {
+      for (let targetSetKey of Object.keys(this.content.targets)) {
+        if (this.content.targets[targetSetKey].includes(target)) {
+          return true;
+        }
+      }
+      return false;
+    },
     addTargetSet: function() {
       if (this.newTarget === "") {
+        return;
+      }
+      if (this.targetExists(this.newTarget)) {
         return;
       }
       let newTargetSetKey = Object.keys(this.content.targets).length;
       let newTargetSet = [
         this.newTarget.toLowerCase().trim()
       ];
-      // TODO verify it's unique
+      
       this.$set(this.content.targets, newTargetSetKey, newTargetSet);
       this.newTarget = "";
       this.targetSetKey = newTargetSetKey; // Also select it.
     },
     addTargetToSet: function() {
-      if (this.newTarget === "" || this.targetSetKey === undefined) {
+      if (this.newTarget.trim() === "" || this.targetSetKey === undefined) {
+        return;
+      }
+      if (this.targetExists(this.newTarget)) {
         return;
       }
       this.content.targets[this.targetSetKey].push(this.newTarget.toLowerCase().trim());
@@ -229,11 +245,19 @@ export default {
       // Check if we deleted the last one, and remove the whole set if so.
       this.content.targets[this.targetSetKey].splice(index, 1);
       if (this.content.targets[this.targetSetKey].length === 0) {
+        
+        // Delete the current binding before doing anything.
+        if (this.resultKey !== undefined) {
+          this.deleteAllBindingsWithTargetSetKey(this.targetSetKey);
+          // TODO delete all newly-unused results.
+          this.resultKey = undefined;
+        }
+        
         delete this.content.targets[this.targetSetKey];
         this.targetSetKey = undefined;
       }
     },
-    addResult: function() {
+    addResult: async function() {
       if (this.newResult === "") {
         return;
       }
@@ -242,6 +266,11 @@ export default {
       this.$set(this.content.results, newResultKey, this.newResult);
       this.newResult = "";
       this.resultKey = newResultKey; // Also select it.
+      
+      this.saveBinding(); // Also save it.
+      
+      await Vue.nextTick();
+      this.$refs.existingresulttextarea.focus();
     },
     verbTargetHasBinding: function(targetKey) {
       if (this.verbKey === undefined) {
@@ -288,31 +317,59 @@ export default {
         this.content.bindings[this.verbKey] = {};
       }
       this.content.bindings[this.verbKey][this.targetSetKey] = this.resultKey;
-      
-      this.restartBindingProcess();
     },
     deleteBinding: function() {
-      if (this.verbKey === undefined || this.targetSetKey === undefined || this.resultKey === undefined) {
+      this.deleteSpecificBinding(this.verbKey, this.targetSetKey, this.resultKey);
+      
+      // Note, this leaves verbKey, targetSetKey, and resultKey untouched. Call restartBindingProcess if you want to clean those up.
+    },
+    deleteSpecificBinding: function(verbKey, targetSetKey, resultKey) {
+      if (verbKey === undefined || targetSetKey === undefined || resultKey === undefined) {
         return;
       }
       
       // If binding was never set, we're done.
-      if (this.content.bindings[this.verbKey] === undefined || this.content.bindings[this.verbKey][this.targetSetKey] === undefined) {
+      if (this.content.bindings[verbKey] === undefined || this.content.bindings[verbKey][targetSetKey] === undefined) {
         return;
       }
       
       // TODO decide what to do with orphaned results and target sets.
       
       // Delete the actual binding.
-      delete this.content.bindings[this.verbKey][this.targetSetKey];
+      delete this.content.bindings[verbKey][targetSetKey];
       
       // Clean up the verb binding entirely if it has no targets.
-      if (Object.keys(this.content.bindings[this.verbKey]).length === 0) {
-        delete this.content.bindings[this.verbKey];
+      if (Object.keys(this.content.bindings[verbKey]).length === 0) {
+        delete this.content.bindings[verbKey];
       }
-      
-      // Clean up.
-      this.restartBindingProcess();
+    },
+    deleteAllBindingsWithTargetSetKey(targetSetKeyToUnbind) {
+      let verbKeys = Object.keys(this.content.bindings);
+      for (let verbKey of verbKeys) {
+        let targetSetKeys = Object.keys(this.content.bindings[verbKey]);
+        console.log(targetSetKeys);
+        for (let targetSetKey of targetSetKeys) {
+          if (targetSetKey == targetSetKeyToUnbind) {
+            console.log("unbinding " + this.content.results[this.content.bindings[verbKey][targetSetKey]]);
+            this.deleteSpecificBinding(verbKey, targetSetKey, this.content.bindings[verbKey][targetSetKey]);
+          }
+          else {
+            console.log(targetSetKey + " was not a match with " + targetSetKeyToUnbind);
+          }
+        }
+      }
+    },
+    deleteAllBindingsWithResultKey(resultKeyToUnbind) {
+      let verbKeys = Object.keys(this.content.bindings);
+      for (let verbKey of verbKeys) {
+        let targetSetKeys = Object.keys(this.content.bindings[verbKey]);
+        for (let targetSetKey of targetSetKeys) {
+          let resultKey = this.content.bindings[verbKey][targetSetKey];
+          if (resultKey == resultKeyToUnbind) {
+            this.deleteSpecificBinding(verbKey, targetSetKey, resultKey);
+          }
+        }
+      }
     },
     shorten: function(result) {
       return (result.length < 32
@@ -328,6 +385,17 @@ export default {
         }
       }
       return 'result-tag';
+    },
+    isForbiddenEdge: function(str) {
+      if (str !== undefined && str.indexOf("edge") === 0 && str.length === 5) {
+        let num = parseInt(str.substr(4, 5));
+        if (num >= 0 && num < 6) {
+          if (this.content.edges[num] === undefined) {
+            return true;
+          }
+        }
+      }
+      return false;
     }
   },
   watch: {
@@ -344,6 +412,50 @@ export default {
         && this.content.bindings[this.verbKey] !== undefined
       ) {
         this.resultKey = this.content.bindings[this.verbKey][this.targetSetKey];
+      }
+    },
+    newResult: function(newResult, oldNewResult) {
+      // Add results immediately.
+      if (newResult !== undefined && newResult !== "") {
+        this.addResult();
+      }
+    },
+    resultKey: function(resultKey, oldResultKey) {
+      if (resultKey !== undefined) {
+        // Save result as old result in case it gets edited to an invalid state.
+        this.oldEditingResult = this.content.results[resultKey];
+        
+        // Update the binding (the function will not do anything if a binding can't be saved.)
+        this.saveBinding();
+      }
+      else if (oldResultKey !== undefined) {
+        // Unbind if you set a result key back to undefined.
+        if (this.verbKey !== undefined && this.targetSetKey !== undefined) {
+          this.deleteSpecificBinding(this.verbKey, this.targetSetKey, oldResultKey);
+        }
+      }
+    },
+    content: {
+      immediate: true,
+      deep: true,
+      handler: function(content, oldContent) {
+        if (this.resultKey !== undefined) {
+          
+          // Prevent forbidden inputs ('edge0', for example, when there is no edge 0).
+          if (this.isForbiddenEdge(content.results[this.resultKey])) {
+            content.results[this.resultKey] = this.oldEditingResult; // Note, we have 'oldEditingResult' because there's no way to know the old result value.
+          }
+          else {
+            this.oldEditingResult = content.results[this.resultKey];
+          }
+          
+          // Also, notice if the result went empty and delete the result/binding if so.
+          if (content.results[this.resultKey] === "") {
+            delete content.results[this.resultKey];
+            this.deleteAllBindingsWithResultKey(this.resultKey);
+            this.resultKey = undefined; // Unset the result key, but leave verbKey and targetSetKey behind.
+          }
+        }
       }
     }
   }

@@ -4,7 +4,8 @@ export default {
       <ul>
         <li v-for="nodeKey of pageNodeKeys">
           <button v-on:click="viewNode(nodeKey)">View</button>
-          <button v-on:click="editNode(nodeKey)">Edit</button>
+          <button v-if="nodes[nodeKey].type === 'draft'" v-on:click="editNode(nodeKey)">Edit</button>
+          <button v-if="nodes[nodeKey].isOwnedBy(account) || nodes[nodeKey].type === 'draft'" v-on:click="deleteNode(nodeKey)">Delete</button>
           <span>{{nodeString(nodeKey)}}</span>
         </li>
       </ul>
@@ -26,7 +27,8 @@ export default {
   props: {
     myNodeKeys: Array,
     myDraftNodeKeys: Array,
-    nodes: Object
+    nodes: Object,
+    account: String
   },
   computed: {
     maxPage: function() {
@@ -67,6 +69,9 @@ export default {
     },
     editNode: function(nodeKey) {
       this.$emit("editNodeClick", nodeKey);
+    },
+    deleteNode: function(nodeKey) {
+      this.$emit("deleteNodeClick", nodeKey);
     },
     addNode: function(nodeKey) {
       this.$emit("addNodeClick");

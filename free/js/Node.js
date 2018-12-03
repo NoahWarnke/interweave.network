@@ -24,7 +24,7 @@ export default class Node {
     // Universal IPFS data.
     this._name = "";
     this._format = undefined;
-    this._formatVersion = 1;
+    this._formatVersion = undefined;
   }
   
   /**
@@ -171,5 +171,9 @@ export default class Node {
    */
   get formatVersion() {
     return this._formatVersion;
+  }
+  
+  isOwnedBy(addr) {
+    if (this._bData !== undefined && this._bData.ownerAddr === addr);
   }
 }

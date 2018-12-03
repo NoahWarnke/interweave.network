@@ -33,7 +33,6 @@ export default {
         v-on:myNodesClick="myNodesClick()"
         v-on:myEdgeProposalsClick="myEdgeProposalsClick()"
         v-on:editNodeClick="editNodeClick($event)"
-        v-on:deleteNodeClick="deleteNodeClick()"
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
       <explore-area
@@ -57,9 +56,11 @@ export default {
         v-if="currentView === 'mynodes'"
         v-bind:myNodeKeys="myNodeKeys"
         v-bind:nodes="nodes"
+        v-bind:account="account"
         v-on:pagedToTheseNodeKeys="updateNodes($event)"
         v-on:myNodesViewClick="myNodesViewClick($event)"
         v-on:editNodeClick="editNodeClick($event)"
+        v-on:deleteNodeClick="deleteNodeClick()"
         v-on:addNodeClick="addNodeClick()">
       </list-nodes>
       <modal-info v-if="false"></modal-info>

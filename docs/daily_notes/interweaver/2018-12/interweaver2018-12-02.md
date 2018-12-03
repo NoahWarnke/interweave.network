@@ -1,9 +1,5 @@
-# Interweaver's to-do items, 2018-12-01:
+# Interweaver's to-do items, 2018-12-02:
 
-- Further thoughts:
-  - Should have the dropdowns stay in a line, rather than separate divs and deselect buttons, etc.
-  - Synonyms should accumulate vertically below the dropdowns?
-  
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:
@@ -11,20 +7,19 @@
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.
-            - [X] Make dropdowns be in line.
-            - [X] Make 'add new' just be the default dropdown option for targets and results.
-            - [X] Make results be editable
-            - [X] Fix binding textareas having trailing newline from enter.
-            - [X] Make targets addable to existing target sets
-            - [X] Make targets editable and deleteable
-              - Well okay, just deleteable - you can always delete and re-add one if you want.
-            - [ ] Make deleting a result back to nothing delete it (and go back to an undefined resultKey for current 'binding' and any others using it).
-            - [ ] Make sure you can only select edges that exist as a result
-              - This is a bit hard, given you can edit an already-bound result to be a non-existant edge.
-              - You can't block it from being set, can you?
-              - Well, maybe you can. Would be a little odd, but yeah, let's do that.
-            - [ ] Make sure targets and results are unique
-            - [ ] Figure out how to remove (or not) unbound targetsets and results and edges
+            - [ ] Consistency preservation:
+              - [X] Make deleting a result back to nothing delete it (and go back to an undefined resultKey for current 'binding' and any others using it).
+              - [X] Make the moment you start typing a newResult, it just becomes an actual new result (so no enter-to-add-result)
+                - The goal here is to avoid cases where "oh, you have to hit enter to save it" is a needed instruction...
+                - Would also want to eliminate the "save binding" or "update binding" messages - just set it immediately.
+              - [X] Make bindings set immediately.
+              - [X] Make sure you can only select edges that exist as a result
+                - This is a bit hard, given you can edit an already-bound result to be a non-existant edge.
+                - You can't block it from being set, can you?
+                - Well, maybe you can. Would be a little odd, but yeah, let's do that.
+              - [ ] Remove results when you delete a target set that was part of the last binding for that result.
+              - [ ] Make sure targets and results are unique
+              - [X] Figure out how to remove (or not) unbound targetsets and results and edges
         - [ ] Give Node a method to export JSON version of the contained iData (plus name/format/formatVersion)
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
         - [ ] Make a button to deploy to blockchain.

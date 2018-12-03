@@ -57,7 +57,7 @@ export default class SimpleText {
       "edges": {
       },
       "targets": {
-        "0": ["", "here", "area", "plain", "ground", "light", "point"]
+        "0": ["here", "area", "plain", "ground", "light", "point"]
       },
       "results": {
         "0": "Half the world is purest white, and the other half deepest black, except for that painfully bright point of light overhead."

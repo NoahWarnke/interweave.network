@@ -4,7 +4,11 @@ export default {
   template: `
     <div id="build">
       <div id="format-and-name" v-if="currentStep === 'formatandname'">
-        <h2>Set your Node's format and name</h2>
+        <h2>Set your Node's name and format</h2>
+        <p>
+          <span>Node name: </span>
+          <input v-model="currentNode.name"></input>
+        </p>
         <p>
           <span>Node format: </span>
           <select v-model="currentFormat">
@@ -15,31 +19,26 @@ export default {
               {{formod.name()}}
             </option>
           </select>
-        </p>
-        <p>
-          <span>Node version: {{currentNode.formatVersion}}</span>
-        </p>
-        <p>
-          <span>Node name: </span>
-          <input v-model="currentNode.name"></input>
+          <span v-if="currentNode.formatVersion !== undefined">(version {{currentNode.formatVersion}})</span>
         </p>
       </div>
       <div id="format-specific" v-show="currentStep === 'formatspecific'">
-        <h2>Set your Node's format-specific details</h2>
         <div ref="formodbuildslot"></div>
       </div>
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
         <h2>Deploy your Node's content to IPFS</h2>
+        <p>This functionality is not done yet.</p>
         <button>Do it!</button>
       </div>
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
         <h2>Deploy your Node to the Ethereum blockchain</h2>
+        <p>This functionality is not done yet.</p>
         <button>Do it!</button>
       </div>
       <div id="next-prev-buttons">
         <hr>
-        <button v-if="canClickPrev" v-on:click="clickPrev()">Previous</button>
-        <button v-if="canClickNext" v-on:click="clickNext()">Next</button>
+        <button v-if="canClickPrev" v-on:click="clickPrev()" class="prev-next previous-button">< Previous</button>
+        <button v-if="canClickNext" v-on:click="clickNext()" class="prev-next next-button">Next ></button>
       </div>
     </div>
   `,
