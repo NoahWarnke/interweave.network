@@ -36,7 +36,6 @@ export default {
         <button>Do it!</button>
       </div>
       <div id="next-prev-buttons">
-        <hr>
         <button v-if="canClickPrev" v-on:click="clickPrev()" class="prev-next previous-button">< Previous</button>
         <button v-if="canClickNext" v-on:click="clickNext()" class="prev-next next-button">Next ></button>
       </div>

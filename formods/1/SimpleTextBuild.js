@@ -347,14 +347,9 @@ export default {
       let verbKeys = Object.keys(this.content.bindings);
       for (let verbKey of verbKeys) {
         let targetSetKeys = Object.keys(this.content.bindings[verbKey]);
-        console.log(targetSetKeys);
         for (let targetSetKey of targetSetKeys) {
           if (targetSetKey == targetSetKeyToUnbind) {
-            console.log("unbinding " + this.content.results[this.content.bindings[verbKey][targetSetKey]]);
             this.deleteSpecificBinding(verbKey, targetSetKey, this.content.bindings[verbKey][targetSetKey]);
-          }
-          else {
-            console.log(targetSetKey + " was not a match with " + targetSetKeyToUnbind);
           }
         }
       }

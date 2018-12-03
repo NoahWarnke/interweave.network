@@ -46,7 +46,7 @@ export default {
       <button
         id="button-edit-node"
         class="navbar-button right"
-        v-if="showBuildTools && currentNode !== undefined && currentNode.isOwnedBy(account)"
+        v-if="showBuildTools && currentNode !== undefined && currentNode.type === 'draft'"
         v-on:click="editNodeClick()">
         Edit Node
       </button>
