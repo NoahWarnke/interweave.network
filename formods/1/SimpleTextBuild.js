@@ -137,12 +137,7 @@ export default {
             v-on:keypress.stop.prevent.enter="addTargetToSet"
             v-on:keypress.esc="addTargetToSet"></input>
         </p>
-          
-        <p v-if="resultKey !== undefined">
-          <button v-if="showSave()" v-on:click="saveBinding">Save new binding</button>
-          <button v-if="showUpdate()" v-on:click="saveBinding">Update binding</button>
-          <button v-if="showDelete()" v-on:click="deleteBinding(); restartBindingProcess();">Delete binding</button>
-        </p>
+        
       </div>
       
     </div>
@@ -280,27 +275,6 @@ export default {
         return false;
       }
       return (this.content.bindings[this.verbKey][targetKey] !== undefined);
-    },
-    getCurrentBindingResult: function() {
-      if (this.verbKey === undefined || this.targetSetKey === undefined || this.resultKey === undefined) {
-        return undefined;
-      }
-      if (this.content.bindings[this.verbKey] === undefined) {
-        return undefined;
-      }
-      return this.content.bindings[this.verbKey][this.targetSetKey];
-    },
-    fullBindingIsSet: function() {
-      return this.getCurrentBindingResult() !== undefined;
-    },
-    showSave: function() {
-      return !this.fullBindingIsSet();
-    },
-    showUpdate: function() {
-      return this.fullBindingIsSet() && this.getCurrentBindingResult() !== this.resultKey;
-    },
-    showDelete: function() {
-      return this.fullBindingIsSet() && this.getCurrentBindingResult() === this.resultKey; // Can't delete a binding if a different change is proposed.
     },
     restartBindingProcess: function() {
       this.verbKey = undefined;
@@ -448,7 +422,9 @@ export default {
           if (content.results[this.resultKey] === "") {
             delete content.results[this.resultKey];
             this.deleteAllBindingsWithResultKey(this.resultKey);
-            this.resultKey = undefined; // Unset the result key, but leave verbKey and targetSetKey behind.
+            
+            // Unset the result key, but leave verbKey and targetSetKey behind.
+            this.resultKey = undefined;
           }
         }
       }
