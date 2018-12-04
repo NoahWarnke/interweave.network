@@ -448,8 +448,8 @@ export default {
       let draftNodeKey = "draft" + (Math.random() * 10E16);
       this.myDraftNodeKeys.push(draftNodeKey);
       this.initializeNode(draftNodeKey, "draft");
-      this.setCurrentNode(draftNodeKey);
-      this.currentView = "editnode";
+      //this.setCurrentNode(draftNodeKey);
+      //this.currentView = "editnode";
       
     },
     deleteNodeClick: async function() {

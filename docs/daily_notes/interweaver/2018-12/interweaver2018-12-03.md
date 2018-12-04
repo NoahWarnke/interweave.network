@@ -2,7 +2,7 @@
 
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
-  - [ ] Create functional DApp:
+  - [ ] Create functional DApp:htt
     - [ ] Make build mode:
       - [X] Fix navbar again, so that it's more of a tab situation than buttons (need to see, but not click, current mode)
         - Edit Node, My Nodes, My Edge Proposals, should be joined by Explore

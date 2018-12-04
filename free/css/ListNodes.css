@@ -2,3 +2,35 @@
 #list-nodes .current-node {
   font-weight: bold;
 }
+
+#list-nodes .nodes-list {
+  width: 100%;
+}
+
+#list-nodes .node-box {
+  width: 400px;
+  height: 200px;
+  border: 1px solid black;
+  border-radius: 5px;
+  background: lightblue;
+  margin: 5px;
+  float: left;
+}
+
+#list-nodes .node-box .title {
+  background: #8989ff;
+  text-align: center;
+  padding: 5px;
+}
+
+#list-nodes .node-box .contents {
+  padding: 5px;
+  margin: 0px;
+  border: 0px;
+}
+
+#list-nodes .add-node-button {
+  width: 100%;
+  height: calc(100% - 40px);
+  font-size: 6em;
+}

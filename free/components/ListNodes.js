@@ -1,20 +1,33 @@
 export default {
   template: `
     <div id="list-nodes">
-      <ul>
-        <li v-for="nodeKey of pageNodeKeys">
-          <button v-on:click="viewNode(nodeKey)">View</button>
-          <button v-if="nodes[nodeKey].type === 'draft'" v-on:click="editNode(nodeKey)">Edit</button>
-          <button v-if="nodes[nodeKey].isOwnedBy(account) || nodes[nodeKey].type === 'draft'" v-on:click="deleteNode(nodeKey)">Delete</button>
-          <span v-bind:class="currentNodeKey === nodeKey ? 'current-node' : ''">{{nodeString(nodeKey)}}</span>
-          <span v-if="nodes[nodeKey].type === 'draft'">(draft)</span>
-        </li>
-      </ul>
+      <div class="nodes-list">
+        <div class="node-box" v-for="nodeKey of pageNodeKeys">
+          <div class="title">
+            <span v-bind:class="currentNodeKey === nodeKey ? 'current-node' : ''">{{nodeString(nodeKey)}}</span>
+            <span v-if="nodes[nodeKey].type === 'draft'">(draft)</span>
+          </div>
+          <div class="contents">
+            <button v-on:click="viewNode(nodeKey)">View</button>
+            <button v-if="nodes[nodeKey].type === 'draft'" v-on:click="editNode(nodeKey)">Edit</button>
+            <button v-if="nodes[nodeKey].isOwnedBy(account) || nodes[nodeKey].type === 'draft'" v-on:click="deleteNode(nodeKey)">Delete</button>
+          </div>
+        </div>
+        <div class="node-box add">
+          <div class="title add">
+            Add New Node
+          </div>
+          <div class="contents">
+            <button class="add-node-button" v-on:click="addNode">+</button>
+          </div>
+        </div>
+      </div>
+      <hr>
       <button v-on:click="pageLeft()"><</button>
       <span>{{page+1}}/{{maxPage+1}}</span>
       <button v-on:click="pageRight()">></button>
       <p>
-        <button v-on:click="addNode">Add New Node</button>
+      
       </p>
     </div>
   `,
