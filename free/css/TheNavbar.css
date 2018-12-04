@@ -1,6 +1,8 @@
 #navbar {
   padding: 8px;
+  padding-bottom: 0px;
   margin: 0px;
+  height: 65px;
   flex: 0 1 auto;
   background-image: linear-gradient(to bottom, #dddddd, #999999);
   border-bottom: 2px solid grey;
@@ -13,6 +15,7 @@
   border-radius: 15px;
   border: 1px solid grey;
   margin: 5px;
+  margin-bottom: 0px;
   background-color: white;
 }
 
@@ -24,6 +27,12 @@
   float: left;
 }
 
+#navbar .active-tab {
+  border-bottom-left-radius: 0px;
+  border-bottom-right-radius: 0px;
+  height: 60px;
+}
+
 #navbar #home {
   text-decoration: none;
   display: flex;
@@ -33,15 +42,11 @@
   background-image: linear-gradient(to bottom, #ffffff, #ff5555 25%, #ff5555 75%, #990000);
 }
 
-#navbar #dropdown-edges {
-  background-image: linear-gradient(to bottom, #ffffff, #ffaa55 25%, #ffaa55 75%, #994400);
-}
-
-#navbar #button-edit-node {
+#navbar #button-view-node {
   background-image: linear-gradient(to bottom, #ffffff, #ffff55 25%, #ffff55 75%, #999900);
 }
 
-#navbar #button-delete-node {
+#navbar #button-edit-node {
   background-image: linear-gradient(to bottom, #ffffff, #55ff55 25%, #55ff55 75%, #009900);
 }
 

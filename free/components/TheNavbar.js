@@ -3,6 +3,7 @@ import ButtonEdge from "./ButtonEdge.js";
 export default {
   template: `
     <div id="navbar">
+    
       <a
         role="button"
         id="home"
@@ -10,47 +11,54 @@ export default {
         href="../../">
         Home
       </a>
-      <!--
-      <button-edge
-        v-for="edge in availableEdges" :key="edge.nodeKey"
-        v-bind:edge="edge"
-        v-on:edgeClick="edgeClick">
-      </button-edge>
-      -->
+      
       <button
-        id="dropdown-edges"
+        id="button-view-node"
         class="navbar-button left"
-        v-if="showBuildTools">
-        Edges
+        v-bind:class="currentView === 'explore' ? 'active-tab' : ''"
+        v-bind:disabled="currentView === 'explore'"
+        v-if="showBuildTools"
+        v-on:click="viewNodeClick()">
+        View Node
       </button>
+      
+      <button
+        id="button-edit-node"
+        class="navbar-button left"
+        v-bind:class="currentView === 'editnode' ? 'active-tab' : ''"
+        v-bind:disabled="currentNode === undefined || currentNode.type !== 'draft' || currentView === 'editnode'"
+        v-if="showBuildTools"
+        v-on:click="editNodeClick()">
+        Edit Node
+      </button>
+      
+      <button
+        id="button-my-nodes"
+        class="navbar-button left"
+        v-bind:class="currentView === 'mynodes' ? 'active-tab' : ''"
+        v-bind:disabled="currentView === 'mynodes'"
+        v-if="showBuildTools"
+        v-on:click="myNodesClick()">
+        My Nodes
+      </button>
+      
+      <button
+        id="button-my-edge-proposals"
+        class="navbar-button left"
+        v-bind:class="currentView === 'myedges' ? 'active-tab' : ''"
+        v-if="showBuildTools"
+        v-bind:disabled="currentView === 'myedges'"
+        v-on:click="myEdgeProposalsClick()">
+        My Edges
+      </button>
+      
       <button
         id="button-build"
         class="navbar-button right"
         v-on:click="buildClick()">
         {{buildButtonLabel}}
       </button>
-      <button
-        id="button-my-edge-proposals"
-        class="navbar-button right"
-        v-if="showBuildTools"
-        v-on:click="myEdgeProposalsClick()">
-        My Edge Proposals
-      </button>
-      <button
-        id="button-my-nodes"
-        class="navbar-button right"
-        v-if="showBuildTools"
-        v-on:click="myNodesClick()">
-        My Nodes
-      </button>
-      <button
-        id="button-edit-node"
-        class="navbar-button right"
-        v-if="showBuildTools && currentNode !== undefined && currentNode.type === 'draft'"
-        v-on:click="editNodeClick()">
-        Edit Node
-      </button>
-
+      
     </div>
   `,
   components: {
@@ -115,6 +123,9 @@ export default {
     },
     myEdgeProposalsClick: function() {
       this.$emit("myEdgeProposalsClick");
+    },
+    viewNodeClick: function() {
+      this.$emit("viewNodeClick", this.currentNodeKey);
     },
     editNodeClick: function() {
       this.$emit("editNodeClick", this.currentNodeKey);

@@ -4,6 +4,7 @@
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:
     - [ ] Make build mode:
+      - [ ] Fix navbar again, so that it's more of a tab situation than buttons (need to see, but not click, current mode)
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.
@@ -17,9 +18,17 @@
                 - This is a bit hard, given you can edit an already-bound result to be a non-existant edge.
                 - You can't block it from being set, can you?
                 - Well, maybe you can. Would be a little odd, but yeah, let's do that.
+              - [X] Make sure targets are unique
+              - [ ] Remove target sets that are not used? The flow requires them to exist before being bound, though...
+                - Maybe if you switch away from having added a new one, or unbind one, that deletes it?
+                - But then you can go elsewhere in the app and leave it dangling.
+                - Maybe there's a pendingTargetSet which gets created until you make a binding with it, and then gets added to the actual set?
+                - Then definitely remove a target set when you unbind its last binding.
               - [ ] Remove results when you delete a target set that was part of the last binding for that result.
-              - [ ] Make sure targets and results are unique
-              - [X] Figure out how to remove (or not) unbound targetsets and results and edges
+              - [ ] Remove result when you select away from it and it was the last binding pointing to it.
+              - [ ] Make sure results are unique
+                - This is hard... Can't block you from typing a redundant result, or else if you were copying, and then adding to, another one, you'd get stuck.
+                - Maybe that's the best solution though. This should happen rarely.
         - [ ] Give Node a method to export JSON version of the contained iData (plus name/format/formatVersion)
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
         - [ ] Make a button to deploy to blockchain.

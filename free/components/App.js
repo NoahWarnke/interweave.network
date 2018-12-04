@@ -29,10 +29,11 @@ export default {
         v-bind:showBuildTools="showBuildTools"
         v-bind:currentView="currentView"
         v-bind:account="account"
-        v-on:buildClick="buildClick()"
+        v-on:viewNodeClick="viewNodeClick($event)"
+        v-on:editNodeClick="editNodeClick($event)"
         v-on:myNodesClick="myNodesClick()"
         v-on:myEdgeProposalsClick="myEdgeProposalsClick()"
-        v-on:editNodeClick="editNodeClick($event)"
+        v-on:buildClick="buildClick()"
         v-on:edgeClick="edgeStart($event); edgeBoundary();">
       </the-navbar>
       <explore-area
@@ -398,54 +399,57 @@ export default {
           this.currentView = "mynodes";
           await this.updateMyDeployedNodeKeys();
         }
-        else {
-          this.currentView = "explore";
-          // TODO delete ipfs data for currently-paged nodes?
-        }
       }
     },
     /**
      * When a Node in the My Nodes list has its 'view' button clicked.
      * @param nodeKey The key of the Node clicked.
      */
-    myNodesViewClick: async function(nodeKey) {
-      this.setCurrentNode(nodeKey);
-      this.previousNodeKey = undefined;
-      this.nextNodeKey = undefined;
+    myNodesViewClick: function(nodeKey) {
+      
+      if (this.currentNodeKey !== nodeKey) {
+        this.setCurrentNode(nodeKey);
+        this.previousNodeKey = undefined;
+        this.nextNodeKey = undefined;
+      }
+
+      this.currentView = "explore";
+    },
+    viewNodeClick: function(nodeKey) {
+      
+      if (this.currentNodeKey !== nodeKey) {
+        this.setCurrentNode(nodeKey);
+        this.previousNodeKey = undefined;
+        this.nextNodeKey = undefined;
+      }
       this.currentView = "explore";
     },
     /**
      * When a Node (in the My Nodes list or directly) has its 'edit' button clicked.
      * @param nodeKey The key of the Node clicked.
      */
-    editNodeClick: async function(nodeKey) {
-      if (this.currentView !== "editnode") {
+    editNodeClick: function(nodeKey) {
+      
+      if (this.currentNodeKey !== nodeKey) {
         this.setCurrentNode(nodeKey);
         this.previousNodeKey = undefined;
         this.nextNodeKey = undefined;
-        this.currentView = "editnode";
       }
-      else {
-        this.currentView = "explore";
-      }
+      
+      this.currentView = "editnode";
     },
     myEdgeProposalsClick: async function() {
       // TODO
     },
     addNodeClick: async function() {
       
-      if (this.currentView !== "editnode") {
-        
-        // Create a new draft Node, without any content yet.
-        let draftNodeKey = "draft" + (Math.random() * 10E16);
-        this.myDraftNodeKeys.push(draftNodeKey);
-        this.initializeNode(draftNodeKey, "draft");
-        this.setCurrentNode(draftNodeKey);
-        this.currentView = "editnode";
-      }
-      else {
-        this.currentView = "explore";
-      }
+      // Create a new draft Node, without any content yet.
+      let draftNodeKey = "draft" + (Math.random() * 10E16);
+      this.myDraftNodeKeys.push(draftNodeKey);
+      this.initializeNode(draftNodeKey, "draft");
+      this.setCurrentNode(draftNodeKey);
+      this.currentView = "editnode";
+      
     },
     deleteNodeClick: async function() {
       // TODO

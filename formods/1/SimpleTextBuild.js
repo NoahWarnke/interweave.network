@@ -4,7 +4,7 @@ import SimpleTextUtils from './SimpleTextUtils.js';
 export default {
   template: `
     <div id="simple-text-build">
-      <h1>Set up your new SimpleText Node!</h1>
+      <h2>Set up your SimpleText Node</h2>
       
       <div>
         <button v-on:click="setView('description')">Description</button>
@@ -40,7 +40,7 @@ export default {
           <textarea v-model="content.edges[slot].leaveDesc"></textarea>
         </div>
           
-        <div v-if="content.edges[slot] === undefined">
+        <div v-if="slot !== undefined && content.edges[slot] === undefined">
           <p>This slot doesn't have an edge right now.</p>
         </div>
       </div>
