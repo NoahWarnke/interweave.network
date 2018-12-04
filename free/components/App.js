@@ -55,6 +55,7 @@ export default {
       </build-area>
       <list-nodes
         v-if="currentView === 'mynodes'"
+        v-bind:currentNodeKey="currentNodeKey"
         v-bind:myNodeKeys="myNodeKeys"
         v-bind:nodes="nodes"
         v-bind:account="account"

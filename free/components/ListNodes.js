@@ -6,7 +6,8 @@ export default {
           <button v-on:click="viewNode(nodeKey)">View</button>
           <button v-if="nodes[nodeKey].type === 'draft'" v-on:click="editNode(nodeKey)">Edit</button>
           <button v-if="nodes[nodeKey].isOwnedBy(account) || nodes[nodeKey].type === 'draft'" v-on:click="deleteNode(nodeKey)">Delete</button>
-          <span>{{nodeString(nodeKey)}}</span>
+          <span v-bind:class="currentNodeKey === nodeKey ? 'current-node' : ''">{{nodeString(nodeKey)}}</span>
+          <span v-if="nodes[nodeKey].type === 'draft'">(draft)</span>
         </li>
       </ul>
       <button v-on:click="pageLeft()"><</button>
@@ -25,6 +26,7 @@ export default {
     };
   },
   props: {
+    currentNodeKey: String,
     myNodeKeys: Array,
     myDraftNodeKeys: Array,
     nodes: Object,
