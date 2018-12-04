@@ -2,10 +2,10 @@
   padding: 8px;
   padding-bottom: 0px;
   margin: 0px;
-  height: 65px;
+  height: 70px;
   flex: 0 1 auto;
-  background-image: linear-gradient(to bottom, #dddddd, #999999);
-  border-bottom: 2px solid grey;
+  background-image: linear-gradient(to bottom, #dddddd, #777777);
+  border-bottom: 0px;
   text-align: center;
 }
 
@@ -30,7 +30,7 @@
 #navbar .active-tab {
   border-bottom-left-radius: 0px;
   border-bottom-right-radius: 0px;
-  height: 60px;
+  height: 65px;
 }
 
 #navbar #home {
