@@ -6,11 +6,26 @@
   - However, result is currently live-editing, where the moment you start typing, it creates a new result and edits that.
   - This is nice because you don't have to remember to hit 'enter' - node state is always exactly what you see.
   - However, when you type to something not allowed (invalid edge, or duplicate result), this is hard to fix up.
-  - So either have to fix it
+  - So either have to fix it to be non-live again, where hitting enter adds or edits the entry (unless invalid)
+    - This case could be hard to convey the 'saved' versus 'not saved' states of the text area.
+    - That's already the case for the target entry fields, but there it's obvious, because the entered ones aren't fields but just spans.
+    - Can't do that for result - can we?
+    - Maybe having it show as a text area even when not being edited is a mistake.
+    - If it's just a big div with text in it, with no obvious editing, then when the text area is active, it's being edited.
+    - You hit enter, and it goes back to being a div (unless invalid)
+    - Then you have to click again to start editing again.
+    - If it's new, it's an empty text area (maybe with faded 'click to add')
+    - Hmm, this just seems a little complicated though... I really like just editing and that's it, it's saved.
+  - Or, you could switch back to the newResult variable if invalid, and delete the actual Result (so it's go back to (select result) in the dropdown)
+    - Then you'd switch back to an actual result whenever newResult goes to a valid result (just like you do when going from an empty newResult to non-empty)
+    - This actually makes sense. If it's an invalid, non-zero newResult, could also put a red outline around the box, to make clear it's not saved.
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:htt
     - [ ] Make build mode:
+      - [ ] Make the 'delete' button do something
+        - [ ] If it's a draft node with no connections, just delete it, and if it was the current node, go back to the default Node.
+        - [ ] If it's deployed, and has zero edges set, actually call the blockchain delete.
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.

@@ -62,7 +62,7 @@ export default {
         v-on:pagedToTheseNodeKeys="updateNodes($event)"
         v-on:myNodesViewClick="myNodesViewClick($event)"
         v-on:editNodeClick="editNodeClick($event)"
-        v-on:deleteNodeClick="deleteNodeClick()"
+        v-on:deleteNodeClick="deleteNodeClick($event)"
         v-on:addNodeClick="addNodeClick()">
       </list-nodes>
       <modal-info v-if="false"></modal-info>
@@ -90,6 +90,7 @@ export default {
       },
       
       // Navigation
+      initialNodeKey: "4802423149786398712975601635277375780486398097217997509586637249159306333648",
       currentNodeKey: undefined,
       previousNodeKey: undefined,
       nextNodeKey: undefined, // For when an edge transition is in progress.
@@ -145,7 +146,7 @@ export default {
         window.interweave = this.contract;
         
         // Grab starting node data.
-        await this.setCurrentNode("4802423149786398712975601635277375780486398097217997509586637249159306333648");
+        await this.setCurrentNode(this.initialNodeKey);
       }
       catch (error) {
         console.log("App init: " + error);
@@ -166,7 +167,6 @@ export default {
      * @param force Whether to force-update, even if it's already loaded.
      */
     updateNodeBlockchain: async function(nodeKey, force) {
-      
       let node = this.nodes[nodeKey];
       
       if (node === undefined) {
@@ -262,7 +262,6 @@ export default {
     * @param force Whether to force-update if it's already loaded.
     */
     updateNode: async function(nodeKey, force) {
-      
       // Don't update draft Nodes.
       if (this.nodes[nodeKey] !== undefined && this.nodes[nodeKey].type === "draft") {
         return;
@@ -324,6 +323,7 @@ export default {
           return key != 0;
         })
       ;
+      console.log(adjacentNodeKeys);
       promises.push(this.updateNodes(adjacentNodeKeys, false));
       
       await Promise.all(promises);
@@ -448,12 +448,37 @@ export default {
       let draftNodeKey = "draft" + (Math.random() * 10E16);
       this.myDraftNodeKeys.push(draftNodeKey);
       this.initializeNode(draftNodeKey, "draft");
-      //this.setCurrentNode(draftNodeKey);
-      //this.currentView = "editnode";
-      
     },
-    deleteNodeClick: async function() {
-      // TODO
+    deleteNodeClick: async function(nodeKey) {
+      console.log("Deleting " + nodeKey);
+      let node = this.nodes[nodeKey];
+      if (node === undefined) {
+        return;
+      }
+      if (node.type === "deployed") {
+        if (node.bStatus === "successful" && node.bData.edgeNodeKeys.reduce((accumulator, val) => accumulator && val === "0", true)) {
+          console.log("Deployed and deletable.");
+        }
+        else {
+          console.log("Deployed but not deletable.");
+        }
+      }
+      else if (node.type === "draft") {
+        if (node.bStatus === "successful" && node.bData.edgeNodeKeys.reduce((accumulator, val) => accumulator && val === "0", true)) {
+          console.log("Draft and deletable.");
+          if (this.currentNodeKey === nodeKey) {
+            this.setCurrentNode(this.initialNodeKey);
+            this.previousNodeKey = undefined;
+          }
+          // Remove from myNodeKeys
+          this.myDraftNodeKeys.splice(this.myDraftNodeKeys.indexOf(nodeKey), 1);
+          // Delete the entry in nodes
+          this.$set(this.nodes, nodeKey, undefined);
+        }
+        else {
+          console.log("Draft but not deletable.");
+        }
+      }
     }
   },
   created: function() {
