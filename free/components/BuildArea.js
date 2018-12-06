@@ -78,9 +78,6 @@ export default {
   },
   methods: {
     init: function() {
-      if (this.currentNode.iStatus === "init") {
-        this.currentNode.name = "New Node";
-      }
       this.currentFormat = this.currentNode.format;
       if (this.currentFormat !== undefined) {
         this.setBuildSlot();
@@ -123,14 +120,6 @@ export default {
       
       this.currentNode.format = this.currentFormat;
       this.currentNode.formatVersion = this.currentFormod.latestVersion();
-      
-      let fakeBlockchain = {
-        key: this.currentNodeKey,
-        ownerAddr: this.account,
-        ipfs: undefined,
-        edgeNodeKeys: ["0", "0", "0", "0", "0", "0"]
-      };
-      this.currentNode.setBlockchainState("successful", fakeBlockchain, undefined);
       
       let content = this.currentFormod.validateAndImportContent(
         this.currentNode.formatVersion,

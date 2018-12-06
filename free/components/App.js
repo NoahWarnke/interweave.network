@@ -88,6 +88,7 @@ export default {
       formats: {
         "simpletext": new SimpleText()
       },
+      defaultFormat: "simpletext",
       
       // Navigation
       initialNodeKey: "4802423149786398712975601635277375780486398097217997509586637249159306333648",
@@ -323,7 +324,6 @@ export default {
           return key != 0;
         })
       ;
-      console.log(adjacentNodeKeys);
       promises.push(this.updateNodes(adjacentNodeKeys, false));
       
       await Promise.all(promises);
@@ -448,6 +448,29 @@ export default {
       let draftNodeKey = "draft" + (Math.random() * 10E16);
       this.myDraftNodeKeys.push(draftNodeKey);
       this.initializeNode(draftNodeKey, "draft");
+      let newNode = this.nodes[draftNodeKey];
+
+      // Set up fake blockchain data for the draft Node..
+      let fakeBlockchain = {
+        key: this.currentNodeKey,
+        ownerAddr: this.account,
+        ipfs: undefined,
+        edgeNodeKeys: ["0", "0", "0", "0", "0", "0"]
+      };
+      newNode.setBlockchainState("successful", fakeBlockchain, undefined);
+      
+      // Set up its general IPFS data.
+      let defaultFormod = this.formats[this.defaultFormat];
+      newNode.name = "New Node";
+      newNode.format = this.defaultFormat;
+      newNode.formatVersion = defaultFormod.latestVersion();
+      
+      // Now set up its format-specific IPFS data (using default values for that formod).
+      let content = defaultFormod.validateAndImportContent(
+        defaultFormod.latestVersion(),
+        defaultFormod.defaultData()
+      );
+      newNode.setIPFSState("successful", content, undefined);
     },
     deleteNodeClick: async function(nodeKey) {
       console.log("Deleting " + nodeKey);
