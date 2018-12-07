@@ -244,7 +244,7 @@ export default {
         // Delete the current binding before doing anything.
         if (this.resultKey !== undefined) {
           this.deleteAllBindingsWithTargetSetKey(this.targetSetKey);
-          // TODO delete all newly-unused results.
+          this.deleteAllUnusedResults();
           this.resultKey = undefined;
         }
         
@@ -266,6 +266,28 @@ export default {
       
       await Vue.nextTick();
       this.$refs.existingresulttextarea.focus();
+    },
+    deleteAllUnusedResults: function() {
+      let resultKeysUsed = Object
+        .keys(this.content.results)
+        .reduce(
+          (acc, el) => {
+            acc[el] = false;
+            return acc;
+          },
+          {}
+        )
+      ;
+      for (let verbKey of Object.keys(this.content.bindings)) {
+        for (let targetSetKey of Object.keys(this.content.bindings[verbKey])) {
+          resultKeysUsed[this.content.bindings[verbKey][targetSetKey]] = true;
+        }
+      }
+      for (let resultKey of Object.keys(resultKeysUsed)) {
+        if (!resultKeysUsed[resultKey]) {
+          delete this.content.results[resultKey];
+        }
+      }
     },
     verbTargetHasBinding: function(targetKey) {
       if (this.verbKey === undefined) {

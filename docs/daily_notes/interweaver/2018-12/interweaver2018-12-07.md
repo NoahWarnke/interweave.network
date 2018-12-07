@@ -1,12 +1,4 @@
-# Interweaver's to-do items, 2018-12-04:
-
-- Thoughts about SimpleBuild flow
-  - So currently targetsets and targets are enter-to-add, where you're typing into a temp variable until hitting enter.
-  - When you do that, it does the checks to make sure it's not duplicate, and if not, adds it.
-  - However, result is currently live-editing, where the moment you start typing, it creates a new result and edits that.
-  - This is nice because you don't have to remember to hit 'enter' - node state is always exactly what you see.
-  - However, when you type to something not allowed (invalid edge, or duplicate result), this is hard to fix up.
-  - So either have to fix it
+# Interweaver's to-do items, 2018-12-07:
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:htt
@@ -15,16 +7,15 @@
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.
             - [ ] Consistency preservation:
-              - [ ] Remove target sets that are not used? The flow requires them to exist before being bound, though...
-                - Maybe if you switch away from having added a new one, or unbind one, that deletes it?
-                - But then you can go elsewhere in the app and leave it dangling.
-                - Maybe there's a pendingTargetSet which gets created until you make a binding with it, and then gets added to the actual set?
-                - Then definitely remove a target set when you unbind its last binding.
-              - [ ] Remove results when you delete a target set that was part of the last binding for that result.
+              - [X] Remove results when you delete a target set that was part of the last binding for that result.
               - [ ] Remove result when you select away from it and it was the last binding pointing to it.
-              - [ ] Make sure results are unique
-                - This is hard... Can't block you from typing a redundant result, or else if you were copying, and then adding to, another one, you'd get stuck.
-                - Maybe that's the best solution though. This should happen rarely.
+              - [ ] Make sure actual results are always valid.
+                - [ ] Make a function that checks the validity of a given result string (not empty, not invalid edge, not existing result)
+                - [ ] Whenever newResult changes, use this function to check if it's valid.
+                - [ ] If it is, and no current result, then create an actual result and create the binding, and empty newResult.
+                - [ ] If it isn't, and current result, then delete the binding, set newResult to the result value, and delete the result if nowhere else uses it.
+                - [ ] If nonzero and invalid, display red outline around result area.
+                
         - [ ] Give Node a method to export JSON version of the contained iData (plus name/format/formatVersion)
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
         - [ ] Make a button to deploy to blockchain.

@@ -1,4 +1,4 @@
-# Interweaver's to-do items, 2018-12-03:
+# Interweaver's to-do items, 2018-12-06:
 
 - Thoughts about SimpleBuild flow
   - So currently targetsets and targets are enter-to-add, where you're typing into a temp variable until hitting enter.
@@ -23,8 +23,8 @@
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:htt
     - [ ] Make build mode:
-      - [ ] Make the 'delete' button do something
-        - [ ] If it's deployed, and has zero edges set, actually call the blockchain delete.
+      - [X] Make the 'delete' button do something
+        - [X] If it's deployed, and has zero edges set, actually call the blockchain delete.
       - [ ] Add 'draft' Nodes
         - [ ] Make SimpleTextBuild work.
           - [ ] Make all the properties addable/removable/editable.

@@ -1,4 +1,4 @@
-# Interweaver's to-do items, 2018-12-03:
+# Interweaver's to-do items, 2018-12-05:
 
 - Thoughts about SimpleBuild flow
   - So currently targetsets and targets are enter-to-add, where you're typing into a temp variable until hitting enter.
