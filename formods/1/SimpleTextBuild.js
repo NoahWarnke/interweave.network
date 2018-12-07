@@ -423,6 +423,7 @@ export default {
         // Unbind if you set a result key back to undefined.
         if (this.verbKey !== undefined && this.targetSetKey !== undefined) {
           this.deleteSpecificBinding(this.verbKey, this.targetSetKey, oldResultKey);
+          this.deleteAllUnusedResults();
         }
       }
     },
