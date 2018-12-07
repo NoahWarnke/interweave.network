@@ -479,8 +479,13 @@ export default {
         return;
       }
       if (node.type === "deployed") {
-        if (node.bStatus === "successful" && node.bData.edgeNodeKeys.reduce((accumulator, val) => accumulator && val === "0", true)) {
+        if (
+          node.bStatus === "successful"
+          && node.bData.edgeNodeKeys.reduce((accumulator, val) => accumulator && val === "0", true)
+          && this.account !== undefined
+        ) {
           console.log("Deployed and deletable.");
+          this.contract.deleteNode(nodeKey, this.account);
         }
         else {
           console.log("Deployed but not deletable.");

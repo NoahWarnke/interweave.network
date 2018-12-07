@@ -15,7 +15,7 @@ export default {
         </div>
         <div class="node-box add">
           <div class="title add">
-            Add New Node
+            (Add New Node)
           </div>
           <div class="contents">
             <button class="add-node-button" v-on:click="addNode">+</button>

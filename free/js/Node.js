@@ -174,6 +174,6 @@ export default class Node {
   }
   
   isOwnedBy(addr) {
-    if (this._bData !== undefined && this._bData.ownerAddr === addr);
+    return (this._bData !== undefined && this._bData.ownerAddr.toLowerCase() === addr.toLowerCase());
   }
 }
