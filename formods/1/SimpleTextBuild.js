@@ -84,12 +84,12 @@ export default {
             v-model="resultKey"
             v-if="targetSetKey !== undefined"
             class="tag"
-            v-bind:class="resultClass(content.results[resultKey])">
+            v-bind:class="resultTagClass(content.results[resultKey])">
             <option v-bind:value="undefined" class="result-tag">(Select result)</option>
             <option
               v-for="(result, rKey) of content.results"
               v-bind:value="rKey"
-              v-bind:class="resultClass(result)">
+              v-bind:class="resultTagClass(result)">
               {{shorten(result)}}
             </option>
           </select>
@@ -100,21 +100,12 @@ export default {
         
           <!-- For adding a new result's first character (will create a new result when you do). -->
           <textarea
-            v-if="resultKey === undefined"
-            v-bind:class="resultClass(newResult)"
+            v-bind:class="resultTagClass(newResult) + ' ' + resultInvalidClass()"
             placeholder="Add a new result"
             v-model="newResult"
             v-on:keypress.stop.prevent.enter>
           </textarea>
           
-          <!-- For editing an existing result. -->
-          <textarea
-            ref="existingresulttextarea"
-            v-if="resultKey !== undefined"
-            v-bind:class="resultClass(content.results[resultKey])"
-            v-model="content.results[resultKey]"
-            v-on:keypress.stop.prevent.enter>
-          </textarea>
         </p>
         
         <p v-if="verbKey !== undefined">
@@ -155,8 +146,30 @@ export default {
       newResult: "",
       view: "description",
       slot: undefined,
-      slots: [0, 1, 2, 3, 4, 5],
-      oldEditingResult: undefined
+      slots: [0, 1, 2, 3, 4, 5]
+    }
+  },
+  computed: {
+    newResultInvalid: function() {
+      if (this.newResult === undefined || this.newResult === "") {
+        console.log("result undefined or empty, so forbidden...");
+        return true;
+      }
+      if (this.newResult.indexOf("edge") === 0 && this.newResult.length === 5) {
+        let num = parseInt(this.newResult.substr(4, 5));
+        if (num >= 0 && num < 6 && this.content.edges[num] === undefined) {
+          return true;
+        }
+      }
+      for (let resultKey of Object.keys(this.content.results)) {
+        if (resultKey != this.resultKey && this.content.results[resultKey] === this.newResult) {
+          console.log(resultKey + " versus " + this.resultKey);
+          console.log("result is different result, so forbidden.");
+          return true;
+        }
+      }
+      console.log("result passes...");
+      return false;
     }
   },
   methods: {
@@ -252,6 +265,7 @@ export default {
         this.targetSetKey = undefined;
       }
     },
+    /*
     addResult: async function() {
       if (this.newResult === "") {
         return;
@@ -267,6 +281,7 @@ export default {
       await Vue.nextTick();
       this.$refs.existingresulttextarea.focus();
     },
+    */
     deleteAllUnusedResults: function() {
       let resultKeysUsed = Object
         .keys(this.content.results)
@@ -368,25 +383,20 @@ export default {
         : result.substr(0, 32) + "..."
       );
     },
-    resultClass: function(result) {
+    resultTagClass: function(result) {
       if (result !== undefined && result.indexOf("edge") === 0 && result.length === 5) {
         let num = parseInt(result.substr(4, 5));
         if (num >= 0 && num < 6) {
-          return 'edge-tag';
+          classes = "edge-tag";
         }
       }
-      return 'result-tag';
+      return "result-tag";
     },
-    isForbiddenEdge: function(str) {
-      if (str !== undefined && str.indexOf("edge") === 0 && str.length === 5) {
-        let num = parseInt(str.substr(4, 5));
-        if (num >= 0 && num < 6) {
-          if (this.content.edges[num] === undefined) {
-            return true;
-          }
-        }
-      }
-      return false;
+    resultInvalidClass: function() {
+      return (this.newResult !== "" && this.newResultInvalid)
+        ? "invalid-result"
+        : ""
+      ;
     }
   },
   watch: {
@@ -397,36 +407,114 @@ export default {
     },
     targetSetKey: function(val, oldVal) {
       // Set the resultKey to whatever the binding is, if there is one, or undefined otherwise.
-      this.resultKey = undefined;
       if ( this.verbKey !== undefined
         && this.targetSetKey !== undefined
         && this.content.bindings[this.verbKey] !== undefined
       ) {
         this.resultKey = this.content.bindings[this.verbKey][this.targetSetKey];
+        this.newResult = this.content.results[this.resultKey];
+      }
+      else {
+        this.resultKey = undefined;
+        this.newResult = "";
       }
     },
     newResult: function(newResult, oldNewResult) {
+      console.log("newResult changed...");
+      if (this.newResultInvalid) {
+        console.log("newResult forbidden.");
+        if (this.resultKey !== undefined) {
+          console.log("Setting resultKey undefined.");
+          // We went from valid result to invalid.
+          
+          // If newResult being empty is the cause of the invalidity, delete all bindings using the result, and then any unused results (the result).
+          if (newResult === "") {
+            this.deleteAllBindingsWithResultKey(this.resultKey);
+            this.deleteAllUnusedResults();
+          }
+          
+          // resultKey is now
+          this.resultKey = undefined;
+          
+          // Note, the resultKey watcher will delete the current binding, and the result too if it was not used elsewhere.
+        }
+      }
+      else {
+        console.log("newResult valid.");
+        if (this.resultKey === undefined) {
+          console.log("New result needed.");
+          let existingResultKey = undefined;
+          for (let resultKeyToCheck of Object.keys(this.content.results)) {
+            if (this.content.results[resultKeyToCheck] === newResult) {
+              existingResultKey = resultKeyToCheck;
+            }
+          }
+          if (existingResultKey !== undefined) {
+            // Went from invalid result to a valid, existing one, so start using the existing one.
+            this.resultKey = existingResultKey;
+            console.log("(existing result found)");
+          }
+          else {
+            console.log("(creating new result)");
+            // New valid result, so create it, and then use it.
+            this.resultKey = Object.keys(this.content.results).length;
+            while (this.content.results[this.resultKey] !== undefined) {
+              this.resultKey--; // If our new resultKey is already in use, decrement until we find the 'hole' left where another one must have been deleted.
+            }
+            this.$set(this.content.results, this.resultKey, newResult);
+          }
+          
+          // Note, the resultKey watcher will call saveBinding.
+        }
+        else {
+          // An updated valid result value, so just update the current result.
+          console.log("Updating existing result.");
+          this.content.results[this.resultKey] = newResult;
+        }
+      }
+      
+      
       // Add results immediately.
+      /*
       if (newResult !== undefined && newResult !== "") {
         this.addResult();
       }
+      */
     },
     resultKey: function(resultKey, oldResultKey) {
+      console.log("resultKey watcher...");
       if (resultKey !== undefined) {
         // Save result as old result in case it gets edited to an invalid state.
-        this.oldEditingResult = this.content.results[resultKey];
+        //this.oldEditingResult = this.content.results[resultKey];
+        
+        // This is sometimes redundant, but if resultKey got changed on its own via the select, need to update newResult.
+        this.newResult = this.content.results[resultKey];
         
         // Update the binding (the function will not do anything if a binding can't be saved.)
+        console.log("Saving new binding.");
         this.saveBinding();
       }
       else if (oldResultKey !== undefined) {
+        
         // Unbind if you set a result key back to undefined.
         if (this.verbKey !== undefined && this.targetSetKey !== undefined) {
+          console.log("Deleting old binding and possibly result.");
           this.deleteSpecificBinding(this.verbKey, this.targetSetKey, oldResultKey);
           this.deleteAllUnusedResults();
         }
+        
+        // If the old result isn't forbidden, this must be a user-selected 'undefined' result, so set newResult to empty.
+        console.log(this.content.results[oldResultKey]);
+        if (!this.newResultInvalid) {
+          this.newResult = "";
+          console.log("Old result wasn't forbidden, so set new to undefined.")
+        }
+        else {
+          console.log("old result was forbidden, so leave alone (we're temporarily changing things around.)");
+        }
       }
     },
+    /*
     content: {
       immediate: true,
       deep: true,
@@ -434,7 +522,7 @@ export default {
         if (this.resultKey !== undefined) {
           
           // Prevent forbidden inputs ('edge0', for example, when there is no edge 0).
-          if (this.isForbiddenEdge(content.results[this.resultKey])) {
+          if (this.isForbiddenResult(content.results[this.resultKey])) {
             content.results[this.resultKey] = this.oldEditingResult; // Note, we have 'oldEditingResult' because there's no way to know the old result value.
           }
           else {
@@ -452,5 +540,6 @@ export default {
         }
       }
     }
+    */
   }
 }

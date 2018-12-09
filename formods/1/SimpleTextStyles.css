@@ -80,6 +80,10 @@
   border: 1px solid blue;
 }
 
+#simple-text-build .invalid-result {
+  border: 3px solid red;
+}
+
 #simple-text-build .edge-tag {
   background-color: #ff88ff;
   border: 1px solid purple;
