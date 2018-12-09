@@ -144,6 +144,7 @@ export default {
       newTarget: "",
       resultKey: undefined,
       newResult: "",
+      leaveNewResult: false, // To disambiguate between when user selects an undefined resultKey and when they type an invalid result and it gets set undefined.
       view: "description",
       slot: undefined,
       slots: [0, 1, 2, 3, 4, 5]
@@ -433,7 +434,8 @@ export default {
             this.deleteAllUnusedResults();
           }
           
-          // resultKey is now
+          // resultKey is now undefined, but we don't want newResult to get set to empty in the resultKey watcher.
+          this.leaveNewResult = true;
           this.resultKey = undefined;
           
           // Note, the resultKey watcher will delete the current binding, and the result too if it was not used elsewhere.
@@ -503,14 +505,11 @@ export default {
           this.deleteAllUnusedResults();
         }
         
-        // If the old result isn't forbidden, this must be a user-selected 'undefined' result, so set newResult to empty.
-        console.log(this.content.results[oldResultKey]);
-        if (!this.newResultInvalid) {
-          this.newResult = "";
-          console.log("Old result wasn't forbidden, so set new to undefined.")
+        if (this.leaveNewResult) {
+          this.leaveNewResult = false;
         }
         else {
-          console.log("old result was forbidden, so leave alone (we're temporarily changing things around.)");
+          this.newResult = "";
         }
       }
     },
