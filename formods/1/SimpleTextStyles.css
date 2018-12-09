@@ -81,7 +81,7 @@
 }
 
 #simple-text-build .invalid-result {
-  border: 3px solid red;
+  border: 3px solid red !important;
 }
 
 #simple-text-build .edge-tag {

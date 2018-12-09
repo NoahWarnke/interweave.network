@@ -30,7 +30,7 @@ export default {
           </option>
         </select>
         
-        <button v-if="slot !== undefined && content.edges[slot] !== undefined" v-on:click="deleteEdge(slot)">Delete edge</button>
+        <button v-if="slot !== undefined && canDeleteEdge(slot)" v-on:click="deleteEdge(slot)">Delete edge</button>
         <button v-if="slot !== undefined && content.edges[slot] === undefined" v-on:click="addEdge(slot)">Add edge</button>
         
         <div v-if="slot !== undefined && content.edges[slot] !== undefined">
@@ -188,10 +188,27 @@ export default {
         leaveDesc: "You leave."
       });
     },
+    /**
+     * Check if you can delete the given edge.
+     * You can't if it isn't already set, or if it's used as any result.
+     */
+    canDeleteEdge: function(slot) {
+      if (this.content.edges[slot] === undefined) {
+        return false;
+      }
+      for (let resultKey in Object.keys(this.content.results)) {
+        if (this.content.results[resultKey] == "edge" + slot) {
+          return false;
+        }
+      }
+      return true;
+    },
     deleteEdge: function() {
-      if (this.slot === undefined || this.content.edges[this.slot] === undefined) {
+      // Make sure it's deleteable.
+      if (this.slot === undefined || !this.canDeleteEdge(this.slot)) {
         return;
       }
+
       this.$delete(this.content.edges, this.slot);
     },
     verbsFromKey: function(verbKey) {
@@ -266,23 +283,6 @@ export default {
         this.targetSetKey = undefined;
       }
     },
-    /*
-    addResult: async function() {
-      if (this.newResult === "") {
-        return;
-      }
-      let newResultKey = Object.keys(this.content.results).length;
-      // TODO verify it's unique
-      this.$set(this.content.results, newResultKey, this.newResult);
-      this.newResult = "";
-      this.resultKey = newResultKey; // Also select it.
-      
-      this.saveBinding(); // Also save it.
-      
-      await Vue.nextTick();
-      this.$refs.existingresulttextarea.focus();
-    },
-    */
     deleteAllUnusedResults: function() {
       let resultKeysUsed = Object
         .keys(this.content.results)
@@ -388,7 +388,7 @@ export default {
       if (result !== undefined && result.indexOf("edge") === 0 && result.length === 5) {
         let num = parseInt(result.substr(4, 5));
         if (num >= 0 && num < 6) {
-          classes = "edge-tag";
+          return "edge-tag";
         }
       }
       return "result-tag";
@@ -411,6 +411,7 @@ export default {
       if ( this.verbKey !== undefined
         && this.targetSetKey !== undefined
         && this.content.bindings[this.verbKey] !== undefined
+        && this.content.bindings[this.verbKey][this.targetSetKey] !== undefined
       ) {
         this.resultKey = this.content.bindings[this.verbKey][this.targetSetKey];
         this.newResult = this.content.results[this.resultKey];
@@ -434,11 +435,12 @@ export default {
             this.deleteAllUnusedResults();
           }
           
-          // resultKey is now undefined, but we don't want newResult to get set to empty in the resultKey watcher.
+          // Set leaveNewResult to true because we don't want newResult to get set to "" in the resultKey watcher.
           this.leaveNewResult = true;
+          
           this.resultKey = undefined;
           
-          // Note, the resultKey watcher will delete the current binding, and the result too if it was not used elsewhere.
+          // Note, the resultKey watcher will now delete the current binding, and the result too if it was not used elsewhere.
         }
       }
       else {
@@ -474,37 +476,36 @@ export default {
           this.content.results[this.resultKey] = newResult;
         }
       }
-      
-      
-      // Add results immediately.
-      /*
-      if (newResult !== undefined && newResult !== "") {
-        this.addResult();
-      }
-      */
     },
+    /**
+     * Watch resultKey for changes.
+     * Usually this will be the user selecting a result in the bindings results dropdown.
+     * Sometimes it will be the user entering an invalid result (nonexistant edge or duplicate result),
+     * and the resultKey getting set to undefined or defined in the newResult watcher.
+     */
     resultKey: function(resultKey, oldResultKey) {
-      console.log("resultKey watcher...");
-      if (resultKey !== undefined) {
-        // Save result as old result in case it gets edited to an invalid state.
-        //this.oldEditingResult = this.content.results[resultKey];
-        
-        // This is sometimes redundant, but if resultKey got changed on its own via the select, need to update newResult.
-        this.newResult = this.content.results[resultKey];
-        
-        // Update the binding (the function will not do anything if a binding can't be saved.)
-        console.log("Saving new binding.");
-        this.saveBinding();
-      }
-      else if (oldResultKey !== undefined) {
-        
-        // Unbind if you set a result key back to undefined.
+      
+      // Get rid of the old binding if there was a previous result key.
+      if (oldResultKey !== undefined) {
         if (this.verbKey !== undefined && this.targetSetKey !== undefined) {
-          console.log("Deleting old binding and possibly result.");
           this.deleteSpecificBinding(this.verbKey, this.targetSetKey, oldResultKey);
           this.deleteAllUnusedResults();
         }
+      }
+      
+      // Update newResult (and possibly make a new binding).
+      if (resultKey !== undefined) {
         
+        // This is sometimes redundant, but that's fine.
+        this.newResult = this.content.results[resultKey];
+        
+        // We have a new result selected, so save the new binding.
+        // Should never be able to change resultKey if verbKey and targetSetKey are not set, but if they aren't, saveBinding does nothing.
+        this.saveBinding();
+      }
+      else {
+        // If the user selected resultKey to be undefined (the "(select result)" option), empty newResult.
+        // If resultKey is undefined because newResult is an invalid value (and hence leaveNewResult is true), don't do anything.
         if (this.leaveNewResult) {
           this.leaveNewResult = false;
         }
@@ -512,33 +513,6 @@ export default {
           this.newResult = "";
         }
       }
-    },
-    /*
-    content: {
-      immediate: true,
-      deep: true,
-      handler: function(content, oldContent) {
-        if (this.resultKey !== undefined) {
-          
-          // Prevent forbidden inputs ('edge0', for example, when there is no edge 0).
-          if (this.isForbiddenResult(content.results[this.resultKey])) {
-            content.results[this.resultKey] = this.oldEditingResult; // Note, we have 'oldEditingResult' because there's no way to know the old result value.
-          }
-          else {
-            this.oldEditingResult = content.results[this.resultKey];
-          }
-          
-          // Also, notice if the result went empty and delete the result/binding if so.
-          if (content.results[this.resultKey] === "") {
-            delete content.results[this.resultKey];
-            this.deleteAllBindingsWithResultKey(this.resultKey);
-            
-            // Unset the result key, but leave verbKey and targetSetKey behind.
-            this.resultKey = undefined;
-          }
-        }
-      }
     }
-    */
   }
 }
