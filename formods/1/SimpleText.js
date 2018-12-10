@@ -36,11 +36,44 @@ export default class SimpleText {
     throw new Error("Invalid SimpleText version number (" + version + ")");
   }
   
-  /** Export the given SimpleText content to json. */
-  exportContentToJson(version, content) {
+  /** Export the given SimpleText content to an object appropriate for conversion to json. */
+  exportContent(version, content) {
     
     if (version === 1) {
-      return JSON.stringify({"test": "muffin"});
+      let res = {
+        shortDesc: content.shortDesc,
+        edges: {},
+        targets: {},
+        results: {},
+        bindings: {}
+      };
+      
+      for (let edgeKey in content.edges) {
+        res.edges[edgeKey] = {
+          enterDesc: content.edges[edgeKey].enterDesc,
+          leaveDesc: content.edges[edgeKey].leaveDesc
+        };
+      }
+      
+      for (let targetSetKey in content.targets) {
+        res.targets[targetSetKey] = [];
+        for (let targetKey in content.targets[targetSetKey]) {
+          res.targets[targetSetKey][targetKey] = content.targets[targetSetKey][targetKey];
+        }
+      }
+      
+      for (let resultKey in content.results) {
+        res.results[resultKey] = content.results[resultKey];
+      }
+      
+      for (let verbKey in content.bindings) {
+        res.bindings[verbKey] = {};
+        for (let targetSetKey in content.bindings[verbKey]) {
+          res.bindings[verbKey][targetSetKey] = content.bindings[verbKey][targetSetKey];
+        }
+      }
+      
+      return res;
     }
     throw new Error("Invalid SimpleText version number (" + version + ")");
   }

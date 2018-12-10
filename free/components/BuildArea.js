@@ -27,9 +27,10 @@ export default {
       </div>
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
         <h2>Deploy your Node's content to IPFS</h2>
-        <p>This functionality is not done yet.</p>
-        <textarea v-bind="nodeExportedJson"></textarea>
-        <button>Do it!</button>
+        <p>Copy the below JSON code and save it as a file. Then upload it to IPFS, and copy the IPFS hash that results.</p>
+        <textarea class="json-output-textarea" readonly v-bind:value="nodeExportedJson"></textarea>
+        <p>Now paste the IPFS hash here!</p>
+        <input size=60 v-model="ipfsInput"></input>
       </div>
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
         <h2>Deploy your Node to the Ethereum blockchain</h2>
@@ -53,6 +54,7 @@ export default {
       currentStep: "formatandname",
       currentFormat: undefined,
       buildRenderer: undefined,
+      ipfsInput: ""
     }
   },
   computed: {
@@ -63,7 +65,18 @@ export default {
       if (this.currentFormod === undefined) {
         return "Error";
       }
-      return (this.currentFormod.exportContentToJson(this.currentNode.formatVersion, this.currentNode.iData.content));
+      console.log(this.currentNode);
+      let contentExport = this.currentFormod.exportContent(
+        this.currentNode.formatVersion,
+        this.currentNode.iData
+      );
+      console.log(contentExport);
+      return JSON.stringify({
+        name: this.currentNode.name,
+        format: this.currentNode.format,
+        formatVersion: this.currentNode.formatVersion,
+        content: contentExport
+      }, null, 2);
     },
     currentFormod: function() {
       return this.formats[this.currentFormat];
@@ -71,6 +84,9 @@ export default {
     canClickNext: function() {
       if (this.currentStep === "deployblockchain") {
         return false;
+      }
+      if (this.currentStep === "deployipfs") {
+        return (this.currentNode.bStatus === "successful" && this.currentNode.bData.ipfs !== undefined);
       }
       if (this.currentStep === "formatandname") {
         return (this.currentFormod !== undefined);
@@ -202,6 +218,11 @@ export default {
           this.setNewFormod();
           this.currentNode.formatVersion = this.currentFormod.latestVersion();
         }
+      }
+    },
+    ipfsInput: function(ipfsInput, oldIpfsInput) {
+      if (this.currentNode.type === "draft") {
+        this.currentNode.bData.ipfs = (ipfsInput !== "" ? ipfsInput : undefined);
       }
     }
   },

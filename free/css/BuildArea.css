@@ -21,3 +21,9 @@
   right: 0;
   bottom: 0;
 }
+
+#build .json-output-textarea {
+  resize: none;
+  width: 100%;
+  height: 300;
+}
