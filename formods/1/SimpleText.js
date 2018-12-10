@@ -36,6 +36,15 @@ export default class SimpleText {
     throw new Error("Invalid SimpleText version number (" + version + ")");
   }
   
+  /** Export the given SimpleText content to json. */
+  exportContentToJson(version, content) {
+    
+    if (version === 1) {
+      return JSON.stringify({"test": "muffin"});
+    }
+    throw new Error("Invalid SimpleText version number (" + version + ")");
+  }
+  
   /** Return the name (for the build mode dropdown) of this format module. */
   name() {
     return "SimpleText";

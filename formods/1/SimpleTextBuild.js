@@ -47,7 +47,7 @@ export default {
       
       <div v-if="view === 'bindings'">
       
-        <p>Create or edit verb-target-result bindings.</p>
+        <p>Create or edit verb-target-result bindings. To bind to an edge, put 'edge0' (for example) as the result.</p>
         
         <p>
         
@@ -103,7 +103,7 @@ export default {
             v-bind:class="resultTagClass(newResult) + ' ' + resultInvalidClass()"
             placeholder="Add a new result"
             v-model="newResult"
-            v-on:keypress.stop.prevent.enter>
+            v-on:keypress.stop.prevent.enter="restartBindingProcess()">
           </textarea>
           
         </p>
@@ -314,7 +314,7 @@ export default {
       }
       return (this.content.bindings[this.verbKey][targetKey] !== undefined);
     },
-    restartBindingProcess: function() {
+    restartBindingProcess: async function() {
       this.verbKey = undefined;
       this.targetSetKey = undefined;
       this.resultKey = undefined;

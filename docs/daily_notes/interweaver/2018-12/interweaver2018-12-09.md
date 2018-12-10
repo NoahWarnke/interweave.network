@@ -1,35 +1,14 @@
-# Interweaver's to-do items, 2018-12-08:
+# Interweaver's to-do items, 2018-12-09:
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp:htt
     - [ ] Make build mode:
       - [ ] Add 'draft' Nodes
-        - [X] Make SimpleTextBuild work.
-          - [X] Make all the properties addable/removable/editable.
-            - [X] Consistency preservation:
-              - [X] Make sure actual results are always valid.
-                - New invariant:
-                  - newResult is always bound to the textarea.
-                  - It may contain valid or invalid result values.
-                  - If it is invalid, then there is no current binding or actual result
-                    - If there were any previously when it goes invalid, the binding gets deleted, and the result as well, if it was the last binding.
-                  - If it is valid, then there is also a corresponding binding and result.
-                    - if going from invalid to valid, resultKey will be currently undefined...
-                    - check first to see if the newly valid result already exists, and if so, use its key rather than creating a new result.
-                    - if resultKey is not undefined, then it's an update to an existing result, so just change the result value.
-                - [X] Make a function that checks the validity of a given result string (not empty, not invalid edge, not existing result)
-                - [X] Make there only be one result entry box, bound to newResult (not one bound to the actual value)
-                - [X] Whenever newResult changes, use this function to check if it's valid.
-                - [X] If it is,
-                  - [X] if resultKey is undefined, then check for existing results with the same value as the new newResult...
-                    - [X] if none exist, create a new result and create the binding.
-                    - [X] If one exists, set resultKey to that key, and create the binding.
-                  - [X] If resultKey is defined, then just update the existing result.
-                - [X] If it isn't,
-                  - [X] If resultKey is defined, then delete the current binding, and if no more bindings for that result, delete it as well.
-                  - [X] If newResult not "", display red outline around result area.
-                - [X] Whenever targetSetKey changes, set newResult to either the existing bound result, or "" if none.
         - [ ] Give Node a method to export JSON version of the contained iData (plus name/format/formatVersion)
+          - [X] Create method in SimpleText.js (takes Node content and version, validates it, and then outputs json)
+          - [ ] Add a text area in the appropriate BuildArea
+          - [ ] Make computed value in BuildArea that is the current Node converted to json using above function plus general Node stuff.
+          - [ ] Make the SimpleText function work.
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
         - [ ] Make a button to deploy to blockchain.
           - [ ] Actually add the new Node

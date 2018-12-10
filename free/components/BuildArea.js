@@ -28,6 +28,7 @@ export default {
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
         <h2>Deploy your Node's content to IPFS</h2>
         <p>This functionality is not done yet.</p>
+        <textarea v-bind="nodeExportedJson"></textarea>
         <button>Do it!</button>
       </div>
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
@@ -57,6 +58,12 @@ export default {
   computed: {
     currentNode: function() {
       return this.nodes[this.currentNodeKey];
+    },
+    nodeExportedJson: function() {
+      if (this.currentFormod === undefined) {
+        return "Error";
+      }
+      return (this.currentFormod.exportContentToJson(this.currentNode.formatVersion, this.currentNode.iData.content));
     },
     currentFormod: function() {
       return this.formats[this.currentFormat];
