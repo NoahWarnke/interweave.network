@@ -4,11 +4,11 @@
   - [ ] Create functional DApp:htt
     - [ ] Make build mode:
       - [ ] Add 'draft' Nodes
-        - [X] Give Node a method to export JSON version of the contained iData (plus name/format/formatVersion)
-          - [X] Create method in SimpleText.js (takes Node content and version, validates it, and then outputs json)
-          - [X] Add a text area in the appropriate BuildArea
-          - [X] Make computed value in BuildArea that is the current Node converted to json using above function plus general Node stuff.
-          - [X] Make the SimpleText function work.
+        - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
+          - Looks like file does need to exist locally.
+          - [X] Make 'download file' button instead of textarea.
+          - [ ] Check for existance of IPFS daemon via API
+          - [ ] Create deploy to IPFS button if it exists (with alternate ipfs input field)
         - [ ] Make a button to deploy to blockchain.
           - [ ] Actually add the new Node
           - [ ] move the Node data from draftIpfsData to ipfsData,
@@ -16,7 +16,7 @@
           - [ ] add real one to myNodeKeys
           - [ ] add blockchain data to nodes
           - [ ] Hunt down all instances of the fake node key in myDraftEdgeProposalKeys and replace with the real one.
-        - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
+
       - [ ] My Edge Proposals
         - [ ] Create an app mode for myedgeproposals
         - [ ] Create a test EdgeProposal or two.

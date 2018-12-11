@@ -28,7 +28,8 @@ export default {
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
         <h2>Deploy your Node's content to IPFS</h2>
         <p>Copy the below JSON code and save it as a file. Then upload it to IPFS, and copy the IPFS hash that results.</p>
-        <textarea class="json-output-textarea" readonly v-bind:value="nodeExportedJson"></textarea>
+        <a v-bind:href="ipfsDataUrl" v-bind:download="currentNode.name + '.json'" class="button download-button">Download Node JSON File</a>
+        <!--<textarea class="json-output-textarea" readonly v-bind:value="nodeExportedJson"></textarea>-->
         <p>Now paste the IPFS hash here!</p>
         <input size=60 v-model="ipfsInput"></input>
       </div>
@@ -38,8 +39,8 @@ export default {
         <button>Do it!</button>
       </div>
       <div id="next-prev-buttons">
-        <button v-if="canClickPrev" v-on:click="clickPrev()" class="prev-next previous-button">< Previous</button>
-        <button v-if="canClickNext" v-on:click="clickNext()" class="prev-next next-button">Next ></button>
+        <button v-if="canClickPrev" v-on:click="clickPrev()" class="button previous-button">< Previous</button>
+        <button v-if="canClickNext" v-on:click="clickNext()" class="button next-button">Next ></button>
       </div>
     </div>
   `,
@@ -65,18 +66,19 @@ export default {
       if (this.currentFormod === undefined) {
         return "Error";
       }
-      console.log(this.currentNode);
       let contentExport = this.currentFormod.exportContent(
         this.currentNode.formatVersion,
         this.currentNode.iData
       );
-      console.log(contentExport);
       return JSON.stringify({
         name: this.currentNode.name,
         format: this.currentNode.format,
         formatVersion: this.currentNode.formatVersion,
         content: contentExport
       }, null, 2);
+    },
+    ipfsDataUrl: function() {
+      return "data:text/plain;charset=utf-8," + encodeURIComponent(this.nodeExportedJson);
     },
     currentFormod: function() {
       return this.formats[this.currentFormat];
