@@ -1,3 +1,5 @@
+import Utils from "./Utils.js";
+
 /** A class that handles interaction with IPFS. */
 export default class IpfsHandler {
   
@@ -7,7 +9,9 @@ export default class IpfsHandler {
   constructor() {
     
     this.ipfsAddress = "https://ipfs.io/ipfs/";
+    this.nodePort = 5001; // TODO: make changeable by user.
     this.nodePresent = false;
+    this.nodeErorr = undefined;
     this.nodeVersion = undefined;
     
     this.listeners = {};
@@ -17,6 +21,7 @@ export default class IpfsHandler {
    * Initialize this IpfsHandler. Checks if the IPFS node is available, and then starts polling to update that regularly.
    */
   async initialize() {
+    console.log("Ipfs handler init!");
     await this.update();
     
     setInterval(() => {
@@ -60,8 +65,9 @@ export default class IpfsHandler {
     }
     
     let varToEventMapping = {
-      "nodePresent": "nodePresenceChanged",
-      "nodeVersion": "nodeVersionChanged"
+      "nodePresent": "nodePresentChanged",
+      "nodeVersion": "nodeVersionChanged",
+      "nodeError": "nodeErrorChanged"
     }
     
     if (varToEventMapping[varName]) {
@@ -73,15 +79,43 @@ export default class IpfsHandler {
   
   /** Update the web3Handler's state given the current state of window variables. */
   async update() {
-    
+    let version = undefined;
+    let error = "Missing or undefined Version";
+    try {
+      version = await this.getVersion();
+    }
+    catch (err) {
+      error = err;
+    }
+    if (version === undefined || version === "") {
+      this.updateState("nodePresent", false);
+      this.updateState("nodeVersion", undefined);
+      this.updateState("nodeError", error);
+    }
+    else {
+      this.updateState("nodePresent", true);
+      this.updateState("nodeVersion", version);
+      this.updateState("nodeError", undefined);
+    }
   }
   
+  /**
+   * Get the version of the IPFS node the user may or may not have running. */
   async getVersion() {
-    
+    let versionJson = await Utils.getAjax("http://localhost:" + this.nodePort + "/api/v0/version", 10000);
+    let result = JSON.parse(versionJson);
+    if (result !== undefined) {
+      return result.Version;
+    }
+    return undefined;
   }
   
   async getFile(ipfsHash) {
-    
+    if (this.nodePresent) {
+      return await Utils.getAjax("http://localhost:" + this.nodePort + "/api/v0/get/" + ipfsHash);
+    }
+    // Web ipfs gateway fallback.
+    return await Utils.getAjax(this.ipfsAddress + ipfsHash);
   }
   
   async addAndPinFile(localPathToFile) {

@@ -18,6 +18,7 @@ export default {
         resolve(xhr.responseText);
       });
       xhr.addEventListener("error", function(err) {
+        console.log("Error?");
         clearInterval(interval);
         reject(err);
       });
@@ -26,7 +27,12 @@ export default {
         reject(timeout + "ms timeout was reached.");
       });
       xhr.open("GET", url);
-      xhr.send();
+      try {
+        xhr.send();
+      }
+      catch (error) {
+        reject(error);
+      }
     });
   }
   

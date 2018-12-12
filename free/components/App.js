@@ -2,6 +2,9 @@
 import Web3Handler from '../js/Web3Handler.js';
 import InterweaveFreeHandler from '../js/InterweaveFreeHandler.js';
 
+// IPFS integration
+import IpfsHandler from "../js/IpfsHandler.js";
+
 // General
 import Utils from '../js/Utils.js';
 import Node from '../js/Node.js';
@@ -47,6 +50,9 @@ export default {
         v-show="currentView === 'explore'">
       </explore-area>
       <build-area
+        v-bind:ipfsHandler="ipfsHandler"
+        v-bind:ipfsNodePresent="ipfsNodePresent"
+        v-bind:ipfsNodeError="ipfsNodeError"
         v-bind:formats="formats"
         v-bind:currentNodeKey="currentNodeKey"
         v-bind:nodes="nodes"
@@ -83,6 +89,11 @@ export default {
       contract: undefined,
       accountPending: false, // Requested account access, don't have it yet.
       account: undefined,
+      
+      // IPFS stuff
+      ipfsHandler: undefined,
+      ipfsNodePresent: false,
+      ipfsNodeError: undefined,
       
       // Formods
       formats: {
@@ -124,10 +135,11 @@ export default {
      */
     init: async function() {
       try {
+        // Get our Web3Handler set up.
         this.web3Handler = new Web3Handler();
-        window.web3Handler = this.web3Handler; // For console access.
         await this.web3Handler.initialize();
         
+        // Need to know when we get ethereum account info from the web3Handler.
         this.web3Handler.registerListener("accountChanged", (oldAccount, newAccount) => {
           this.account = newAccount;
           
@@ -138,13 +150,29 @@ export default {
           this.$forceUpdate(); // external event.
         });
         
+        // Get our Interweave Free contract handler set up.
         this.contract = new InterweaveFreeHandler();
-        window.contract = this.contract; // For console access.
         await this.contract.initialize(this.web3Handler);
+        
+        // Get our IPFS handler set up.
+        this.ipfsHandler = new IpfsHandler();
+        this.ipfsHandler.initialize(); // No need to await.
+        
+        // We care about whether there's a node present.
+        this.ipfsHandler.registerListener("nodePresentChanged", (oldNodePresent, newNodePresent) => {
+          this.ipfsNodePresent = newNodePresent;
+          this.$forceUpdate();
+        });
+        this.ipfsHandler.registerListener("nodeErrorChanged", (oldNodeError, newNodeError) => {
+          console.log(newNodeError);
+          this.ipfsNodeError = newNodeError;
+          this.$forceUpdate();
+        });
         
         // For console access.
         window.web3Handler = this.web3Handler;
-        window.interweave = this.contract;
+        window.interweaveContract = this.contract;
+        window.ipfsHandler = this.ipfsHandler;
         
         // Grab starting node data.
         await this.setCurrentNode(this.initialNodeKey);

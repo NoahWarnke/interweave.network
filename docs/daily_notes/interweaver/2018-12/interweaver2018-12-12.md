@@ -15,7 +15,9 @@
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
           - [ ] Move all IPFS-interface-related code to a dedicated IpfsHandler object. Should abstract all calls for you.
             - [X] Create object.
-            - [ ] Checking if your node is present, giving correct errors if not.
+            - [X] Add it to App like the Web3Handler, and make it available to BuildArea.
+            - [X] Make sure Utils can detect error states, and that IpfsHandler detects changed state correctly.
+            - [X] Checking if your node is present, giving correct errors if not.
             - [ ] Getting (hit up ipfs.io if no local ipfs node, otherwise use that)
             - [ ] Adding/pinning a node from a file URL
           - [ ] Create deploy to IPFS button if it exists (with alternate ipfs input field)

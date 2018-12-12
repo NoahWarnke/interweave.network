@@ -1,5 +1,4 @@
 import Node from "../js/Node.js";
-import Utils from "../js/Utils.js";
 
 export default {
   template: `
@@ -28,11 +27,19 @@ export default {
       </div>
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
         <h2>Deploy your Node's content to IPFS</h2>
-        <p>Copy the below JSON code and save it as a file. Then upload it to IPFS, and copy the IPFS hash that results.</p>
-        <a v-bind:href="ipfsDataUrl" v-bind:download="currentNode.name + '.json'" class="button download-button">Download Node JSON File</a>
-        <!--<textarea class="json-output-textarea" readonly v-bind:value="nodeExportedJson"></textarea>-->
-        <button v-if="ipfsDaemonPresent()">Click here to choose a file and automatically upload to your IPFS node!</button>
-        <p>Or add the file yourself, and paste the IPFS hash here!</p>
+        <p>To do this, you first need to download the file containing your Node's data.</p>
+        <a
+          v-bind:href="downloadDataUrl"
+          v-bind:download="currentNode.name + '.json'"
+          class="button download-button">
+          Download Node JSON File
+        </a>
+        <p>Then you need to add the file you just downloaded to IPFS. To do this, set up an IPFS node (instructions will go here) and then a button below will appear.</p>
+        <p v-if="ipfsNodePresent">
+          <button class="button download-button">Add Downloaded File to IPFS</button>
+        </p>
+        <p v-if="!ipfsNodePresent && ipfsNodeError">{{ipfsNodeError}}</p>
+        <p>Or, add the file yourself somehow, and paste the IPFS hash here.</p>
         <input size=60 v-model="ipfsInput"></input>
       </div>
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
@@ -47,6 +54,9 @@ export default {
     </div>
   `,
   props: {
+    ipfsHandler: Object,
+    ipfsNodePresent: Boolean,
+    ipfsNodeError: String,
     formats: Object,
     currentNodeKey: String,
     nodes: Object,
@@ -79,7 +89,7 @@ export default {
         content: contentExport
       }, null, 2);
     },
-    ipfsDataUrl: function() {
+    downloadDataUrl: function() {
       return "data:text/plain;charset=utf-8," + encodeURIComponent(this.nodeExportedJson);
     },
     currentFormod: function() {
@@ -155,15 +165,6 @@ export default {
       this.currentNode.setIPFSState("successful", content, undefined);
       
       this.setBuildSlot();
-    },
-    ipfsDaemonPresent: async function() {
-      let result = JSON.parse(await Utils.getAjax("http://localhost:5001/api/v0/version", 10000));
-      if (result.version !== undefined && result.version !== "") {
-        console.log(result.version);
-        return true;
-      }
-      console.log(result);
-      return false;
     },
     clickPrev: function() {
       if (!this.canClickPrev) {
