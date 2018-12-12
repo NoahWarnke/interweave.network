@@ -1,4 +1,5 @@
 import Node from "../js/Node.js";
+import Utils from "../js/Utils.js";
 
 export default {
   template: `
@@ -30,7 +31,8 @@ export default {
         <p>Copy the below JSON code and save it as a file. Then upload it to IPFS, and copy the IPFS hash that results.</p>
         <a v-bind:href="ipfsDataUrl" v-bind:download="currentNode.name + '.json'" class="button download-button">Download Node JSON File</a>
         <!--<textarea class="json-output-textarea" readonly v-bind:value="nodeExportedJson"></textarea>-->
-        <p>Now paste the IPFS hash here!</p>
+        <button v-if="ipfsDaemonPresent()">Click here to choose a file and automatically upload to your IPFS node!</button>
+        <p>Or add the file yourself, and paste the IPFS hash here!</p>
         <input size=60 v-model="ipfsInput"></input>
       </div>
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
@@ -154,7 +156,15 @@ export default {
       
       this.setBuildSlot();
     },
-    
+    ipfsDaemonPresent: async function() {
+      let result = JSON.parse(await Utils.getAjax("http://localhost:5001/api/v0/version", 10000));
+      if (result.version !== undefined && result.version !== "") {
+        console.log(result.version);
+        return true;
+      }
+      console.log(result);
+      return false;
+    },
     clickPrev: function() {
       if (!this.canClickPrev) {
         return;

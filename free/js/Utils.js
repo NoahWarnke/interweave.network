@@ -18,7 +18,7 @@ export default {
         resolve(xhr.responseText);
       });
       xhr.addEventListener("error", function(err) {
-        cancelInterval(interval);
+        clearInterval(interval);
         reject(err);
       });
       xhr.addEventListener("abort", function(progresEvent) {
