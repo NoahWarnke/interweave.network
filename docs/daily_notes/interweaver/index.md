@@ -140,3 +140,23 @@
 - Automating the IPFS load and pin during this process via the IPFS API
 - Draft nodes in cookies that show up in My Nodes (via filters)
 - 'edit' and 'view' buttons on My Nodes nodes, letting you explore (and hence test) a draft node just like a normal one.
+
+## 2018-11-23
+- Draft Nodes
+- Draft Edges
+
+## 2018-11-25
+- Add Node button workings
+- Initial thoughts about SimpleTextBuild
+
+## 2018-11-26
+- Further SimpleTextBuild design
+
+## 2018-11-28
+- Further SimpleTextBuild design
+
+## 2018-12-05
+- Yet more SimpleTextBuild design (around flow with adding and removing targetsets/results and when they are invalid)
+
+## 2018-12-11
+- Setting IPFS daemon up to be accessible via API (have to allow CORS)

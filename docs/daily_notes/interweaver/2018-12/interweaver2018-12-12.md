@@ -1,22 +1,23 @@
-# Interweaver's to-do items, 2018-12-11:
+# Interweaver's to-do items, 2018-12-12:
+
+- Thoughts on how IPFS access should work in general:
+  - If the user has no IPFS node, use ipfs.io for accessing IPFS files.
+  - With no IPFS node, they cannot upload their own files, so they can't create their own Nodes.
+  - If they do have an IPFS node, both access and upload IPFS files via it.
+  - Need to check semi-regularly for presence of the node, and have subscribable events for when it comes and goes, or for errors.
+  - Should ideally show the user whether they're connected or not, somewhere.
+  
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
-  - [ ] Create functional DApp:htt
+  - [ ] Create functional DApp
     - [ ] Make build mode:
-      - [ ] Add 'draft' Nodes
+      - [ ] Add 'draft' Nodes that can be deployed to the smart contract:
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
-          - Looks like file does need to exist locally.
-          - [ ] Check for existance of IPFS daemon via API
-            - [X] Make a function able to do that in BuildArea (using Utils.js) - just check ipfs version
-              - http://localhost:5001/api/v0/version
-              - Hmm, getting a CORS error, lol.
-              - Okay, looks like that's IPFS configuration that needs done. Sigh, more difficulty for end users.
-              - https://github.com/INFURA/tutorials/wiki/IPFS-and-CORS
-              - (close down daemon for a moment)
-              - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Origin '["http://localhost:8080"]'
-              - ipfs config --json API.HTTPHeaders.Access-Control-Allow-Methods '["PUT", "GET", "POST"]'
-              - Yep, that works now.
-            - [X] Call it whenever deciding whether to render the 'upload to IPFS' button (as opposed to the IPFS entry box)
+          - [ ] Move all IPFS-interface-related code to a dedicated IpfsHandler object. Should abstract all calls for you.
+            - [X] Create object.
+            - [ ] Checking if your node is present, giving correct errors if not.
+            - [ ] Getting (hit up ipfs.io if no local ipfs node, otherwise use that)
+            - [ ] Adding/pinning a node from a file URL
           - [ ] Create deploy to IPFS button if it exists (with alternate ipfs input field)
             - [ ] Clicking should bring up a file-picker dialog.
             - [ ] Once you do that, it should call the IPFS add api.
@@ -40,6 +41,8 @@
         - [ ] Show blockchain data
         - [ ] Load Node data and show the names
         - [ ] Make clicking on the Nodes go to them.
+    - [ ] Add cookies to save your draft data.
+    - [ ] Make a better homepage.
     - [ ] Style things up to the best of my non-designer ability.
     - [ ] Restructure repos:
       - [ ] Create new a) smart contracts, b) viewer, c) simpletext formod, d) interweave.network website repos under interweave.network github account.
