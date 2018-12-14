@@ -164,7 +164,7 @@ export default {
           this.$forceUpdate();
         });
         this.ipfsHandler.registerListener("nodeErrorChanged", (oldNodeError, newNodeError) => {
-          console.log(newNodeError);
+          console.log(typeof newNodeError);
           this.ipfsNodeError = newNodeError;
           this.$forceUpdate();
         });
@@ -257,7 +257,7 @@ export default {
       // Load IFPS JSON data from the Node's ipfs hash.
       let parsedNodeIpfsJson = undefined;
       try {
-        parsedNodeIpfsJson = JSON.parse(await Utils.getAjax("https://ipfs.io/ipfs/" + node.bData.ipfs, 30000));
+        parsedNodeIpfsJson = JSON.parse(await this.ipfsHandler.getFile(node.bData.ipfs));
       }
       catch (error) {
         console.log("App updateNodeIpfs: ipfs data load failed: " + error);

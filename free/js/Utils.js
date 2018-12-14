@@ -17,10 +17,9 @@ export default {
         }
         resolve(xhr.responseText);
       });
-      xhr.addEventListener("error", function(err) {
-        console.log("Error?");
+      xhr.addEventListener("error", function() {
         clearInterval(interval);
-        reject(err);
+        reject("Connection refused");
       });
       xhr.addEventListener("abort", function(progresEvent) {
         clearInterval(interval);

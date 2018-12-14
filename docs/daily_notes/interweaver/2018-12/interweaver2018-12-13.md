@@ -29,22 +29,17 @@
       - [ ] Add 'draft' Nodes that can be deployed to the smart contract:
         - [ ] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
           - [ ] Move all IPFS-interface-related code to a dedicated IpfsHandler object. Should abstract all calls for you.
-            - [X] Create object.
-            - [X] Add it to App like the Web3Handler, and make it available to BuildArea.
-            - [X] Make sure Utils can detect error states, and that IpfsHandler detects changed state correctly.
-            - [X] Checking if your node is present, giving correct errors if not.
-            - [X] Getting (hit up ipfs.io if no local ipfs node, otherwise use that)
             - [ ] Convert to ipfs-http-client from hand-API calls.
-              - [ ] Import libraries
+              - [X] Import libraries
               - [ ] Wrap ipfs-http-client in my IpfsHandler instead of direct API calls
-              - [ ] Make sure missing/newly-added ipfs daemon is detected
-              - [ ] Use buffer and ipfs-http-client for adding file.
-            - [ ] Adding/pinning a node from a file URL
-          - [ ] Allow deploying your local file to your IPFS node.
-            - [ ] Clicking on the deploy button should bring up a file-picker dialog (or a drag-file dialog?)
-            - [ ] Once you do that, it should call the IPFS add api.
-              - ipfs add -q filepath/filename
-              - ipfs add pin ipfshash
+                - [ ] Get ipfsApi and buffer objects available.
+                - [ ] Detect when node is present and when it goes away
+                - [ ] Get file
+                - [ ] Add needs to work
+                  - [ ] Convert JSON string into an ArrayBuffer object containing the character data.
+                  - [ ] Use Buffer library to convert ArrayBuffer into Buffer object.
+                  - [ ] use "ipfs-api" to send the Buffer to the ipfs daemon's add method.
+                  - [ ] Adding/pinning a node from a file URL
         - [ ] Make a button to deploy to blockchain.
           - [ ] Actually add the new Node
           - [ ] move the Node data from draftIpfsData to ipfsData,

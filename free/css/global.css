@@ -6,6 +6,7 @@ body {
 
 .good, .warn, .error {
   padding: 10px;
+  color: white;
 }
 
 .good {

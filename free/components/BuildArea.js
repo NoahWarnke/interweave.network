@@ -26,21 +26,33 @@ export default {
         <div ref="formodbuildslot"></div>
       </div>
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
+        
         <h2>Deploy your Node's content to IPFS</h2>
-        <p>To do this, you first need to download the file containing your Node's data.</p>
+        
+        <!--
+        <p>First, download the file containing your Node's data. It needs to be saved to your local machine in order to upload it to IPFS.</p>
         <a
+          v-on:click="ipfsFileDownloaded = true"
           v-bind:href="downloadDataUrl"
           v-bind:download="currentNode.name + '.json'"
           class="button download-button">
           Download Node JSON File
         </a>
-        <p>Then you need to add the file you just downloaded to IPFS. To do this, set up an IPFS node (instructions will go here) and then a button below will appear.</p>
-        <p v-if="ipfsNodePresent">
-          <button class="button download-button">Add Downloaded File to IPFS</button>
-        </p>
-        <p v-if="!ipfsNodePresent && ipfsNodeError">{{ipfsNodeError}}</p>
-        <p>Or, add the file yourself somehow, and paste the IPFS hash here.</p>
-        <input size=60 v-model="ipfsInput"></input>
+        -->
+        
+        <p>First, make sure your IPFS node is set up (instructions will go here).</p>
+        <div v-if="!ipfsNodePresent">
+          <p v-if="ipfsNodeError" class="error">{{ipfsNodeError}}</p>
+          <button v-on:click="ipfsHandler.update()" class="button">Check again for IPFS node</button>
+        </div>
+        <div v-if="ipfsNodePresent">
+          <p>&#10004; Your IPFS node is all set!</p>
+          <p>Now just click to upload your file!</p>
+          <button class="button" v-on:click="uploadToIpfs()">Add Downloaded File to IPFS</button>
+          <p>Or, add the file yourself, and paste the IPFS hash here.</p>
+          <input size=60 v-model="ipfsInput"></input>
+        </div>
+          
       </div>
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
         <h2>Deploy your Node to the Ethereum blockchain</h2>
@@ -209,6 +221,9 @@ export default {
           console.log("BuildArea clickNext: defaulted! " + this.currentStep);
         }
       }
+    },
+    uploadToIpfs: async function() {
+      this.ipfsInput = await this.ipfsHandler.addAndPinFile(this.nodeExportedJson);
     }
   },
   watch: {

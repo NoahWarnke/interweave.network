@@ -8,10 +8,17 @@ export default class IpfsHandler {
    */
   constructor() {
     
-    this.ipfsAddress = "https://ipfs.io/ipfs/";
-    this.nodePort = 5001; // TODO: make changeable by user.
+    this.defaultGatewayAddress = "https://ipfs.io/ipfs/";
+    
+    // Your node details (maybe local, maybe not)
+    // TODO make settable by user.
+    this.nodeAddress = "localhost";
+    this.nodePort = 5001;
+    
+    // Handler state.
+    this.ipfsHttpClient = undefined;
     this.nodePresent = false;
-    this.nodeErorr = undefined;
+    this.nodeError = undefined;
     this.nodeVersion = undefined;
     
     this.listeners = {};
@@ -24,13 +31,7 @@ export default class IpfsHandler {
     console.log("Ipfs handler init!");
     await this.update();
     
-    setInterval(() => {
-      this.update();
-    }, 5000);
-    
-    setTimeout(() => {
-      this.update();
-    }, 2000);
+    //setInterval(() => {this.update();}, 5000);
   }
   
   /**
@@ -79,13 +80,16 @@ export default class IpfsHandler {
   
   /** Update the web3Handler's state given the current state of window variables. */
   async update() {
+    
+    this.ipfsHttpClient = window.IpfsHttpClient(this.nodeAddress, this.nodePort);
+    
     let version = undefined;
     let error = "Missing or undefined Version";
     try {
       version = await this.getVersion();
     }
     catch (err) {
-      error = err;
+      error = "Unable to connect to IPFS node at " + this.nodeAddress + ":" + this.nodePort + ". " + err.toString();
     }
     if (version === undefined || version === "") {
       this.updateState("nodePresent", false);
@@ -102,23 +106,38 @@ export default class IpfsHandler {
   /**
    * Get the version of the IPFS node the user may or may not have running. */
   async getVersion() {
-    let versionJson = await Utils.getAjax("http://localhost:" + this.nodePort + "/api/v0/version", 10000);
-    let result = JSON.parse(versionJson);
+    let result = await this.ipfsHttpClient.version();
     if (result !== undefined) {
-      return result.Version;
+      return result.version;
     }
     return undefined;
   }
   
+  /**
+   * Get an IPFS file with the given hash. Will use a web gateway if no local node.
+   */
   async getFile(ipfsHash) {
     if (this.nodePresent) {
-      return await Utils.getAjax("http://localhost:" + this.nodePort + "/api/v0/get/" + ipfsHash);
+      let results = await this.ipfsHttpClient.get(ipfsHash);
+      if (results.length === 0) {
+        throw new Exception("No files at ipfs hash " + ipfsHash);
+      }
+      return results[0].content.toString();
     }
     // Web ipfs gateway fallback.
-    return await Utils.getAjax(this.ipfsAddress + ipfsHash);
+    return await Utils.getAjax(this.defaultGatewayAddress + ipfsHash, 30000);
   }
   
-  async addAndPinFile(localPathToFile) {
+  /** Add file to IPFS. */
+  async addAndPinFile(fileContentString) {
+    if (!this.nodePresent) {
+      throw new Exception("Cannot upload file without an IPFS node available!");
+    }
     
+    let buffer = this.ipfsHttpClient.Buffer(fileContentString);
+    
+    console.log(buffer);
+    
+    return "hashbrowns";
   }
 }
