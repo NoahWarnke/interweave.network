@@ -29,17 +29,6 @@ export default {
         
         <h2>Deploy your Node's content to IPFS</h2>
         
-        <!--
-        <p>First, download the file containing your Node's data. It needs to be saved to your local machine in order to upload it to IPFS.</p>
-        <a
-          v-on:click="ipfsFileDownloaded = true"
-          v-bind:href="downloadDataUrl"
-          v-bind:download="currentNode.name + '.json'"
-          class="button download-button">
-          Download Node JSON File
-        </a>
-        -->
-        
         <p>First, make sure your IPFS node is set up (instructions will go here).</p>
         <div v-if="!ipfsNodePresent">
           <p v-if="ipfsNodeError" class="error">{{ipfsNodeError}}</p>

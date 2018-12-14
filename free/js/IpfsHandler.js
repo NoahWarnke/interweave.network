@@ -89,7 +89,7 @@ export default class IpfsHandler {
       version = await this.getVersion();
     }
     catch (err) {
-      error = "Unable to connect to IPFS node at " + this.nodeAddress + ":" + this.nodePort + ". " + err.toString();
+      error = "Unable to connect to IPFS node at " + this.nodeAddress + ":" + this.nodePort + " (" + err.toString() + ")";
     }
     if (version === undefined || version === "") {
       this.updateState("nodePresent", false);
@@ -135,9 +135,7 @@ export default class IpfsHandler {
     }
     
     let buffer = this.ipfsHttpClient.Buffer(fileContentString);
-    
-    console.log(buffer);
-    
-    return "hashbrowns";
+    let results = await this.ipfsHttpClient.add(buffer, {pin: true});
+    return results[0].hash;
   }
 }
