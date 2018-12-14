@@ -36,10 +36,9 @@ export default {
         </div>
         <div v-if="ipfsNodePresent">
           <p>&#10004; Your IPFS node is all set!</p>
-          <p>Now just click to upload your file!</p>
-          <button class="button" v-on:click="uploadToIpfs()">Add Downloaded File to IPFS</button>
-          <p>Or, add the file yourself, and paste the IPFS hash here.</p>
-          <input size=60 v-model="ipfsInput"></input>
+          <p>Now upload your file!</p>
+          <button class="button" v-on:click="uploadToIpfs()" v-if="!haveIpfsValue">Add Downloaded File to IPFS</button>
+          <p v-if="haveIpfsValue">&#10004; Your Node file is uploaded to IPFS with hash {{currentNode.bData.ipfs}}!</p>
         </div>
           
       </div>
@@ -96,12 +95,15 @@ export default {
     currentFormod: function() {
       return this.formats[this.currentFormat];
     },
+    haveIpfsValue: function() {
+      return this.currentNode.bStatus === "successful" && this.currentNode.bData.ipfs !== undefined;
+    },
     canClickNext: function() {
       if (this.currentStep === "deployblockchain") {
         return false;
       }
       if (this.currentStep === "deployipfs") {
-        return (this.currentNode.bStatus === "successful" && this.currentNode.bData.ipfs !== undefined);
+        return this.haveIpfsValue;
       }
       if (this.currentStep === "formatandname") {
         return (this.currentFormod !== undefined);
