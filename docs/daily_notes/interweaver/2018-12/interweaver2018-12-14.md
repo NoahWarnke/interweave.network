@@ -5,13 +5,12 @@
     - [ ] Make build mode:
       - [ ] Add 'draft' Nodes that can be deployed to the smart contract:
         - [ ] Make pushing the button on the last BuildArea page deploy the draft Node to the blockchain.
-          - [ ] Hook up functions
-          - [ ] Call addNode on the blockchain, to get it properly added.
-          - [ ] Make sure to save the key of the new Node in memory for re-matching the draft edges...
-          - [ ] Delete the draft Node
-            - [ ] remove the fake key from myDraftNodeKeys
-            - [ ] Remove the fake data from nodes
-          - [ ] Do a refresh of myNodes, which will include the new Node.
+          - [X] Hook up functions
+          - [X] Make sure IPFS hasn't been used already by calling getNode.
+          - [X] Call addNode on the blockchain, to get it properly added.
+          - [X] Make sure to save the key of the new Node in memory for re-matching the draft edges...
+          - [X] Delete the draft Node using existing deletion code.
+          - [X] Do a refresh of myNodes, which will include the new Node.
           - [ ] (later, once draft edges are in place) Hunt down all instances of the fake node key in myDraftEdgeProposalKeys and replace with the real one.
       - [ ] My Edge Proposals
         - [ ] Create an app mode for myedgeproposals
@@ -26,6 +25,7 @@
         - [ ] Make clicking on the Nodes go to them.
     - [ ] Bugfixes:
       - [ ] Whenever draft Node content changes in the editor, unset the IPFS hash if they'd already uploaded it, since it's gone stale.
+      - [ ] When Node deploy fails, should somehow update BuildArea again?
     - [ ] Add cookies to save your draft data.
     - [ ] Make a better homepage.
     - [ ] Style things up to the best of my non-designer ability.

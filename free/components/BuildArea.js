@@ -48,8 +48,10 @@ export default {
       
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
         <h2>Deploy your Node to the Ethereum blockchain</h2>
-        <p>Finally, deploy your Node to the blockchain! This will require you to sign the transaction with MetaMask, and pay a gas fee for interacting with the blockchain.</p>
-        <button v-on:click="clickDeployNode">Deploy Node to Blockchain</button>
+        <p>Finally, deploy your Node to the blockchain! You <strong>cannot change your Node data after this point</strong>, only delete the Node or manage its connections.</p>
+        <p>You will need to sign the transaction with MetaMask, and will need to pay the gas fee.</p>
+        <button v-on:click="clickDeployNode" class="button" v-if="!deployPending">Deploy Node to Blockchain</button>
+        <p v-if="deployPending">Your Node deployment is in progress! Depending on your selected gas price, this may take several minutes.</p>
       </div>
       
       <div id="next-prev-buttons">
@@ -72,7 +74,8 @@ export default {
       currentStep: "formatandname",
       currentFormat: undefined,
       buildRenderer: undefined,
-      ipfsInput: ""
+      ipfsInput: "",
+      deployPending: false
     }
   },
   computed: {
@@ -222,6 +225,7 @@ export default {
       this.ipfsInput = await this.ipfsHandler.addAndPinFile(this.nodeExportedJson);
     },
     clickDeployNode: function() {
+      this.deployPending = true;
       this.$emit("deployNodeClick", this.currentNodeKey);
     }
   },

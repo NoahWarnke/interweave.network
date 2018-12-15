@@ -502,7 +502,64 @@ export default {
       newNode.setIPFSState("successful", content, undefined);
     },
     deployNodeClick: async function(draftNodeKey) {
-      console.log("Deploy draft node " + draftNodeKey);
+      
+      // Make sure Node with the draft Node's IPFS hasn't already been created by someone else.
+      let draftNode = this.nodes[draftNodeKey];
+      
+      if (draftNode === undefined || draftNode.bStatus !== "successful") {
+        console.log("App deployNodeClick: ipfs not available for key " + draftNodeKey);
+        return;
+      }
+      let ipfs = draftNode.bData.ipfs;
+      if (ipfs === undefined || ipfs === "") {
+        console.log("App deployNodeClick: ipfs not available for key " + draftNodeKey);
+        return;
+      }
+      
+      // 1) Grab the key
+      let newNodeKey = await this.contract.nodeKeyFromIpfs(ipfs);
+      
+      // 2) Check whether it's already taken.
+      let existingNode = await this.contract.getNode(newNodeKey);
+      
+      if (existingNode !== undefined) {
+        console.log("App deployNodeClick: node with ipfs already existed.");
+        return;
+      }
+      
+      // 3) Actually create the Node! Yay! May take a little while...
+      try {
+        await this.contract.createNode(ipfs, this.account);
+      }
+      catch (error) {
+        // e.g., user rejects tx.
+        console.log(error);
+        return;
+      }
+      
+      // 4) Refresh my deployed Node keys, and confirm it now includes the new Node.
+      await this.updateMyDeployedNodeKeys();
+      
+      if (this.myNodeKeys.indexOf(newNodeKey) === -1) {
+        console.log("deployed Node didn't have expected key?");
+        return;
+      }
+      
+      // 5) Delete draft Node.
+      this.deleteDraftNode();
+      
+      // 6) Hopefully set the current Node to the newly-created one.
+      this.currentNodeKey = newNodeKey;
+      
+      // 7) Lastly, leave edit mode, assuming you deployed from there.
+      this.currentView = "explore";
+      
+    },
+    deleteDraftNode: function(draftNodeKey) {
+      // Remove from myNodeKeys
+      this.myDraftNodeKeys.splice(this.myDraftNodeKeys.indexOf(draftNodeKey), 1);
+      // Delete the entry in nodes
+      this.$set(this.nodes, draftNodeKey, undefined);
     },
     deleteNodeClick: async function(nodeKey) {
       console.log("Deleting " + nodeKey);
@@ -516,27 +573,16 @@ export default {
           && node.bData.edgeNodeKeys.reduce((accumulator, val) => accumulator && val === "0", true)
           && this.account !== undefined
         ) {
-          console.log("Deployed and deletable.");
           this.contract.deleteNode(nodeKey, this.account);
-        }
-        else {
-          console.log("Deployed but not deletable.");
         }
       }
       else if (node.type === "draft") {
         if (node.bStatus === "successful" && node.bData.edgeNodeKeys.reduce((accumulator, val) => accumulator && val === "0", true)) {
-          console.log("Draft and deletable.");
           if (this.currentNodeKey === nodeKey) {
             this.setCurrentNode(this.initialNodeKey);
             this.previousNodeKey = undefined;
           }
-          // Remove from myNodeKeys
-          this.myDraftNodeKeys.splice(this.myDraftNodeKeys.indexOf(nodeKey), 1);
-          // Delete the entry in nodes
-          this.$set(this.nodes, nodeKey, undefined);
-        }
-        else {
-          console.log("Draft but not deletable.");
+          this.deleteDraftNode(nodeKey);
         }
       }
     }

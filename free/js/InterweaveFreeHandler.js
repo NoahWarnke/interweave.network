@@ -205,12 +205,18 @@ export default class InterweaveFreeHandler {
   /**
    * Get the data for a Node by key.
    * @param nodeKey The key of the Node to get the data for.
-   * @returns An object containing the Node data: ipfs string, owner address, and an array of the 6 edgeNodeKeys.
+   * @returns An object containing the Node data: ipfs string, owner address, and an array of the 6 edgeNodeKeys, or undefined if no Node found.
    */
   async getNode(nodeKey) {
     this.contractMustBeInitialized();
     
-    let rawData = await this.contract.methods.getNode(nodeKey).call();
+    let rawData = undefined;
+    try {
+      rawData = await this.contract.methods.getNode(nodeKey).call();
+    }
+    catch (error) {
+      return undefined;
+    }
     
     return {
       key: nodeKey,
