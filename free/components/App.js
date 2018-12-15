@@ -57,6 +57,7 @@ export default {
         v-bind:currentNodeKey="currentNodeKey"
         v-bind:nodes="nodes"
         v-bind:account="account"
+        v-on:deployNodeClick="deployNodeClick($event)"
         v-if="currentView === 'editnode'">
       </build-area>
       <list-nodes
@@ -69,7 +70,7 @@ export default {
         v-on:myNodesViewClick="myNodesViewClick($event)"
         v-on:editNodeClick="editNodeClick($event)"
         v-on:deleteNodeClick="deleteNodeClick($event)"
-        v-on:addNodeClick="addNodeClick()">
+        v-on:addNodeClick="addDraftNodeClick()">
       </list-nodes>
       <modal-info v-if="false"></modal-info>
     </div>
@@ -470,7 +471,7 @@ export default {
     myEdgeProposalsClick: async function() {
       // TODO
     },
-    addNodeClick: async function() {
+    addDraftNodeClick: async function() {
       
       // Create a new draft Node, without any content yet.
       let draftNodeKey = "draft" + (Math.random() * 10E16);
@@ -499,6 +500,9 @@ export default {
         defaultFormod.defaultData()
       );
       newNode.setIPFSState("successful", content, undefined);
+    },
+    deployNodeClick: async function(draftNodeKey) {
+      console.log("Deploy draft node " + draftNodeKey);
     },
     deleteNodeClick: async function(nodeKey) {
       console.log("Deleting " + nodeKey);

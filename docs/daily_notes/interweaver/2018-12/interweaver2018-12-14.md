@@ -4,25 +4,15 @@
   - [ ] Create functional DApp
     - [ ] Make build mode:
       - [ ] Add 'draft' Nodes that can be deployed to the smart contract:
-        - [X] Figure out how to interface with the IPFS API and actually accomplish that, getting back the IPFS hash.
-          - [X] Move all IPFS-interface-related code to a dedicated IpfsHandler object. Should abstract all calls for you.
-            - [X] Convert to ipfs-http-client from hand-API calls.
-              - [X] Import libraries
-              - [X] Wrap ipfs-http-client in my IpfsHandler instead of direct API calls
-                - [X] Get ipfsHttpClient object available.
-                - [X] Detect when node is present by getting version.
-                - [X] Get file
-                - [X] Add needs to work
-                  - [X] Use Buffer (conveniently on IpfsHttpClient!) to convert Node json into Buffer object.
-                  - [X] use "ipfs-api" to send the Buffer to the ipfs daemon's add method.
-                  - [X] Return the hash to BuildArea
-        - [ ] Make a button to deploy to blockchain.
-          - [ ] Actually add the new Node
-          - [ ] move the Node data from draftIpfsData to ipfsData,
-          - [ ] remove the fake key from myDraftNodeKeys,
-          - [ ] add real one to myNodeKeys
-          - [ ] add blockchain data to nodes
-          - [ ] Hunt down all instances of the fake node key in myDraftEdgeProposalKeys and replace with the real one.
+        - [ ] Make pushing the button on the last BuildArea page deploy the draft Node to the blockchain.
+          - [ ] Hook up functions
+          - [ ] Call addNode on the blockchain, to get it properly added.
+          - [ ] Make sure to save the key of the new Node in memory for re-matching the draft edges...
+          - [ ] Delete the draft Node
+            - [ ] remove the fake key from myDraftNodeKeys
+            - [ ] Remove the fake data from nodes
+          - [ ] Do a refresh of myNodes, which will include the new Node.
+          - [ ] (later, once draft edges are in place) Hunt down all instances of the fake node key in myDraftEdgeProposalKeys and replace with the real one.
       - [ ] My Edge Proposals
         - [ ] Create an app mode for myedgeproposals
         - [ ] Create a test EdgeProposal or two.

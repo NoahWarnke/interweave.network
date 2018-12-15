@@ -3,6 +3,7 @@ import Node from "../js/Node.js";
 export default {
   template: `
     <div id="build">
+    
       <div id="format-and-name" v-if="currentStep === 'formatandname'">
         <h2>Set your Node's name and format</h2>
         <p>
@@ -22,9 +23,11 @@ export default {
           <span v-if="currentNode.formatVersion !== undefined">(version {{currentNode.formatVersion}})</span>
         </p>
       </div>
+      
       <div id="format-specific" v-show="currentStep === 'formatspecific'">
         <div ref="formodbuildslot"></div>
       </div>
+      
       <div id="deploy-ipfs" v-if="currentStep === 'deployipfs'">
         
         <h2>Deploy your Node's content to IPFS</h2>
@@ -42,11 +45,13 @@ export default {
         </div>
           
       </div>
+      
       <div id="deploy-blockchain" v-if="currentStep === 'deployblockchain'">
         <h2>Deploy your Node to the Ethereum blockchain</h2>
-        <p>This functionality is not done yet.</p>
-        <button>Do it!</button>
+        <p>Finally, deploy your Node to the blockchain! This will require you to sign the transaction with MetaMask, and pay a gas fee for interacting with the blockchain.</p>
+        <button v-on:click="clickDeployNode">Deploy Node to Blockchain</button>
       </div>
+      
       <div id="next-prev-buttons">
         <button v-if="canClickPrev" v-on:click="clickPrev()" class="button previous-button">< Previous</button>
         <button v-if="canClickNext" v-on:click="clickNext()" class="button next-button">Next ></button>
@@ -215,6 +220,9 @@ export default {
     },
     uploadToIpfs: async function() {
       this.ipfsInput = await this.ipfsHandler.addAndPinFile(this.nodeExportedJson);
+    },
+    clickDeployNode: function() {
+      this.$emit("deployNodeClick", this.currentNodeKey);
     }
   },
   watch: {
