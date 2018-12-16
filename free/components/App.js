@@ -14,6 +14,7 @@ import TheNavbar from './TheNavbar.js';
 import ExploreArea from './ExploreArea.js';
 import BuildArea from './BuildArea.js';
 import ListNodes from './ListNodes.js';
+import ListEdges from './ListEdges.js';
 import ModalInfo from './ModalInfo.js';
 
 // Format modules
@@ -72,6 +73,9 @@ export default {
         v-on:deleteNodeClick="deleteNodeClick($event)"
         v-on:addNodeClick="addDraftNodeClick()">
       </list-nodes>
+      <list-edges
+        v-if="currentView === 'myedges'">
+      </list-edges>
       <modal-info v-if="false"></modal-info>
     </div>
   `,
@@ -80,6 +84,7 @@ export default {
     ExploreArea,
     BuildArea,
     ListNodes,
+    ListEdges,
     ModalInfo,
     Node
   },
@@ -469,7 +474,7 @@ export default {
       this.currentView = "editnode";
     },
     myEdgeProposalsClick: async function() {
-      // TODO
+      this.currentView = "myedges";
     },
     addDraftNodeClick: async function() {
       
