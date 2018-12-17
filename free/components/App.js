@@ -15,6 +15,7 @@ import ExploreArea from './ExploreArea.js';
 import BuildArea from './BuildArea.js';
 import ListNodes from './ListNodes.js';
 import ListEdges from './ListEdges.js';
+import ManageEdge from './ManageEdge.js';
 import ModalInfo from './ModalInfo.js';
 
 // Format modules
@@ -61,6 +62,10 @@ export default {
         v-on:deployNodeClick="deployNodeClick($event)"
         v-if="currentView === 'editnode'">
       </build-area>
+      <manage-edge
+        v-if="currentView === 'manageedge'"
+        v-bind:currentEdgeIdentifier="currentEdgeIdentifier">
+      </manage-edge>
       <list-nodes
         v-if="currentView === 'mynodes'"
         v-bind:currentNodeKey="currentNodeKey"
@@ -74,6 +79,7 @@ export default {
         v-on:addNodeClick="addDraftNodeClick()">
       </list-nodes>
       <list-edges
+        v-on:clickEdge="edgeClick($event)"
         v-if="currentView === 'myedges'">
       </list-edges>
       <modal-info v-if="false"></modal-info>
@@ -85,6 +91,7 @@ export default {
     BuildArea,
     ListNodes,
     ListEdges,
+    ManageEdge,
     ModalInfo,
     Node
   },
@@ -119,6 +126,7 @@ export default {
       nodes: {},
       
       // Deployed edge (proposals)
+      currentEdgeIdentifier: undefined,
       myEdgeProposalKeys: [],
       myDraftEdgeProposalKeys: [],
       edgeProposals: {},
@@ -475,6 +483,11 @@ export default {
     },
     myEdgeProposalsClick: async function() {
       this.currentView = "myedges";
+    },
+    edgeClick: function(edgeIdentifier) {
+      console.log(edgeIdentifier);
+      this.currentView = "manageedge";
+      this.currentEdgeIdentifier = edgeIdentifier;
     },
     addDraftNodeClick: async function() {
       

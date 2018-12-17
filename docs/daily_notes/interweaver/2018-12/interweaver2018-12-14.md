@@ -1,4 +1,4 @@
-# Interweaver's to-do items, 2018-12-13:
+# Interweaver's to-do items, 2018-12-14:
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp

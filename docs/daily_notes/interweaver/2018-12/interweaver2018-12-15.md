@@ -5,8 +5,8 @@
     - [ ] Make build mode:
       - [X] Add 'draft' Nodes that can be deployed to the smart contract:
         - [X] Make pushing the button on the last BuildArea page deploy the draft Node to the blockchain.
-      - [ ] My Edge Proposals
-        - [ ] Create an app mode for myedgeproposals
+      - [ ] My Edges
+        - [X] Create an app mode for myedges
         - [ ] Create a test EdgeProposal or two.
         - [ ] Show paged view of all my EdgeProposal keys.
         - [ ] Load EdgeProposal blockchain data (so getting the two Node keys and epmess and slots).
