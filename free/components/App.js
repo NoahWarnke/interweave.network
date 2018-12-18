@@ -80,7 +80,8 @@ export default {
       </list-nodes>
       <list-edges
         v-on:clickEdge="edgeClick($event)"
-        v-if="currentView === 'myedges'">
+        v-if="currentView === 'myedges'"
+        v-bind:myEdgeIdentifiers="myEdgeIdentifiers">
       </list-edges>
       <modal-info v-if="false"></modal-info>
     </div>
@@ -139,6 +140,9 @@ export default {
   computed: {
     myNodeKeys: function() {
       return this.myDeployedNodeKeys.concat(this.myDraftNodeKeys);
+    },
+    myEdgeIdentifiers: function() {
+      return this.myEdgeProposalKeys.concat(this.myDraftEdgeProposalKeys); // TODO include actual edges
     }
   },
   methods: {
@@ -382,6 +386,16 @@ export default {
         console.log("App updateMyDeployedNodeKeys: " + error);
       }
     },
+    updateMyEdgeProposalKeys: async function() {
+      try {
+        this.myEdgeProposalKeys = await this.contract.getEdgeProposalsBelongingTo(this.web3Handler.account);
+        this.myEdgeProposalKeys.push("fakekey");
+      }
+      catch (error) {
+        this.myEdgeProposalKeys = [];
+        console.log("App updateMyEdgeProposalKeys: " + error);
+      }
+    },
     /**
      * Begin a standard transition between Nodes.
      * @param event An Object containing a slot value, indicating which Node edge to follow.
@@ -483,6 +497,7 @@ export default {
     },
     myEdgeProposalsClick: async function() {
       this.currentView = "myedges";
+      this.updateMyEdgeProposalKeys();
     },
     edgeClick: function(edgeIdentifier) {
       console.log(edgeIdentifier);

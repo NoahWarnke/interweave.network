@@ -2,10 +2,10 @@
 export default {
   template: `
     <div>
-      <h2>Editing edge {{currentEdgeIdentifier.test}}</h2>
+      <h2>Editing edge {{currentEdgeIdentifier}}</h2>
     </div>
   `,
   props: {
-    currentEdgeIdentifier: Object
+    currentEdgeIdentifier: String
   }
 }
