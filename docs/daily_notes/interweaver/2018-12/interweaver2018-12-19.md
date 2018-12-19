@@ -1,4 +1,4 @@
-# Interweaver's to-do items, 2018-12-18:
+# Interweaver's to-do items, 2018-12-19:
 
 
   - Okay, what if the Edit Node view also contains a list of the Node's edge slots, with the status of any edges in those slots?

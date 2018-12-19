@@ -4,13 +4,101 @@
     <meta property="og:title" content="Interweave Network">
     <title>Interweave Network</title>
     <link rel="shortcut icon" type="image/png" href="assets/icon-260x260.png"/>
+    <style>
+    
+      body {
+        margin: 0px;
+        padding: 0px;
+        border: 0px;
+        font-family: Verdana, Geneva, sans-serif;
+      }
+      
+      .full {
+        width: 100%;
+        height: 100%;
+        position: absolute;
+        top: 0px;
+        left: 0px;
+        
+        margin: 0px;
+        border: 0px;
+      }
+      
+      #background {
+        z-index: -10;
+        background-color: black;
+      }
+      
+      #site {
+        z-index: 10;
+        background-image: linear-gradient(
+          5deg,
+          #55ff22,
+          #44ff55 10%,
+          #00ccff 25%,
+          #002233 37%,
+          #00000000 50%,
+          #00000000 100%
+        );
+      }
+      
+      .title {
+        font-size: 5em;
+        color: white;
+        text-align: center;
+      }
+      
+      .desc {
+        font-size: 2em;
+        text-align: center;
+        color: white;
+      }
+      
+      .links {
+        font-size: 2em;
+      }
+    
+    </style>
   </head>
   <body>
-    <h2>Interweave Network</h2>
-    <p>A user-created explorable network of fictional places. Currently still in the early phases of development, as you can tell by the quality of this web page :)</p>
-    <ul>
-      <li><a href="https://github.com/NoahWarnke/interweave.network">GitHub</a></li>
-      <li><a href="./free">Interweave Network Free Version</a></li>
-      <li><a href="./sethash/">Set Hash Practice dApp</a></li>
+    <div id="background" class="full"><canvas id="canv"></canvas></div>
+    <div id="site" class="full">
+      <h2 class="title">Interweave Network</h2>
+      <p class="desc">A user-created and user-owned explorable metaverse of virtual places</p>
+      <ul>
+        <li class="links"><a href="./free/">Version 1</a></li>
+        <li class="links"><a href="https://github.com/NoahWarnke/interweave.network">GitHub</a></li>
+      </ul>
+    </site>
+    <script>
+      // Title:
+      
+    
+      // Stars
+      let background = document.querySelector("#background");
+      let wid = background.offsetWidth;
+      let hei = background.offsetHeight;
+      let numStars = wid * hei / 500;
+      let canvas = document.querySelector("#canv");
+      canvas.width = wid;
+      canvas.height = hei;
+      let context = canvas.getContext("2d");
+      for (var i = 0; i < numStars; i++) {
+        let s = Math.random();
+        let size = (Math.log(s + 0.9) + 0.2) * 2;
+        let br = Math.log(s + 1) * 255;
+        let col = Math.random() * 0.2 + 0.9;
+        context.fillStyle = "rgb("
+          + Math.max(Math.min(255, br * col), 0)
+          + "," + br
+          + "," + Math.max(Math.min(255, br * (2 - col)), 0)
+          + ")"
+        ;
+        context.beginPath();
+        context.arc( Math.random() * wid, Math.random() * background.offsetHeight, size, 0, 2 * Math.PI, false);
+        context.fill();
+      }
+    </script>
+
   </body>
 </html>
