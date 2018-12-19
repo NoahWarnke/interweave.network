@@ -64,7 +64,9 @@ export default {
       </build-area>
       <manage-edge
         v-if="currentView === 'manageedge'"
-        v-bind:currentEdgeIdentifier="currentEdgeIdentifier">
+        v-bind:currentEdgeIdentifier="currentEdgeIdentifier"
+        v-bind:nodes="nodes"
+        v-bind:edgeProposals="edgeProposals">
       </manage-edge>
       <list-nodes
         v-if="currentView === 'mynodes'"
@@ -129,8 +131,8 @@ export default {
       // Deployed edge (proposals)
       currentEdgeIdentifier: undefined,
       myEdgeProposalKeys: [],
-      myDraftEdgeProposalKeys: [],
-      edgeProposals: {},
+      myDraftEdgeProposalKeys: ["123abc"],
+      edgeProposals: {"123abc": "this is a test draft edge!"},
       
       // Build-related DApp state
       showBuildTools: false,
@@ -389,7 +391,6 @@ export default {
     updateMyEdgeProposalKeys: async function() {
       try {
         this.myEdgeProposalKeys = await this.contract.getEdgeProposalsBelongingTo(this.web3Handler.account);
-        this.myEdgeProposalKeys.push("fakekey");
       }
       catch (error) {
         this.myEdgeProposalKeys = [];
