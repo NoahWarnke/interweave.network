@@ -122,6 +122,7 @@ export default {
       currentNodeKey: undefined,
       previousNodeKey: undefined,
       nextNodeKey: undefined, // For when an edge transition is in progress.
+      nodeKeyHistory: [],
       
       // Nodes
       myDeployedNodeKeys: [],
@@ -339,9 +340,14 @@ export default {
      */
     setCurrentNode: async function(nodeKey) {
       
+      if (this.currentNodeKey === nodeKey) {
+        return;
+      }
+      
       // Update previous and current nodeKey values.
       if (this.currentNodeKey !== undefined) {
         this.previousNodeKey = this.currentNodeKey;
+        this.nodeKeyHistory.push(this.currentNodeKey);
       }
       this.currentNodeKey = nodeKey;
       

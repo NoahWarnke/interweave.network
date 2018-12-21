@@ -33,6 +33,10 @@
   - Proposed Edges are specified by an EdgeProposalKey, and further specified by looking the nodeKeys and edgeProposalKeys up in the dictionaries.
   - Deployed Edges are specified by their two Nodes pointing to each other in a specific slot pair. No ID here.
   - Deployed-and-proposed-to-be-deleted Edges are specified by the EdgeProposalKey and their two Nodes as well.
+  
+  - Observation: you can always generate a fake edgeProposalKey via the API for any pair of nodeKeys and edges.
+  - This might be an appropriate way to generate fake edgeProposalKeys for draft Nodes (which could turn into add proposals) and deployed edges (which could turn into delete proposals.)
+  - Then edgeProposals contains a mix of real and fake items, and 
 
 - [ ] Build Version 1 (the "free version", i.e. without any way to exchange money) of the Interweave Network.
   - [ ] Create functional DApp
